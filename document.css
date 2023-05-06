@@ -1,0 +1,46 @@
+
+
+
+
+
+
+
+
+
+/** spin */
+.container, .hover-spin:hover {
+  perspective: 1000px; /* Add perspective for 3D effect */
+}
+
+.container img, .hover-spin:hover {
+  transform-style: preserve-3d; /* Preserve 3D transformation */
+  animation: spin 8s linear infinite; /* Apply the spinning animation */
+}
+
+.container img {
+  animation: spin 8s linear infinite; /* Apply the spinning animation */
+}
+
+/*.hover-spin img {
+  animation-play-state: paused;
+}*/
+
+.hover-spin:hover img {
+  animation: spin 1s linear forwards; /* Apply the spinning animation */
+}
+
+.hover-spin:not(:hover) {
+  animation: stop-spinning 1s ease-in-out forwards;
+}
+
+@keyframes spin {
+  to {
+    transform: rotateY(360deg); /* Rotate the image to 360 degrees */
+  }
+}
+
+@keyframes stop-spinning {
+  to {
+    transform: rotateY(360deg);
+  }
+}
