@@ -20,19 +20,44 @@
     select, textarea, button, input {padding:.5vw;border-radius:.5vw;font-size:.9em;}
   </style>
   <link href="document.css" type="text/css" rel="stylesheet" />
+  <link href="spin.css" type="text/css" rel="stylesheet" />
+  <link href="bounce-in.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
   <noscript style="color:red">Javascript is required but is turned off on your device</noscript>
   <div style="width:100%;height:100%;display:flex;align-items: center;justify-content: center;">
     <div>
-      <div class="container">
-        <img src="https://yt3.googleusercontent.com/ytc/AGIKgqP1V9PSbmViLBx36v69pngjBhbvJx7f-uUHKzY1Ww=s900-c-k-c0x00ffffff-no-rj" alt="Your Image"
-          style="width:50vw;max-width:500px;border-radius: 50%;border:6px solid black;"
-        />
+      <div class="bounce-in" style="--fx-index:0">
+        <div class="spin-container">
+          <div>
+            <img src="https://yt3.googleusercontent.com/ytc/AGIKgqP1V9PSbmViLBx36v69pngjBhbvJx7f-uUHKzY1Ww=s900-c-k-c0x00ffffff-no-rj"
+              alt="Cary Hardy" border="0"
+              style="width:50vw;max-width:500px;border-radius: 50%;"
+            />
+          </div>
+          <div style="visibility: hidden;">
+            <img src="https://yt3.googleusercontent.com/ytc/AGIKgqP1V9PSbmViLBx36v69pngjBhbvJx7f-uUHKzY1Ww=s900-c-k-c0x00ffffff-no-rj"
+              alt="Cary Hardy" border="0"
+              style="width:50vw;max-width:500px;border-radius: 50%;"
+            />
+          </div>
+          <div class="middle" style="left:-1vw;top:-1vw;width:25vw;height:25vw;background-color: black;border-radius: 50%;">
+            <img src="https://texaspinball.com/tpf/wp-content/images/2022/12/Cary-Hardy.jpg"
+              alt="Cary Hardy" border="0"
+              style="visibility:hidden;width:50vw;max-width:500px;border-radius: 50%;border:1vw solid black;"
+            />
+          </div>
+          <div>
+            <img src="https://texaspinball.com/tpf/wp-content/images/2022/12/Cary-Hardy.jpg"
+              alt="Cary Hardy" border="0"
+              style="width:50vw;max-width:500px;border-radius: 50%;"
+            />
+          </div>
+        </div>
       </div>
       <br />
       <div style="display:flex;gap:1em;justify-content: center;">
-        <div style="border:2px solid #aaa;border-radius: 25%;background-color: black;padding:.2em .2em">
+        <div class="bounce-in" style="--fx-index: 2;border:2px solid #aaa;border-radius: 25%;background-color: black;padding:.2em .2em">
           <a href="https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA" class="hover-spin"
             style="display:flex;align-items: self-end;justify-content: center;"
           >
@@ -41,7 +66,8 @@
             />
           </a>
         </div>
-        <div style="border:2px solid #aaa;border-radius: 25%;background-color: black;padding:.2em .2em">
+
+        <div class="bounce-in" style="--fx-index: 3;border:2px solid #aaa;border-radius: 25%;background-color: black;padding:.2em .2em">
           <a href="https://rumble.com/c/c-2975430" class="hover-spin"
             style="display:flex;align-items: self-end;justify-content: center;"
           >

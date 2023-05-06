@@ -1,46 +1,70 @@
-
-
-
-
-
-
-
-
-
-/** spin */
-.container, .hover-spin:hover {
-  perspective: 1000px; /* Add perspective for 3D effect */
+.spin-container {
+  position: relative;
 }
 
-.container img, .hover-spin:hover {
-  transform-style: preserve-3d; /* Preserve 3D transformation */
-  animation: spin 8s linear infinite; /* Apply the spinning animation */
+.spin-container > *:first-child,
+.spin-container > .middle,
+.spin-container > *:last-child {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-size: cover;
+  background-position: center;
+  transform-style: preserve-3d;
+  transform-origin: center center;
 }
 
-.container img {
-  animation: spin 8s linear infinite; /* Apply the spinning animation */
+.spin-container > *:first-child {
+  animation: spin-front 8s linear infinite;
+  z-index: 1;
+  backface-visibility: hidden;
 }
 
-/*.hover-spin img {
-  animation-play-state: paused;
-}*/
-
-.hover-spin:hover img {
-  animation: spin 1s linear forwards; /* Apply the spinning animation */
+.spin-container > .middle {
+  animation: spin-middle 8s linear infinite;
 }
 
-.hover-spin:not(:hover) {
-  animation: stop-spinning 1s ease-in-out forwards;
+.spin-container > *:last-child {
+  animation: spin-back 8s linear infinite;
+  animation-delay: -4s;
+  backface-visibility: hidden;
 }
 
-@keyframes spin {
-  to {
-    transform: rotateY(360deg); /* Rotate the image to 360 degrees */
+@keyframes spin-front {
+  0% {
+    transform: rotateY(0deg) translateZ(10px);
+  }
+  50% {
+    transform: rotateY(180deg) translateZ(10px);
+  }
+  100% {
+    transform: rotateY(360deg) translateZ(10px);
   }
 }
 
-@keyframes stop-spinning {
-  to {
-    transform: rotateY(360deg);
+@keyframes spin-middle {
+  0% {
+    transform: rotateY(0deg) translateZ(5px);
+  }
+  50% {
+    transform: rotateY(180deg) translateZ(5px);
+  }
+  100% {
+    transform: rotateY(360deg) translateZ(5px);
+  }
+}
+
+@keyframes spin-back {
+  0% {
+    visibility: visible;
+    transform: rotateY(0deg) translateZ(10px);
+  }
+  50% {
+    visibility: visible;
+    transform: rotateY(180deg) translateZ(10px);
+  }
+  100% {
+    visibility: visible;
+    transform: rotateY(360deg) translateZ(10px);
   }
 }
