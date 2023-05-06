@@ -2,12 +2,7 @@
   position: relative;
 }
 
-.spin-container > *:first-child,
-.spin-container > .middle,
-.spin-container > *:last-child {
-  transform-style: preserve-3d;
-  perspective: 800px; /* set the perspective distance */
-
+.spin-container > * {
   position: absolute;
   top: 0;
   left: 0;
@@ -22,11 +17,8 @@
   z-index: 1;
 }
 
-.spin-container > .middle {
+.spin-container > *:not(:first-child):not(:last-child) {
   animation: spin-middle 8s linear infinite;
-  z-index: 0;
-  top:-10px;
-  left:-10px;
 }
 
 .spin-container > *:last-child {
