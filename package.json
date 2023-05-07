@@ -1,0 +1,21 @@
+{
+  "name": "cary-hardy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "git commit -am \"update\" && git push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AckerApple/cary-hardy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AckerApple/cary-hardy/issues"
+  },
+  "homepage": "https://github.com/AckerApple/cary-hardy#readme"
+}
