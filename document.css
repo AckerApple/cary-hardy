@@ -13,30 +13,46 @@
 
 .spin-container > *:first-child {
   animation: spin-front 8s linear infinite;
-  backface-visibility: hidden;
-  z-index: 1;
 }
 
 .spin-container > *:not(:first-child):not(:last-child) {
   animation: spin-middle 8s linear infinite;
+  z-index:1;
 }
 
 .spin-container > *:last-child {
   animation: spin-back 8s linear infinite;
   animation-delay: -4s;
-  backface-visibility: hidden;
-  z-index: 2;
 }
 
 @keyframes spin-front {
   0% {
-    transform: rotateY(0deg) translateZ(10px);
+    transform: rotateY(0deg) translateZ(20px);
+    z-index:6;
+  }
+  25% {
+    transform: rotateY(90deg) translateZ(20px);
+    z-index:6;
+  }
+  26% {
+    transform: rotateY(90deg) translateZ(20px);
+    z-index:0;
   }
   50% {
-    transform: rotateY(180deg) translateZ(10px);
+    transform: rotateY(180deg) translateZ(20px);
+    z-index:0;
+  }
+  75% {
+    transform: rotateY(270deg) translateZ(20px);
+    z-index:0;
+  }
+  76% {
+    transform: rotateY(270deg) translateZ(20px);
+    z-index:6;
   }
   100% {
-    transform: rotateY(360deg) translateZ(10px);
+    transform: rotateY(360deg) translateZ(20px);
+    z-index:6;
   }
 }
 
@@ -44,8 +60,14 @@
   0% {
     transform: rotateY(0deg);
   }
+  25% {
+    transform: rotateY(90deg);
+  }
   50% {
     transform: rotateY(180deg);
+  }
+  75% {
+    transform: rotateY(270deg);
   }
   100% {
     transform: rotateY(360deg);
@@ -54,12 +76,31 @@
 
 @keyframes spin-back {
   0% {
-    transform: rotateY(0deg) translateZ(10px);
+    transform: rotateY(0deg) translateZ(20px);
+    z-index:6;
+  }
+  25% {
+    transform: rotateY(90deg) translateZ(20px);
+    z-index:6;
+  }
+  26% {
+    transform: rotateY(90deg) translateZ(20px);
+    z-index:0;
   }
   50% {
-    transform: rotateY(180deg) translateZ(10px);
+    transform: rotateY(180deg) translateZ(20px);
+    z-index:0;
+  }
+  75% {
+    transform: rotateY(270deg) translateZ(20px);
+    z-index:0;
+  }
+  76% {
+    transform: rotateY(270deg) translateZ(20px);
+    z-index:6;
   }
   100% {
-    transform: rotateY(360deg) translateZ(10px);
+    transform: rotateY(360deg) translateZ(20px);
+    z-index:6;
   }
 }
