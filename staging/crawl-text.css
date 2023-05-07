@@ -22,7 +22,7 @@
   position: relative;
   animation: crawl 90s linear infinite;
   opacity: 0;
-  animation-delay: 5s
+  /*animation-delay: 5s*/
 }
 
 .crawl > .title {
