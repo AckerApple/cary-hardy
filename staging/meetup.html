@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Cary Hardy</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <meta name="apple-mobile-web-app-title" content="App" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <!-- emoji as favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚪️</text></svg>" />
+    <style>
+    * {box-sizing:border-box;}
+    html, body{
+      color:white;
+      font-family: Arial, Helvetica, sans-serif;
+      height:100%;padding:0;margin:0;
+      background: #666 linear-gradient(to top, #666, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0)) no-repeat; /* Create a gradient from black to transparent */
+    }
+    html {scroll-behavior:smooth;font-size:calc(22px + .4vw);} input[type="checkbox"], input[type="radio"] {width:1em;height:1em;}
+    select, textarea, button, input {padding:.5vw;border-radius:.5vw;font-size:.9em;}
+    </style>
+    <link href="document.css" type="text/css" rel="stylesheet" />
+    <link href="spin.css" type="text/css" rel="stylesheet" />
+    <link href="bounce-in.css" type="text/css" rel="stylesheet" />
+    <script type="module" src="app.js"></script>
+  
+      <script type="module">
+        import app from './app.js'
+        app()
+      </script></head>
+    
+  <body>
+    <noscript style="color:red">Javascript is required but is turned off on your device</noscript>
+    <table cellPadding="0" cellSpacing="0" border="0" style="width: 100%;height: 100%;">
+      <tr>
+        <td valign="center" style="text-align: center;">
+          <cary-app now:="new Date()" date:="new Date('May 30, 2023 21:00:00 EDT')">
+            <template>
+              <img class="bounce-in reflection" alt="Cary Hardy logo" src="https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png"
+  style="--fx-index:0;width: 55vw;min-width: 200px;max-width: 400px;"
+/>
+
+<div class="bounce-in" style="--fx-index:1">
+  <h1>Meet & talk everything pinball!</h1>
+  <p>for Patreon LE supporters</p>
+  <div style="display:flex;flex-wrap:wrap;gap:.5em;justify-content: center;">
+    <span>🗓️ Tuesday, May 30th</span>
+    <span>🕘 9 PM Eastern 🕖 7 PM Pacific</span>
+  </div>
+</div>
+
+<div class="bounce-in" style="--fx-index:2">
+  <count-clock [date]="date"></count-clock>
+</div>
+
+<br />
+
+<div class="bounce-in" style="--fx-index:3;text-align: center;">
+  <div style="display: inline-block;">
+    <div style="
+      max-width: 900px;
+      background-color:#333;border-radius: .7em;
+      padding:0em 2em;margin:.5em;text-align: justify;
+      border:1px solid rgba(255,255,255,.5);
+      color:rgba(255,255,255,.85);
+    ">
+      <div style="line-height: 1.5em;">
+        <p>
+          And if that sounds interesting to you, then consider joining us!
+          <div>
+            By becoming a <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Cary Hardy LE supporter</a> before May 30th, you will receive an LE only Patreon <span style="white-space: nowrap;">💬 message</span>, <b>before the meeting start time</b>, with an invite <span style="white-space: nowrap;">🔗 link</span> to join this very exclusive meeting.
+          </div>
+        </p>
+      </div>
+      <p style="font-size: 0.7em;padding:0 1em;">In the event of meeting cancellation or disruption due to unforeseen circumstances, a makeup meeting will be communicated directly from Cary Hardy. Meeting software is to be determined but most likely will be Zoom or Google meets.</p>
+      <div style="text-align: center;">
+        ⚪️&nbsp;
+        <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Patreon memberships</a>
+        &nbsp;⚪️
+      </div>
+    </div>
+  </div>  
+</div>
+
+<br /><br />
+
+<div class="bounce-in" style="--fx-index:4;text-align: center;">
+  <div style="padding:.8em;font-size: .7em;">
+    <a class="no-a-style" href="index.html">
+    <button type="button">
+        🔙 home
+      </button>
+    </a>
+  </div>
+</div>
+
+            </template>
+          </cary-app>
+        </td>
+      </tr>
+    </table>
+</body>
+</html>

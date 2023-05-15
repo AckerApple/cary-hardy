@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy:staging": "cp staging/* ./ && npm run deploy",
-    "deploy": "git add . && git commit -m \"update\" && git push"
+    "deploy": "npm run build && npm run save",
+    "save": "git add . && git commit -m \"update\" && git push",
+    "build": "node --experimental-modules scripts/ack-build.js ack-build.json",
+    "build:watch": "npm run build -- --watch"
   },
   "repository": {
     "type": "git",
