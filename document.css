@@ -172,3 +172,14 @@
     z-index:5;
   }
 }
+
+button, a {cursor: pointer;}
+
+.color-inherit {
+  color: inherit;
+}
+
+.no-a-style {
+  text-decoration: none;
+  color: inherit;
+}

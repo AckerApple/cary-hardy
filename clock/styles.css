@@ -1,0 +1,69 @@
+.countdown {
+  background: black;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  padding: .3em;
+  border:1px solid white;
+  border-left:0;
+  border-right:0;
+  gap: .5em;
+}
+
+.digit-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color:black;
+}
+
+.digit {
+  position:relative;
+  margin: 0.1rem;
+}
+
+.digit span {
+  box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.1), inset 0 -5px 10px rgba(0, 0, 0, 0.1);
+  margin:0;
+  text-align: center;
+  font-weight: bold;
+  font-size: 2rem;
+  padding: 0 0.5rem;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: white;
+  display:flex;
+}
+
+.digit .changed {
+  position: absolute;
+  border:1px solid red;
+  animation: fade-out .1s ease forwards;
+}
+
+.digit .line {
+  position:absolute;
+  top:50%;
+  border-top:1px solid black;
+  opacity: .2;
+  width: 100%;
+}
+
+.label {
+  color:white;
+  margin: 0 1rem;
+  text-align: center;
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  
+  100% {
+    transform: rotateX(90deg);
+    opacity: 1;
+  }
+}

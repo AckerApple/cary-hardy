@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy:staging": "cp staging/* ./ && npm run deploy",
+    "deploy:staging": "cp -R staging/* ./ && npm run deploy",
     "deploy": "npm run build && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
     "build": "node --experimental-modules scripts/ack-build.js ack-build.json",

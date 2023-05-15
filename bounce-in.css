@@ -1,13 +1,22 @@
-.bounce-in {
+.fade-in {
   opacity: 0;
-  animation-name: fade-down, bounce;
+  animation-name: fade-in-fx;
   animation-duration: 1.5s, 1s;
   animation-timing-function: ease-in ease-out, cubic-bezier(0.68, -0.55, 0.265, 1.55);
   animation-fill-mode: both, both;
   animation-delay: calc(var(--fx-index) * 300ms);
 }
 
-@keyframes fade-down {
+.bounce-in {
+  opacity: 0;
+  animation-name: fade-in-fx, bounce;
+  animation-duration: 1.5s, 1s;
+  animation-timing-function: ease-in ease-out, cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation-fill-mode: both, both;
+  animation-delay: calc(var(--fx-index) * 300ms);
+}
+
+@keyframes fade-in-fx {
   from {
     opacity: 0;
   }
