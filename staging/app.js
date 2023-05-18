@@ -1,4 +1,4 @@
-import { ackApp } from "./ackApp.js"
+import { ackApp } from "./divine/ackApp.js"
 import { CountClock } from "./clock/component.js"
 
 class CaryApp extends HTMLElement {

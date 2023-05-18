@@ -1,7 +1,6 @@
-import { ElementComponent } from "./ElementComponent.js";
+import { ElementComponent } from "../ElementComponent.js";
 import { ackApp } from "./ackApp.js";
-
-class AContainer extends ElementComponent { }
+import AContainer from "./AContainer.js";
 
 class AAPP extends ElementComponent {
   people = [{

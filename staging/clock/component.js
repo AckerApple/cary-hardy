@@ -1,7 +1,41 @@
+import { Subject } from "../divine/Subject.js"
 import { ElementComponent } from "../ElementComponent.js"
 
 export class CountClock extends ElementComponent {
   date
+
+  clockDisplaySpeed = 1000
+
+  time = {
+    days: [{
+      speed: this.clockDisplaySpeed * 60 * 60 * 24 * 10,
+      value$: new Subject(),
+    },{
+      speed: this.clockDisplaySpeed * 60 * 60 * 24,
+      value$: new Subject(),
+    }],
+    hours: [{
+      speed: this.clockDisplaySpeed * 60 * 60 * 10,
+      value$: new Subject(),
+    },{
+      speed: this.clockDisplaySpeed * 60 * 60,
+      value$: new Subject(),
+    }],
+    minutes: [{
+      speed: this.clockDisplaySpeed * 60 * 10,
+      value$: new Subject(),
+    },{
+      speed: this.clockDisplaySpeed * 60,
+      value$: new Subject(),
+    }],
+    seconds: [{
+      speed: this.clockDisplaySpeed * 10,
+      value$: new Subject(),
+    },{
+      speed: this.clockDisplaySpeed,
+      value$: new Subject(),
+    }]
+  }
 
   constructor() {
     super()
@@ -9,86 +43,69 @@ export class CountClock extends ElementComponent {
     this.imports({
       template: new URL('template.html', import.meta.url),
       styles: new URL('styles.css', import.meta.url),
-    }).then(this.load)
+    }).then(this.displayImports.bind(this)).then(this.load)
   }
 
-  load(imports) {
-    const shadow = this.attachShadow({ mode: 'open' })
-    const template = document.createElement('div')
-    const style = document.createElement('style')
-
-    style.textContent = imports.styles;
-    shadow.appendChild(style);
-
-    template.innerHTML = imports.template;
-    shadow.appendChild(template.cloneNode(true))
-    this.run(shadow)
+  load() {
+    this.run(this.shadowRoot)
   }
 
-  run(shadow) {
+  changeMe(element, value, map) {
+    const span = document.createElement('span')
+    span.classList.add('wrap')
+    span.innerText = value
+    
+    element.appendChild(span)
+
+    if ( element.children.length === 1 ) {
+      return // no need to remove when only 1
+    }
+
+    function remove() {
+      requestAnimationFrame(() => {
+        span.classList.add('changed')
+        
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            element.removeChild(span)
+          }, 200)
+        })
+      })      
+    }
+
+    setTimeout(remove, map.speed-1)
+  }
+  
+  run() {
     const date = this.date = this.date || new Date()
     function updateCountdown() {
       const now = new Date();
       const remaining = date - now;
     
-      let days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-      let hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      let minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      let seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-      
-      const daysEl = shadow.querySelector('.days');
-      const hoursEl = shadow.querySelector('.hours');
-      const minutesEl = shadow.querySelector('.minutes');
-      const secondsEl = shadow.querySelector('.seconds');
-    
-      if (daysEl.getAttribute('data-value') !== String(days)) {
-        animateDigits(daysEl, days);
-      }
-      if (hoursEl.getAttribute('data-value') !== String(hours)) {
-        animateDigits(hoursEl, hours);
-      }
-      if (minutesEl.getAttribute('data-value') !== String(minutes)) {
-        animateDigits(minutesEl, minutes);
-      }
-      if (secondsEl.getAttribute('data-value') !== String(seconds)) {
-        animateDigits(secondsEl, seconds);
-      }
-    
-      daysEl.setAttribute('data-value', days);
-      hoursEl.setAttribute('data-value', hours);
-      minutesEl.setAttribute('data-value', minutes);
-      secondsEl.setAttribute('data-value', seconds);
+      const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+      Object.entries({days,hours,minutes,seconds}).forEach(([key, value]) => {
+        const digits = getDigits(value)
+        if (digits[0] != this.time[key][0].value$.value) {
+          this.time[key][0].value$.next( digits[0] )
+        }
+  
+        if (digits[1] != this.time[key][1].value$.value) {        
+          this.time[key][1].value$.next(digits[1])
+        }    
+      })
     }
     
-    function animateDigits(element, value) {
-      const [digit1, digit2] = element.children;
-    
+    function getDigits(value) {
       const d2 = value % 10
       const d1 = Math.floor(value / 10)
     
-      animateDigit(d1, digit1)
-      animateDigit(d2, digit2)
+      return [d1, d2]
     }
     
-    function animateDigit(d, digit) {
-      const old = digit.children[1]
-      
-      if ( old.textContent == d.toString() ) {
-        return
-      }
-    
-      const clone = old.cloneNode()
-    
-      clone.textContent = d
-      digit.appendChild(clone)
-      old.classList.add('changed')
-    
-      setTimeout(() => {
-        digit.removeChild(old)
-      }, 500);
-    }
-    
-    setInterval(updateCountdown, 1000);
-    
+    setInterval(updateCountdown.bind(this), this.clockDisplaySpeed)
   }
 }
