@@ -1,4 +1,5 @@
 .countdown {
+  /*line-height: 1.75em;*/
   background: black;
   display: flex;
   flex-wrap: wrap;
@@ -30,7 +31,7 @@
   text-align: center;
   font-weight: bold;
   font-size: 2rem;
-  padding: 0 0.5rem;
+  padding: .3em;
   border: 2px solid black;
   border-radius: 5px;
   background-color: white;
@@ -38,7 +39,7 @@
 }
 
 .digit .wrap{
-  position: absolute
+  position: absolute;
 }
 
 .digit .wrap.changed {

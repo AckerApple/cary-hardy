@@ -11,6 +11,7 @@
     "save": "git add . && git commit -m \"update\" && git push",
     "build": "node --experimental-modules scripts/ack-build.js ack-build.json",
     "start": "npm run build:watch",
+    "start:server": "ack-reload ./staging",
     "build:watch": "npm run build -- --watch"
   },
   "repository": {
@@ -23,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/AckerApple/cary-hardy/issues"
   },
-  "homepage": "https://github.com/AckerApple/cary-hardy#readme"
+  "homepage": "https://github.com/AckerApple/cary-hardy#readme",
+  "devDependencies": {
+    "ack-reload": "^4.0.1"
+  }
 }

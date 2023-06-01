@@ -1,0 +1,42 @@
+<!-- test content -->
+<div>
+  <br /><br /><br /><br /><br />
+  <hr />
+  <hr />
+  <div style="border:1px solid red;">
+    <a-app now:="new Date()" date:="new Date('June 26, 2021 21:00:00 EDT')">
+      <template>
+        <div>
+          date:${date}
+        </div>
+        <div>
+          now:${now}
+        </div>
+        <br />
+        <br />
+        Ul testing content
+        <a-container style="color:white;" *for="people:person:personIndex" [people]="people">
+          <template>
+            <ul>
+              <li>person: ${person.firstName}</li>
+              <li>relatives: ${person.relatives.length}</li>
+              <ul>
+                <a-container *for="relatives:relative:relativeIndex" [relatives]="person.relatives">
+                  <template>
+                    <li>
+                      relative: ${relative.firstName}
+                    </li>
+                  </template>
+                </a-container>
+              </ul>
+            </ul>
+          </template>
+        </a-container>
+      </template>
+    </a-app>
+  </div>
+  <hr />
+  <hr />
+  <br /><br /><br /><br /><br />
+</div>
+<!-- end: test content -->

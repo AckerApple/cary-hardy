@@ -1,59 +1,80 @@
-<img class="bounce-in reflection" alt="Cary Hardy logo" src="https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png"
-  style="--fx-index:0;width: 55vw;min-width: 200px;max-width: 400px;"
-/>
+<a-container>
+  <template>
+    <img class="bounce-in reflection" alt="Cary Hardy logo" src="https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png"
+      style="--fx-index:0;width: 55vw;min-width: 200px;max-width: 400px;"
+    />
 
-<div class="bounce-in" style="--fx-index:1">
-  <h1>Meet & talk everything pinball!</h1>
-  <p>for Patreon LE supporters</p>
-  <div style="display:flex;flex-wrap:wrap;gap:.5em;justify-content: center;">
-    <span>🗓️ Tuesday, May 30th</span>
-    <span>🕘 9 PM Eastern 🕖 7 PM Pacific</span>
-  </div>
-</div>
-
-<div class="bounce-in" style="--fx-index:2">
-  <count-clock [date]="date"></count-clock>
-</div>
-
-<br />
-
-<div class="bounce-in" style="--fx-index:3;text-align: center;">
-  <div style="display: inline-block;">
-    <div style="
-      max-width: 900px;
-      background-color:#333;border-radius: .7em;
-      margin:.5em;text-align: justify;
-      border:1px solid rgba(255,255,255,.5);
-      color:rgba(255,255,255,.85);
-    ">
-      <div style="padding:0em 2em;">
-        <div style="line-height: 1.5em;">
-          <p>
-            And if that sounds interesting to you, then consider joining us!
-            <div>
-              By becoming a <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Cary Hardy LE supporter</a> before May 30th, you will receive an LE only Patreon <span style="white-space: nowrap;">💬 message</span>, <b>before the meeting start time</b>, with an invite <span style="white-space: nowrap;">🔗 link</span> to join this very exclusive meeting.
-            </div>
-          </p>
+    <div class="bounce-in" style="--fx-index:1">
+      <h1>Meet & talk everything pinball!</h1>
+      <p>for Patreon LE supporters</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.5em;justify-content: center;">
+        <span>🗓️ ${date.toLocaleString('default', { weekday: 'long' })}, ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}</span>
+        <div>
+          <span>🕘 9 PM Eastern 🕖 7 PM Pacific</span>
         </div>
-        <p style="font-size: 0.7em;padding:0 1em;">In the event of meeting cancellation or disruption due to unforeseen circumstances, a makeup meeting will be communicated directly from Cary Hardy. Meeting software is to be determined but most likely will be Zoom or Google meets.</p>
-      </div>
-      <div style="text-align: center;">
-        ⚪️&nbsp;
-        <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Patreon memberships</a>
-        &nbsp;⚪️
       </div>
     </div>
-  </div>  
-</div>
 
-<br /><br />
+    <div class="bounce-in" style="--fx-index:2">
+      <count-clock [date]="date"></count-clock>
+    </div>
 
-<div class="bounce-in" style="--fx-index:4;text-align: center;">
-  <div style="padding:.8em;font-size: .7em;">
-    <a class="no-a-style" href="index.html">
-    <button type="button">
-        🔙 home
-      </button>
-    </a>
-  </div>
-</div>
+    <br />
+
+    <div class="bounce-in" style="--fx-index:3;text-align: center;">
+      <div style="display: inline-block;">
+        <div style="
+          max-width: 900px;
+          background-color:#333;border-radius: .7em;
+          margin:.5em;text-align: justify;
+          border:1px solid rgba(255,255,255,.5);
+          color:rgba(255,255,255,.85);
+        ">
+          <div style="padding:0em 2em;">
+            <div style="line-height: 1.5em;">
+              <p>
+                And if that sounds interesting to you, then consider joining us!
+              </p>
+              <p>
+                By becoming a <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Cary Hardy LE supporter</a> before ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}, you will receive an LE only Patreon <span style="white-space: nowrap;">💬 message</span>, <b>before the meeting start time</b>, with an invite <span style="white-space: nowrap;">🔗 link</span> to join this very exclusive meeting.
+              </p>
+            </div>
+            <br />
+            <h2>How does the meeting work?</h2>
+            <ul>
+              <li>🍺 It mostly works because of beer. Come 🍻 cheers with us!</li>
+              <li>🛎️ Make sure you have Patreon notifications turned on to ensure you receive invite link 1 hour before meeting</li>
+              <li>Meeting software is Google Meets, which is a browser based application. No installation will required.</li>
+              <li>Link to meeting is provided 1 hour before meeting. Must be <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Patreon LE member</a></li>
+            </ul>
+                  
+            <br />
+            <h2>😮 When issues arise</h2>
+            <ul>
+              <li>Watch your Patreon messages.</li>
+              <li>In the event of meeting cancellation or disruption due to unforeseen circumstances, a makeup meeting will be communicated directly from Cary Hardy.</li>
+            </ul>
+          </div>
+          <div style="text-align: center;">
+            ⚪️&nbsp;
+            <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Patreon memberships</a>
+            &nbsp;⚪️
+          </div>
+        </div>
+      </div>  
+    </div>
+
+    <br /><br />
+
+    <div class="bounce-in" style="--fx-index:4;text-align: center;">
+      <div style="padding:.8em;font-size: .7em;">
+        <a class="no-a-style" href="index.html">
+        <button type="button">
+            🔙 home
+          </button>
+        </a>
+      </div>
+    </div>
+
+  </template>
+</a-container>

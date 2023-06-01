@@ -1,4 +1,5 @@
 .countdown {
+  /*line-height: 1.75em;*/
   background: black;
   display: flex;
   flex-wrap: wrap;
@@ -24,26 +25,30 @@
   margin: 0.1rem;
 }
 
-.digit span {
+.digit .wrap, .digit .placeholder {
   box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.1), inset 0 -5px 10px rgba(0, 0, 0, 0.1);
   margin:0;
   text-align: center;
   font-weight: bold;
   font-size: 2rem;
-  padding: 0 0.5rem;
+  padding: .3em;
   border: 2px solid black;
   border-radius: 5px;
   background-color: white;
   display:flex;
 }
 
-.digit .changed {
+.digit .wrap{
   position: absolute;
-  border:1px solid red;
-  animation: fade-out .1s ease forwards;
+}
+
+.digit .wrap.changed {
+  animation: fade-out 130ms ease forwards;
+  z-index:1
 }
 
 .digit .line {
+  z-index:2;
   position:absolute;
   top:50%;
   border-top:1px solid black;
@@ -53,7 +58,6 @@
 
 .label {
   color:white;
-  margin: 0 1rem;
   text-align: center;
 }
 

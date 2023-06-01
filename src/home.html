@@ -92,46 +92,17 @@
     <br />
     <br />
     
-    <!-- test content -->
-        <div>
-          <br /><br /><br /><br /><br />
-          <hr /><hr />
-          <div style="border:1px solid red;">
-              <a-app now:="new Date()" date:="new Date('May 30, 2021 21:00:00 EDT')">
-                <template>
-                  ${date}-${now}
-                  <a-container style="color:white;" *for="people:person:personIndex" [people]="people">
-                    <template>
-                      Ul testing content
-                      <ul>
-                        <li>person: ${person.firstName}</li>
-                        <ul>
-                          <a-container *for="relatives:relative:relativeIndex" [relatives]="person.relatives">
-                            <template>
-                              <li>
-                                relative: ${relative.firstName}
-                              </li>
-                            </template>
-                          </a-container>
-                        </ul>
-                      </ul>
-                    </template>
-                  </a-container>
-                </template>
-              </a-app>
-          </div>
-          <hr /><hr />
-          <br /><br /><br /><br /><br />
-        </div>
-    <!-- end: test content -->
-
     <div class="fade-in" style="--fx-index:16">
       <a-container *if="now < date" [date]="date" [now]="now">
         <template>
           <div style="padding:.5em;">
-            Countdown until the very first, Patreon LE only, group meetup.
+            Countdown until the next, Patreon LE only, group meetup!
           </div>
           <count-clock [date]="date"></count-clock>
+          <br />
+          <div>
+            <span>🗓️ ${date.toLocaleString('default', { weekday: 'long' })}, ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}</span>
+          </div>
           <div style="padding:.8em;font-size: .7em;">
             <a class="no-a-style" href="meetup.html">
               <button type="button">learn more</button>

@@ -1,5 +1,5 @@
-import { Subject } from "../divine/Subject.js"
-import { ElementComponent } from "../ElementComponent.js"
+import { Subject } from "../web-gems/Subject.js"
+import { ElementComponent } from "../web-gems/ElementComponent.js"
 
 export class CountClock extends ElementComponent {
   date

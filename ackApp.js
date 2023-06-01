@@ -1,4 +1,5 @@
 import ackModule from "./ackModule.js";
+import { interpolateReplace } from "./src/web-gems/interpolations.js";
 
 // ensure we register Ack web components only once
 let hasAckApp = false
@@ -243,7 +244,7 @@ function addInterpolateIdsFor(
   id, // Will make ${x} become ${x:id}
   onlyName, // Only modify variables with ${onlyName}
 ) {
-  return string.replace(/\${(.*?)}/g, (match, variableName) => {
+  return string.replace(interpolateReplace, (match, variableName) => {
     const parts = variableName.split('.')
 
     if (parts[0] !== onlyName) {
@@ -260,7 +261,7 @@ function interpolateWithVariableId(
   onlyName, // Only modify variables with ${onlyName}
   id, // Will make ${x} become ${x:id}
 ) {
-  return string.replace(/\${(.*?)}/g, (match, variableName) => {
+  return string.replace(interpolateReplace, (match, variableName) => {
     const was = '${' + variableName + '}'
 
     if (!variableName.includes(':')) {
