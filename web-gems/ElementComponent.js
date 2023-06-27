@@ -20,19 +20,6 @@ export class ElementComponent extends HTMLElement {
     }
 
     this.webGems.ackShadowId = shadowMemory.add(this)
-
-    /*if ( this.children.length ) {
-      const children = new Array(...this.children)
-      console.log('this', children.length, children[0])
-      
-      const isRenderControlled = this.getAttribute('*for') || this.getAttribute('*if')
-      if ( isRenderControlled ) {
-        return // not for me to control
-      }
-      
-      const stackedVars = getParentVarsStacked(this)
-      interpolateChildren(this.children, stackedVars, this)
-    }*/
   }
 
   disconnectedCallback() {
@@ -48,7 +35,6 @@ export class ElementComponent extends HTMLElement {
 
     const template = document.createElement('template')
     template.innerHTML = this.webGems.interpolated.string;
-    
     shadow.appendChild( template.cloneNode(true) )
     
     // all direct children need a memory link

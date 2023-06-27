@@ -50,6 +50,7 @@ export function ackApp(config) {
           // bind *if=""
           loopAttributes(this.attributes, (name, value) => {
             if (name === '*if') {
+              console.log('here', name, value)
               const template = this.getElementsByTagName('template')[0]
               if (!template) {
                 throw '*if has no template within it'
@@ -57,6 +58,7 @@ export function ackApp(config) {
 
               const result = evalWith(value, this)
               if (!result) {
+                console.log('do not place template', name, value)
                 return
               }
 

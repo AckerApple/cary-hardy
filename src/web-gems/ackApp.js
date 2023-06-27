@@ -16,7 +16,7 @@ export function ackApp(config) {
     }
 
     Object.entries(components).forEach(([name, Component]) => {
-      const isApp = Component === App
+      // const isApp = Component === App
       
       Component.isAckElm=true
 
@@ -75,14 +75,15 @@ export function ackApp(config) {
                 throw '*if has no template within it'
               }
 
+              // 🔒 Prevent anyone from editing template which would cause that content to be executable
+              this.removeChild(template)
+              
               const result = evalWith(value, this)
               if (!result) {
                 return
               }
 
-              const toAppend = template.content.cloneNode(true)
-              // 🔒 Prevent anyone from editing template which would cause that content to be executable
-              this.removeChild(template)
+              const toAppend = template.content.cloneNode(true)              
               this.appendChild(toAppend)
             }
           })
@@ -90,7 +91,6 @@ export function ackApp(config) {
           // bind *for="" // TODO ????need to interpolate template just as *if?????
           loopAttributes(this.attributes, (name, value) => {
             if (name === '*for') {
-              console.log('putting a for together')
               forAttribute(value, this)
             }
 
@@ -149,19 +149,20 @@ export function interpolateChildren(
     }
 
     const toAppend = template.content.cloneNode(true)
-
     if ( !toAppend.children.length ) {
       return // no inner templates
     }
 
-    const html = toAppend.children[0].innerHTML
-    const result = interpolateToTemplates(html, context)
-    toAppend.children[0].innerHTML = result.string
-  
-    // 🔒 Prevent anyone from editing template which would cause that content to be executable
+    new Array(...toAppend.children).forEach(child => {      
+      const html = child.innerHTML
+      const result = interpolateToTemplates(html, context)
+      child.innerHTML = result.string
+    
+      // 🔒 Prevent anyone from editing template which would cause that content to be executable
+      owner.appendChild(toAppend)
+    })
+    
     owner.removeChild(template)
-    owner.appendChild(toAppend)
-  
     interpolateTemplateVariableId(owner, context, undefined, undefined)
   })
 }

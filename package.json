@@ -10,8 +10,8 @@
     "deploy": "npm run build && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
     "build": "node --experimental-modules scripts/ack-build.js ack-build.json",
-    "start": "npm run build:watch",
-    "start:server": "ack-reload ./staging",
+    "start": "npm run build:watch & npm run start:server",
+    "start:server": "ack-reload --dir ./staging",
     "build:watch": "npm run build -- --watch"
   },
   "repository": {

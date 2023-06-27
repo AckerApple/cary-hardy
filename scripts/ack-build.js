@@ -57,11 +57,12 @@ async function run() {
   
   function wrapTemplateByPath(filePath) {
     const someFileString = readRelativeFile(filePath)
-    const concatFileString = templateString.replace('%TEMPLATE%', someFileString)
+    const fileTemplateString = `<template>${someFileString}</template>` // wrap in template so content is dynamic/interpolate-able
+    const concatFileString = templateString.replace('%TEMPLATE%', fileTemplateString)
   
     return concatFileString.replace(/<\/head>/g,`
       <script type="module">
-        import app from './app.js'
+        import app from './${configFile.compilerOptions.appFile}'
         app()
       </script></head>
     `)
