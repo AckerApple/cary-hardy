@@ -3,7 +3,7 @@ import { CountClock } from "./clock/component.js"
 
 class CaryApp extends HTMLElement {
   now = new Date()
-  date = new Date('June 26, 2023 21:00:00 EDT')
+  date = new Date('July 24, 2023 21:00:00 EDT')
 
   getDaySuffix(date) {
     var day = date.getDate();

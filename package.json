@@ -26,6 +26,6 @@
   },
   "homepage": "https://github.com/AckerApple/cary-hardy#readme",
   "devDependencies": {
-    "ack-reload": "^4.0.1"
+    "ack-reload": "^4.0.4"
   }
 }
