@@ -1,3 +1,7 @@
+/**
+ * Casts src code into output build folder. Also has code watching abilities
+ * Used for `npm run start` and `npm run build`
+ * */
 import path from 'path'
 import fs from 'fs'
 

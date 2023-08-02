@@ -111,10 +111,12 @@ export function ackApp(config) {
             }
           })
 
-          // interpolation
+          // interpolation that converts ${a} into <template interpolate start id="a"><template><template interpolate end id="a"><template>
           if (this.children.length) {
             const stackedVars = getParentVarsStacked(this)
             interpolateChildren(this.children, stackedVars, this)
+
+            interpolateChildrenAttributes(this.children, stackedVars, this)
           }
         }
 
@@ -138,17 +140,37 @@ export function ackApp(config) {
   return returnFunc
 }
 
+// converts <a href={url}></a> into <a href="http://googe.com"></a>
+export function interpolateChildrenAttributes(
+  children,
+  context, // variables used to evaluate
+  _owner // this aka element
+) {
+  new Array(...children).forEach(child => {
+      child.getAttributeNames().forEach(attrName => {
+        const value = child.getAttribute(attrName)
+        if ( value.search(/^\s*{/) >= 0 && value.search(/}\s*$/) >= 0 ) {
+          const code = value.replace('{','').split('').reverse().join('').replace('}','').split('').reverse().join('')
+          const result = evalWith(code, context, context, true)
+          child.setAttribute(attrName, result)
+        }
+      })
+
+      interpolateChildrenAttributes(child.children, context, child)
+  })
+}
+
 export function interpolateChildren(
   children,
   context, // variables used to evaluate
   owner // this aka element
 ) {
-  new Array(...children).forEach(template => {
-    if (template.tagName !== 'TEMPLATE') {
+  new Array(...children).forEach(child => {
+    if (child.tagName !== 'TEMPLATE') {
       return // not for me
     }
 
-    const toAppend = template.content.cloneNode(true)
+    const toAppend = child.content.cloneNode(true)
     if ( !toAppend.children.length ) {
       return // no inner templates
     }
@@ -162,7 +184,7 @@ export function interpolateChildren(
       owner.appendChild(toAppend)
     })
     
-    owner.removeChild(template)
+    owner.removeChild(child)
     interpolateTemplateVariableId(owner, context, undefined, undefined)
   })
 }

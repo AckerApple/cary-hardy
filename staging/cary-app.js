@@ -1,9 +1,11 @@
 import { ackApp } from "./web-gems/ackApp.js"
 import { CountClock } from "./clock/component.js"
+import config from './config.js'
 
 class CaryApp extends HTMLElement {
   now = new Date()
-  date = new Date('July 24, 2023 21:00:00 EDT')
+  date = new Date(config.nextMeetupDate) // 'July 24, 2023 21:00:00 EDT'
+  calInviteUrl = 'data:text/calendar;charset=utf-8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ADTSTART:20230810T120000%0ADTEND:20230810T130000%0ASUMMARY:Your Event Name%0ADESCRIPTION:Description of the event.%0ALOCATION:Event Location%0AEND:VEVENT%0AEND:VCALENDAR'
 
   getDaySuffix(date) {
     var day = date.getDate();

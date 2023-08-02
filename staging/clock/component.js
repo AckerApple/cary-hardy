@@ -84,6 +84,7 @@ export class CountClock extends ElementComponent {
 
       if ( remaining < 0 ) {
         this.setTo({days: 0,hours: 0,minutes: 0, seconds: 0})
+        clearInterval(interval)
         return
       }
     
@@ -95,7 +96,7 @@ export class CountClock extends ElementComponent {
       this.setTo({days,hours,minutes,seconds})
     }
         
-    setInterval(updateCountdown.bind(this), this.clockDisplaySpeed)
+    const interval = setInterval(updateCountdown.bind(this), this.clockDisplaySpeed)
   }
 
   setTo(

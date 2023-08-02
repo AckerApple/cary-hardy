@@ -9,7 +9,7 @@
     "deploy:staging": "npm run build && cp -R staging/* ./ && npm run deploy",
     "deploy": "npm run build && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
-    "build": "node --experimental-modules scripts/ack-build.js ack-build.json",
+    "build": "node --experimental-modules --experimental-json-modules scripts/ack-build.js ack-build.json",
     "start": "npm run build:watch & npm run start:server",
     "start:server": "ack-reload --dir ./staging",
     "build:watch": "npm run build -- --watch"

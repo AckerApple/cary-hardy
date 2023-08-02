@@ -1,7 +1,12 @@
-import { evalWith, getParentVar } from "./ack.utils.js"
+import { evalWith } from "./ack.utils.js"
 
-//export const interpolateReplace = /\${(.*?)}/g
-export const interpolateReplace = /\${((?:[^{}]|(?:\{[^{}]*\}))*?)}/g
+// export const interpolateReplace = /\${(.*?)}/g
+
+// requires money symbol
+// export const interpolateReplace = /\${((?:[^{}]|(?:\{[^{}]*\}))*?)}/g
+
+// Does not require money symbol (more like React)
+export const interpolateReplace = /\$*{((?:[^{}]|(?:\{[^{}]*\}))*?)}/g
 
 /** replaces ${x} with <template id="x-start"></template><template id="x-end"></template> */
 export function interpolateToTemplates(template) {
@@ -15,6 +20,7 @@ export function interpolateToTemplates(template) {
   return { string, keys }
 }
 
+/** Convert <template interpolate> into <template interpolate id="..."> */
 export function addInterpolateIdsForTemplates(
   element,
   id, // Will make ${x} become ${x:id}
@@ -66,7 +72,7 @@ function getInterpolatedIdFor(
 
 export function interpolateTemplateVariableId(
   element,
-  variable, // the value that will replace
+  variable, // the value that will replace CONTEXT
   onlyName, // Only modify variables with ${onlyName}
   id, // Will make ${x} become ${x:id}
 ) {
@@ -96,6 +102,8 @@ export function interpolateTemplateVariableId(
     }
     
     const targets = parts.join('.')
+
+    // call for actual execution of code
     const result = evalWith(targets, variable, variable, true)
 
     updateBetweenTemplates(result, template, templates[index+1])
@@ -123,6 +131,7 @@ export function updateBetweenTemplates(
   parent.insertBefore(textNode, endTemplate);
 }
 
+/*
 export function interpolateWithVariableId(
   string, // string with ${x}
   variable, // the value that will replace
@@ -165,3 +174,4 @@ export function interpolateWithVariableId(
     return result || was;
   })
 }
+*/
