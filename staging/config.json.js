@@ -1,3 +1,3 @@
 export default {
-  "nextMeetupDate": "September 25, 2023 21:00:00 EDT"
+  "nextMeetupDate": "October 23, 2023 21:00:00 EDT" // 9pm EST
 }
