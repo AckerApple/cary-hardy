@@ -46,16 +46,18 @@
 <div class="bounce-in" style="--fx-index:1">
   <h1>Meet & talk everything pinball!</h1>
   <p>for Patreon LE supporters</p>
-  <div style="display:flex;flex-wrap:wrap;gap:.5em;justify-content: center;">
-    <span>🗓️ ${date.toLocaleString('default', { weekday: 'long' })}, ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}</span>
-    <div>
-      <span>🕘 9 PM Eastern 🕖 7 PM Pacific</span>
-    </div>
-  </div>
+  <!--<p>for Patreon LE supporters</p>-->
+  <p>👉 LIT SPECIAL: <u>One time only</u> end of the year meetup is for <u>ALL Patreon supporters</u>!! 👈</p>
+  <div style="font-size:.8em;opacity: .7;">😎 come experience the hype</div>
 </div>
 
+<br />
+
 <div class="bounce-in" style="--fx-index:2">
+  <div id="count-clock"></count-clock>
+  <!--
   <count-clock [date]="date"></count-clock>
+  -->
 </div>
 
 <br />
@@ -74,8 +76,13 @@
           <p>
             And if that sounds interesting to you, then consider joining us!
           </p>
+          <!--
           <p>
             By becoming a <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Cary Hardy LE supporter</a> before ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}, you will receive an LE only Patreon <span style="white-space: nowrap;">💬 message</span>, <b>before the meeting start time</b>, with an invite <span style="white-space: nowrap;">🔗 link</span> to join this very exclusive meeting.
+          </p>
+          -->
+          <p>
+            By becoming a <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Cary Hardy Patreon supporter</a> before ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}, you will receive an LE only Patreon <span style="white-space: nowrap;">💬 message</span>, <b>before the meeting start time</b>, with an invite <span style="white-space: nowrap;">🔗 link</span> to join this very exclusive meeting.
           </p>
         </div>
         <br />
@@ -84,7 +91,10 @@
           <li>🍺 It mostly works because of beer. Come 🍻 cheers with us!</li>
           <li>🛎️ Make sure you have Patreon notifications turned on to ensure you receive invite link 1 hour before meeting</li>
           <li>Meeting software is Google Meets, which is a browser based application. No installation will be required.</li>
-          <li>Link to meeting is provided 1 hour before meeting. Must be <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Patreon LE member</a></li>
+          <!--
+            <li>Link to meeting is provided 1 hour before meeting. Must be <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Patreon LE member</a></li>
+          -->
+          <li>Link to meeting is provided 1 hour before meeting. Must be <a class="color-inherit" href="https://www.patreon.com/caryhardy/membership">Patreon member</a></li>
         </ul>
               
         <br />

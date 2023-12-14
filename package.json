@@ -6,13 +6,14 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy:staging": "npm run build && cp -R staging/* ./ && npm run deploy",
-    "deploy": "npm run build && npm run save",
+    "deploy": "npm run build && cp -R staging/* ./ && npm run deploy",
+    "deploy:preview": "npm run build && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
     "build": "node --experimental-modules --experimental-json-modules scripts/ack-build.js ack-build.json",
     "start": "npm run build:watch & npm run start:server",
     "start:server": "ack-reload --dir ./staging",
-    "build:watch": "npm run build -- --watch"
+    "build:watch": "npm run build -- --watch",
+    "update": "npm install taggedjs && cp -R node_modules/taggedjs src/taggedjs"
   },
   "repository": {
     "type": "git",
@@ -27,5 +28,8 @@
   "homepage": "https://github.com/AckerApple/cary-hardy#readme",
   "devDependencies": {
     "ack-reload": "^4.0.4"
+  },
+  "dependencies": {
+    "taggedjs": "^0.0.12"
   }
 }

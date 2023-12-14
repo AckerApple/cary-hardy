@@ -95,27 +95,10 @@
     <div class="fade-in" style="--fx-index:16">
       <a-container *if="now < date" [date]="date" [now]="now">
         <template>
-          <div style="padding:.5em;">
-            Countdown until the next, Patreon LE only, group meetup!
-          </div>
-          <count-clock [date]="date"></count-clock>
-          <br />
-          <div>
-            <!--
-              <a href={calInviteUrl}>test</a>
-            -->
-            <!--
-              <a href="data:text/calendar;charset=utf-8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ADTSTART:20230810T120000%0ADTEND:20230810T130000%0ASUMMARY:Your Event Name%0ADESCRIPTION:Description of the event.%0ALOCATION:Event Location%0AEND:VEVENT%0AEND:VCALENDAR" download="event.ics">
-                <span>🗓️ ${date.toLocaleString('default', { weekday: 'long' })}, ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}</span>
-              </a>
-            -->
-            <span>🗓️ {date.toLocaleString('default', { weekday: 'long' })}, ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}</span>
-          </div>
-          <div style="padding:.8em;font-size: .7em;">
-            <a class="no-a-style" href="meetup.html">
-              <button type="button">learn more</button>
-            </a>                
-          </div>
+          <div id="count-clock"></count-clock>
+          <!--
+            <count-clock [date]="date"></count-clock>
+          -->
         </template>
       </a-container>
     </div>
