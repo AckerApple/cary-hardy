@@ -196,8 +196,7 @@ END:VCALENDAR
     </style>
 
     <div style="padding:.5em;">
-      Countdown until the next, Patreon only, group meetup
-      <!--Countdown until the next, Patreon LE only, group meetup-->
+      Countdown until the next, Patreon LE only, group meetup
     </div>
 
     <div class="countdown">
