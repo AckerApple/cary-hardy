@@ -1,82 +1,12 @@
-import { Subject } from "../web-gems/Subject.js"
-import { html, tag } from "../taggedjs/index.js"
-import { getCallback, onInit } from "../taggedjs/index.js"
-
+import { html, tag } from "../taggedjs/bundle.js"
+import { countdown } from "./countdown.tag.js";
+// import { qrCodeDisplay } from "./qrCode.tag.js";
 
 export const ClockComponent = tag(({
   date,
   showLearnMore = true
 }) => {
-  const callback = getCallback()
-
-  onInit(() => run())
-
-  function run() {
-    date = date || new Date()
-    function updateCountdown() {
-      const now = new Date();
-      const remaining = date - now;
-
-      if ( remaining < 0 ) {
-        setTo({days: 0,hours: 0,minutes: 0, seconds: 0})
-        clearInterval(interval)
-        return
-      }
-    
-      const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-
-      setTo({days,hours,minutes,seconds})
-    }
-        
-    const interval = setInterval(callback(updateCountdown), clockDisplaySpeed)
-  }
-
-  function changeMe(element, value, map) {
-    const span = document.createElement('span')
-    span.classList.add('wrap')
-    span.innerText = value
-    
-    element.appendChild(span)
-
-    if ( element.children.length === 1 ) {
-      return // no need to remove when only 1
-    }
-
-    function remove() {
-      requestAnimationFrame(() => {
-        span.classList.add('changed')
-        
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            element.removeChild(span)
-          }, 200)
-        })
-      })      
-    }
-
-    setTimeout(remove, map.speed-1)
-  }
-
-  function setTo(
-    dateData // {days,hours,minutes,seconds}
-  ) {
-    Object.entries(dateData).forEach(([key, value]) => {
-      const digits = getDigits(value)
-      const scope = time[key]
-      if (digits[0] != scope[0].value$.value) {
-        scope[0].value$.next( digits[0] )
-        changeMe(document.getElementById(`${key}-0`), digits[0], scope[0])
-      }
-
-      if (digits[1] != scope[1].value$.value) {
-        scope[1].value$.next(digits[1])
-        changeMe(document.getElementById(`${key}-1`), digits[1], scope[1])
-      }    
-    })
-  }
+  date = new Date(date)
 
   const estTime = formatTime(date, 'America/New_York'); // Eastern Standard Time
   const cstTime = formatTime(date, 'America/Chicago');  // Central Standard Time
@@ -85,16 +15,30 @@ export const ClockComponent = tag(({
   const year = date.getFullYear()
   const month = ('0' + (date.getMonth() + 1)).slice(-2)
   const day = ('0' + (date.getDate())).slice(-2)
+    
   const googleDay = ('0' + (date.getDate() + 1)).slice(-2)
+  const utcStartTime = convertToT000000Z(date) // 'T010000Z' // T020000Z
+  const end = new Date(new Date(date).setHours(date.getHours() + 2))
+  const utcEndTime = convertToT000000Z(end) // T040000Z
+
+  const hours = date.getHours()
+  const endHours = end.getHours()
+  const message = `
+    Link to virtual meeting is posted to Patreon on a day of meeting
+
+    https://www.patreon.com/caryhardy
+  `.trim().replace(/    /g,'')
+
+  const urlMessage = encodeURIComponent(message)
 
   // created using https://parcel.io/tools/calendar
   // Do not forget to update cary-hardy-meetup.ics
   const calLinks = [{
     type:'google',
-    url: `https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${year}${month}${googleDay}T020000Z%2F${year}${month}${googleDay}T040000Z&details=Cary%20Hardy%20LE%20meet%20up%0A%0AGoogle%20Meet%20joining%20info%0AVideo%20call%20link%3A%20https%3A%2F%2Fmeet.google.com%2Fkgt-rfhm-kdk%0AOr%20dial%3A%20%E2%80%AA%28US%29%20%2B1%20502-632-7399%E2%80%AC%20PIN%3A%20%E2%80%AA147%20215%20371%E2%80%AC%23%0AMore%20phone%20numbers%3A%20https%3A%2F%2Ftel.meet%2Fkgt-rfhm-kdk%3Fpin%3D4548775831101&location=&text=Cary%20Hardy%20Patreon%20meetup`,
+    url: `https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${year}${month}${googleDay}${utcStartTime}%2F${year}${month}${googleDay}${utcEndTime}&details=${urlMessage}&location=&text=Cary%20Hardy%20Patreon%20meetup`,
   }, {
     type:'outlook',
-    url: `https://outlook.live.com/calendar/0/action/compose?allday=false&body=Cary%20Hardy%20LE%20meet%20up%0A%0AGoogle%20Meet%20joining%20info%0AVideo%20call%20link%3A%20https%3A%2F%2Fmeet.google.com%2Fkgt-rfhm-kdk%0AOr%20dial%3A%20%E2%80%AA%28US%29%20%2B1%20502-632-7399%E2%80%AC%20PIN%3A%20%E2%80%AA147%20215%20371%E2%80%AC%23%0AMore%20phone%20numbers%3A%20https%3A%2F%2Ftel.meet%2Fkgt-rfhm-kdk%3Fpin%3D4548775831101&enddt=${year}-${month}-${day}T23%3A00%3A00&location=&path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt=${year}-${month}-${day}T21%3A00%3A00&subject=Cary%20Hardy%20Patreon%20meetup`,
+    url: `https://outlook.live.com/calendar/0/action/compose?allday=false&body=${urlMessage}&enddt=${year}-${month}-${day}T${endHours}%3A00%3A00&location=&path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt=${year}-${month}-${day}T${hours}%3A00%3A00&subject=Cary%20Hardy%20Patreon%20meetup`,
   }]
 
   const icalContent=
@@ -102,8 +46,8 @@ export const ClockComponent = tag(({
 VERSION:2.0
 PRODID:Cary Hardy Patreon meetup
 BEGIN:VEVENT
-DTSTART:${year}${month}${googleDay}T020000Z
-DTEND:${year}${month}${googleDay}T040000Z
+DTSTART:${year}${month}${googleDay}${utcStartTime}
+DTEND:${year}${month}${googleDay}${utcEndTime}
 DTSTAMP:${year}${month}14T181547Z
 SUMMARY:Cary Hardy Patreon meetup
 DESCRIPTION:Cary Hardy LE meet up\n\nGoogle Meet joining info\nVideo call link: https://meet.google.com/kgt-rfhm-kdk\nOr dial: ‪(US) +1 502-632-7399‬ PIN: ‪147 215 371‬#\nMore phone numbers: https://tel.meet/kgt-rfhm-kdk?pin=4548775831101
@@ -199,74 +143,8 @@ END:VCALENDAR
       Countdown until the next, Patreon LE only, group meetup
     </div>
 
-    <div class="countdown">
-      <div>
-        <div class="digit-container">
-          <span class="digit">
-            <div class="line"></div>
-            <span id="days-0"></span>
-            <span class="placeholder">0</span>
-          </span>
-          <span class="digit">
-            <div class="line"></div>
-            <span id="days-1"></span>
-            <span class="placeholder">0</span>
-          </span>
-        </div>
-        <div class="label">Days</div>
-      </div>
+    ${countdown({date})}
 
-      <div>
-        <div class="digit-container">
-          <span class="digit">
-            <div class="line"></div>
-            <span id="hours-0"></span>
-            <span class="placeholder">0</span>
-          </span>
-          
-          <span class="digit">
-            <div class="line"></div>
-            <span id="hours-1"></span>
-            <span class="placeholder">0</span>
-          </span>
-        </div>
-        <div class="label">Hours</div>
-      </div>
-
-      <div>
-        <div class="digit-container">
-          <span class="digit">
-            <div class="line"></div>
-            <span id="minutes-0"></span>
-            <span class="placeholder">0</span>
-          </span>
-
-          <span class="digit">
-            <div class="line"></div>
-            <span id="minutes-1"></span>
-            <span class="placeholder">0</span>
-          </span>
-        </div>
-        <div class="label">Minutes</div>
-      </div>
-
-      <div>
-        <div class="digit-container">
-          <span class="digit">
-            <div class="line"></div>
-            <span id="seconds-0"></span>
-            <span class="placeholder">0</span>
-          </span>
-          
-          <span class="digit">
-            <div class="line"></div>
-            <span id="seconds-1"></span>
-            <span class="placeholder">0</span>
-          </span>
-        </div>
-        <div class="label">Seconds</div>
-      </div>
-    </div>
     <div style="font-size:.65em;opacity:.7">
       ${estTime} / ${cstTime} / ${pstTime}
     </div>
@@ -285,16 +163,16 @@ END:VCALENDAR
       </div>
 
       <div style="display:flex;gap:1em;justify-content: center;">
-        ${calLinks.map(item => {
-          return html`
+        ${calLinks.map(item => html`
             <a href=${item.url} target="_blank"
               style="color:inherit;text-decoration:none;border:1px solid #666;border-radius:.3em;width:62px;height:62px;display:flex;align-items:center;justify-content: center;"
             >
               ${item.type === 'google' && html`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48"><rect width="22" height="22" x="13" y="13" fill="#fff"></rect><polygon fill="#1e88e5" points="25.68,20.92 26.688,22.36 28.272,21.208 28.272,29.56 30,29.56 30,18.616 28.56,18.616"></polygon><path fill="#1e88e5" d="M22.943,23.745c0.625-0.574,1.013-1.37,1.013-2.249c0-1.747-1.533-3.168-3.417-3.168 c-1.602,0-2.972,1.009-3.33,2.453l1.657,0.421c0.165-0.664,0.868-1.146,1.673-1.146c0.942,0,1.709,0.646,1.709,1.44 c0,0.794-0.767,1.44-1.709,1.44h-0.997v1.728h0.997c1.081,0,1.993,0.751,1.993,1.64c0,0.904-0.866,1.64-1.931,1.64 c-0.962,0-1.784-0.61-1.914-1.418L17,26.802c0.262,1.636,1.81,2.87,3.6,2.87c2.007,0,3.64-1.511,3.64-3.368 C24.24,25.281,23.736,24.363,22.943,23.745z"></path><polygon fill="#fbc02d" points="34,42 14,42 13,38 14,34 34,34 35,38"></polygon><polygon fill="#4caf50" points="38,35 42,34 42,14 38,13 34,14 34,34"></polygon><path fill="#1e88e5" d="M34,14l1-4l-1-4H9C7.343,6,6,7.343,6,9v25l4,1l4-1V14H34z"></path><polygon fill="#e53935" points="34,34 34,42 42,34"></polygon><path fill="#1565c0" d="M39,6h-5v8h8V9C42,7.343,40.657,6,39,6z"></path><path fill="#1565c0" d="M9,42h5v-8H6v5C6,40.657,7.343,42,9,42z"></path></svg>`}
               ${item.type === 'outlook' && html`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48"><path fill="#03A9F4" d="M21,31c0,1.104,0.896,2,2,2h17c1.104,0,2-0.896,2-2V16c0-1.104-0.896-2-2-2H23c-1.104,0-2,0.896-2,2V31z"></path><path fill="#B3E5FC" d="M42,16.975V16c0-0.428-0.137-0.823-0.367-1.148l-11.264,6.932l-7.542-4.656L22.125,19l8.459,5L42,16.975z"></path><path fill="#0277BD" d="M27 41.46L6 37.46 6 9.46 27 5.46z"></path><path fill="#FFF" d="M21.216,18.311c-1.098-1.275-2.546-1.913-4.328-1.913c-1.892,0-3.408,0.669-4.554,2.003c-1.144,1.337-1.719,3.088-1.719,5.246c0,2.045,0.564,3.714,1.69,4.986c1.126,1.273,2.592,1.91,4.378,1.91c1.84,0,3.331-0.652,4.474-1.975c1.143-1.313,1.712-3.043,1.712-5.199C22.869,21.281,22.318,19.595,21.216,18.311z M19.049,26.735c-0.568,0.769-1.339,1.152-2.313,1.152c-0.939,0-1.699-0.394-2.285-1.187c-0.581-0.785-0.87-1.861-0.87-3.211c0-1.336,0.289-2.414,0.87-3.225c0.586-0.81,1.368-1.211,2.355-1.211c0.962,0,1.718,0.393,2.267,1.178c0.555,0.795,0.833,1.895,0.833,3.31C19.907,24.906,19.618,25.968,19.049,26.735z"></path></svg>`}
             </a>
-            `
-        })}
+          `.key(item)
+        )}
+
         <a href=${downloadString}
           download="cary-hardy-meetup.ics"
           style="color:inherit;text-decoration:none;border:1px solid #666;border-radius:.3em;width:62px;height:62px;display:flex;align-items:center;justify-content: center;"
@@ -307,6 +185,8 @@ END:VCALENDAR
       </div>
     </div>
 
+    ${/*qrCodeDisplay(calLinks[0].url)*/false}
+
     <br />
     ${showLearnMore && html`
       <div style="padding:.8em;font-size: .7em;">
@@ -317,45 +197,6 @@ END:VCALENDAR
     `}
   `
 })
-
-function getDigits(value) {
-  const d2 = value % 10
-  const d1 = Math.floor(value / 10)
-
-  return [d1, d2]
-}
-
-const clockDisplaySpeed = 1000
-const time = {
-  days: [{
-    speed: clockDisplaySpeed * 60 * 60 * 24 * 10,
-    value$: new Subject(),
-  },{
-    speed: clockDisplaySpeed * 60 * 60 * 24,
-    value$: new Subject(),
-  }],
-  hours: [{
-    speed: clockDisplaySpeed * 60 * 60 * 10,
-    value$: new Subject(),
-  },{
-    speed: clockDisplaySpeed * 60 * 60,
-    value$: new Subject(),
-  }],
-  minutes: [{
-    speed: clockDisplaySpeed * 60 * 10,
-    value$: new Subject(),
-  },{
-    speed: clockDisplaySpeed * 60,
-    value$: new Subject(),
-  }],
-  seconds: [{
-    speed: clockDisplaySpeed * 10,
-    value$: new Subject(),
-  },{
-    speed: clockDisplaySpeed,
-    value$: new Subject(),
-  }]
-}
 
 function formatTime(date, timeZone) {
   const options = {
@@ -382,4 +223,16 @@ function getDaySuffix(date) {
   }
 
   return suffix;
+}
+
+function convertToT000000Z(date) {
+  // Get the individual components of the date
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+  
+  // Construct the formatted string
+  const formattedDate = `T${hours}${minutes}${seconds}Z`;
+
+  return formattedDate;
 }

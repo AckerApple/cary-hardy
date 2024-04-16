@@ -1,7 +1,9 @@
 import { ackApp } from "./web-gems/ackApp.js"
 import { ClockComponent } from "./clock/component.js"
 import config from './config.js'
-import { renderAppToElement } from "./taggedjs/index.js"
+import { tagElement } from "./taggedjs/bundle.js"
+import { adminTag } from "./admin.tag.js"
+import { homeTag } from "./home.tag.js"
 
 class CaryApp extends HTMLElement {
   now = new Date()
@@ -12,8 +14,7 @@ class CaryApp extends HTMLElement {
     super()
     setTimeout(() => {
       const clockElm = document.getElementById('count-clock')
-      console.log('clockElm',window.location.href)
-      renderAppToElement(ClockComponent, clockElm, {
+      tagElement(ClockComponent, clockElm, {
         date: this.date,
         showLearnMore: !window.location.href.includes('meetup.html')
       })
@@ -48,14 +49,20 @@ const app = ackApp({
   // TODO: Make this ALSO based on folder structure and load routes automatically
   routes: [{
     path: ".",
-    template: 'home.html'
+    template: 'home.html',
+    callback: () => tagElement(homeTag, document.getElementById('home-tag'))
   }, {
     path: "meetup",
     template: "meetup.html"
   }, {
     path: "test",
     template: "test.html"
+  }, {
+    path: "admin",
+    template: "admin.html",
+    callback: () => tagElement(adminTag, document.getElementById('admin-tag'))
   }]
 })
+
 
 export default app

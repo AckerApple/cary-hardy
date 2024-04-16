@@ -59,21 +59,34 @@ async function run() {
     return fs.readFileSync(fullFilePath).toString()
   }
   
-  function wrapTemplateByPath(filePath) {
+  /**
+   * 
+   * @param {string} filePath
+   * @param {string} routeName
+   * @param {boolean} oldTemplate
+   * @returns {string}
+   */
+  function wrapTemplateByPath(
+    filePath, routeName, oldTemplate,
+  ) {
     const someFileString = readRelativeFile(filePath)
-    const fileTemplateString = `<template>${someFileString}</template>` // wrap in template so content is dynamic/interpolate-able
+    const fileTemplateString = oldTemplate ? `<template>${someFileString}</template>` : someFileString // wrap in template so content is dynamic/interpolate-able
     const concatFileString = templateString.replace('%TEMPLATE%', fileTemplateString)
   
     return concatFileString.replace(/<\/head>/g,`
       <script type="module">
         import app from './${configFile.compilerOptions.appFile}'
-        app()
+        app('${routeName}')
       </script></head>
     `)
   }
 
   appFile.config.routes.forEach(route => {
-    const injectedFileString = wrapTemplateByPath(route.template)
+    const injectedFileString = wrapTemplateByPath(
+      route.template,
+      route.path,
+      route.callback ? false : true,
+    )
     const writePath = getRelativeOutPath(route.template)
     fs.writeFileSync(writePath, injectedFileString)
   })
@@ -84,7 +97,7 @@ async function run() {
 
   // write the index.html as defaultTemplate
   const defaultTemplatePath = appFile.config.defaultTemplate
-  const defaultWrapped = wrapTemplateByPath(defaultTemplatePath)
+  const defaultWrapped = wrapTemplateByPath(defaultTemplatePath ,'.')
   const writePath = getRelativeOutPath('index.html')
   fs.writeFileSync(writePath, defaultWrapped)
   
