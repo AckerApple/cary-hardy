@@ -8,6 +8,8 @@ export const adminTag = tag(() => {
   return html`
     <h3>Hardy Tools</h3>
 
+    <a href="https://github.com/AckerApple/cary-hardy">code base</a>
+
     <fieldset>
       <legend>meeting tools</legend>
       

@@ -7,9 +7,21 @@ import { interpolateTemplateVariableId, interpolateToTemplates } from "./interpo
 let hasAckApp = false
 
 export function ackApp(config) {
-  const { App, components } = config
+  const { components } = config
 
-  const returnFunc = function () {
+  const returnFunc = function (
+    routeName
+  ) {
+    if(routeName) {
+      // OVERRIDE
+      const route = config.routes.find(route => route.path === routeName && route.callback)
+      const callback = route?.callback
+      if(callback) {
+        callback()
+        return
+      }
+    }
+
     if ( !hasAckApp ) {
       hasAckApp = true
       ackModule()
