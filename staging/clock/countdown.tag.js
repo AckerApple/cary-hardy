@@ -1,34 +1,55 @@
 import { Subject } from "../web-gems/Subject.js"
-import { html, tag, getCallback, onInit } from "../taggedjs/bundle.js"
+import { watch, letState, html, tag, callbackMaker, onInit } from "../taggedjs/bundle.js"
 
 export const countdown = tag(({date}) => {
-  const callback = getCallback()
+  const callback = callbackMaker()
+  let interval = letState(null)(x => [interval, interval = x])
 
   onInit(() => {
     run()
   })
 
-  function run() {
-    date = date || new Date()
-    function updateCountdown() {
-      const now = new Date();
-      const remaining = date - now;
-
-      if ( remaining < 0 ) {
-        setTo({days: 0,hours: 0,minutes: 0, seconds: 0})
-        clearInterval(interval)
-        return
-      }
-    
-      const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-
-      setTo({days,hours,minutes,seconds})
+  watch([date], (x) => {
+    if(interval) {
+      stop()
+      start()
+      return
     }
-        
-    const interval = setInterval(callback(updateCountdown), clockDisplaySpeed)
+
+    updateCountdown()
+  })
+
+  date = date || new Date()
+  function updateCountdown() {
+    const now = new Date();
+    const remaining = date - now;
+
+    if ( remaining < 0 ) {
+      setTo({days: 0,hours: 0,minutes: 0, seconds: 0})
+      stop()
+      return
+    }
+  
+    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+    setTo({days,hours,minutes,seconds})
+  }
+
+  function run() {
+    interval = setInterval(callback(updateCountdown), clockDisplaySpeed)
+  }
+
+  function stop() {
+    clearInterval(interval)
+    interval = null
+  }
+
+  function start() {
+    stop()
+    run()
   }
 
   function changeMe(element, value, map) {
@@ -124,7 +145,7 @@ export const countdown = tag(({date}) => {
             <span class="placeholder">0</span>
           </span>
         </div>
-        <div class="label">Minutes</div>
+        <div class="label" oncontextmenu=${start}>Minutes</div>
       </div>
 
       <div>
@@ -141,7 +162,7 @@ export const countdown = tag(({date}) => {
             <span class="placeholder">0</span>
           </span>
         </div>
-        <div class="label">Seconds</div>
+        <div class="label" oncontextmenu=${stop}>Seconds</div>
       </div>
     </div>
   `

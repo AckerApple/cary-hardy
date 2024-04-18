@@ -1,8 +1,12 @@
-import { html, tag } from "../taggedjs/bundle.js"
+import { watch, html, tag, state } from "./taggedjs/bundle.js"
 
-export const qrCodeDisplay = tag((url) => {
+export const qrCodeDisplay = tag(url => {  
+  const id = state(() => "qrTestElm" + performance.now())
+
   const onQrReady = () => {
-    new QRCode(document.getElementById("qrTestElm"), {
+    const elm = document.getElementById(id)
+    elm.innerHTML = ''
+    new QRCode(elm, {
       text: url,
       width: 300,
       height: 300,
@@ -24,11 +28,15 @@ export const qrCodeDisplay = tag((url) => {
       document.head.appendChild(script)
       return
     }
-
+    
     onQrReady()
   }
 
+  watch([url], () => {
+    onQrReady()
+  })
+
   return html`
-    <div style="border:1px solid red;width:400px;height:400px" id="qrTestElm" oninit=${loadQr}></div>
+    <div id=${id} oninit=${loadQr}></div>
   `
 })

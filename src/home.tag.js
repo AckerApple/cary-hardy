@@ -1,9 +1,9 @@
 import { ClockComponent } from "./clock/component.js"
-import { html, tag, setLet } from "./taggedjs/bundle.js"
+import { html, tag, letState } from "./taggedjs/bundle.js"
 import config from './config.js'
 
 export const homeTag = tag(() => {
-  let clickCount = setLet(0)(x => [clickCount, clickCount = x])
+  let clickCount = letState(0)(x => [clickCount, clickCount = x])
 
   return html`
     <div>

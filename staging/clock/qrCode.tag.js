@@ -1,8 +1,6 @@
 import { html, tag } from "../taggedjs/bundle.js"
 
 export const qrCodeDisplay = tag((url) => {
-  console.log('0')
-  
   const onQrReady = () => {
     new QRCode(document.getElementById("qrTestElm"), {
       text: url,
@@ -26,8 +24,7 @@ export const qrCodeDisplay = tag((url) => {
       document.head.appendChild(script)
       return
     }
-    
-    console.log('1')
+
     onQrReady()
   }
 

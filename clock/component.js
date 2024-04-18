@@ -1,6 +1,5 @@
 import { html, tag } from "../taggedjs/bundle.js"
 import { countdown } from "./countdown.tag.js";
-// import { qrCodeDisplay } from "./qrCode.tag.js";
 
 export const ClockComponent = tag(({
   date,
@@ -11,18 +10,10 @@ export const ClockComponent = tag(({
   const estTime = formatTime(date, 'America/New_York'); // Eastern Standard Time
   const cstTime = formatTime(date, 'America/Chicago');  // Central Standard Time
   const pstTime = formatTime(date, 'America/Los_Angeles'); // Pacific Standard Time
-
-  const year = date.getFullYear()
-  const month = ('0' + (date.getMonth() + 1)).slice(-2)
-  const day = ('0' + (date.getDate())).slice(-2)
     
-  const googleDay = ('0' + (date.getDate() + 1)).slice(-2)
   const utcStartTime = convertToT000000Z(date) // 'T010000Z' // T020000Z
-  const end = new Date(new Date(date).setHours(date.getHours() + 2))
   const utcEndTime = convertToT000000Z(end) // T040000Z
 
-  const hours = date.getHours()
-  const endHours = end.getHours()
   const message = `
     Link to virtual meeting is posted to Patreon on a day of meeting
 
@@ -35,26 +26,21 @@ export const ClockComponent = tag(({
   // Do not forget to update cary-hardy-meetup.ics
   const calLinks = [{
     type:'google',
-    url: `https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${year}${month}${googleDay}${utcStartTime}%2F${year}${month}${googleDay}${utcEndTime}&details=${urlMessage}&location=&text=Cary%20Hardy%20Patreon%20meetup`,
+    url: getGoogleInviteLink({
+      startDateTime: date, urlMessage
+    }),
   }, {
     type:'outlook',
-    url: `https://outlook.live.com/calendar/0/action/compose?allday=false&body=${urlMessage}&enddt=${year}-${month}-${day}T${endHours}%3A00%3A00&location=&path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt=${year}-${month}-${day}T${hours}%3A00%3A00&subject=Cary%20Hardy%20Patreon%20meetup`,
+    url: getOutlookInviteLink({
+      startDateTime: date, urlMessage
+    }),
   }]
+  
+  const icalContent = getICalContent({
+    startDateTime: date, message
+  })
 
-  const icalContent=
-`BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:Cary Hardy Patreon meetup
-BEGIN:VEVENT
-DTSTART:${year}${month}${googleDay}${utcStartTime}
-DTEND:${year}${month}${googleDay}${utcEndTime}
-DTSTAMP:${year}${month}14T181547Z
-SUMMARY:Cary Hardy Patreon meetup
-DESCRIPTION:Cary Hardy LE meet up\n\nGoogle Meet joining info\nVideo call link: https://meet.google.com/kgt-rfhm-kdk\nOr dial: ‪(US) +1 502-632-7399‬ PIN: ‪147 215 371‬#\nMore phone numbers: https://tel.meet/kgt-rfhm-kdk?pin=4548775831101
-UID:79992
-END:VEVENT
-END:VCALENDAR
-`
+  console.log('icalContent',icalContent)
 
   // Create a Blob containing the string data
   var blob = new Blob([icalContent], { type: 'text/calendar' })
@@ -235,4 +221,56 @@ function convertToT000000Z(date) {
   const formattedDate = `T${hours}${minutes}${seconds}Z`;
 
   return formattedDate;
+}
+
+function getGoogleInviteLink({
+  startDateTime, urlMessage
+}) {
+  const {year, month} = dateNames(startDateTime)
+  const googleDay = ('0' + (startDateTime.getDate() + 1)).slice(-2)
+  const utcStartTime = convertToT000000Z(date) // 'T010000Z' // T020000Z
+  const utcEndTime = convertToT000000Z(end) // T040000Z
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${year}${month}${googleDay}${utcStartTime}%2F${year}${month}${googleDay}${utcEndTime}&details=${urlMessage}&location=&text=Cary%20Hardy%20Patreon%20meetup`
+}
+
+function getOutlookInviteLink({
+  startDateTime, urlMessage
+}) {
+  const {year, month, day, hours} = dateNames(startDateTime)
+  const end = new Date(new Date(startDateTime).setHours(date.getHours() + 2))
+  const endHours = end.getHours()
+
+  return `https://outlook.live.com/calendar/0/action/compose?allday=false&body=${urlMessage}&enddt=${year}-${month}-${day}T${endHours}%3A00%3A00&location=&path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt=${year}-${month}-${day}T${hours}%3A00%3A00&subject=Cary%20Hardy%20Patreon%20meetup`
+}
+
+function getICalContent({
+  startDateTime, message
+}) {
+  const {year, month} = dateNames(startDateTime)
+  const googleDay = ('0' + (startDateTime.getDate() + 1)).slice(-2)
+  const utcStartTime = convertToT000000Z(date) // 'T010000Z' // T020000Z
+  const utcEndTime = convertToT000000Z(end) // T040000Z
+
+  return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:Cary Hardy Patreon meetup
+BEGIN:VEVENT
+DTSTART:${year}${month}${googleDay}${utcStartTime}
+DTEND:${year}${month}${googleDay}${utcEndTime}
+DTSTAMP:${year}${month}14T181547Z
+SUMMARY:Cary Hardy Patreon meetup
+DESCRIPTION:${message.replace(/\n/g,'\\n')}
+UID:79992
+END:VEVENT
+END:VCALENDAR`
+}
+
+function dateNames(date) {
+  const year = date.getFullYear()
+  const month = ('0' + (date.getMonth() + 1)).slice(-2)
+  const day = ('0' + (date.getDate())).slice(-2)
+  const hours = date.getHours()
+
+  return {year, month, day, hours}
 }
