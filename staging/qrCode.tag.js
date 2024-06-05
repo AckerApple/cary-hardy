@@ -32,7 +32,7 @@ export const qrCodeDisplay = tag(url => {
     onQrReady()
   }
 
-  watch([url], () => {
+  watch.noInit([url], () => {
     onQrReady()
   })
 
