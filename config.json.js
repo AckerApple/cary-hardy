@@ -1,3 +1,3 @@
 export default {
-  "nextMeetupDate": 1719277200000
+  "nextMeetupDate": 1721696400000
 }
