@@ -1,4 +1,4 @@
-import { letState, html, tag } from "../taggedjs/bundle.js"
+import { states, html, tag } from "../taggedjs/bundle.js"
 import { countdown } from "./countdown.tag.js"
 import { qrCodeDisplay } from "../qrCode.tag.js"
 import { getGoogleInviteLink, getOutlookInviteLink, getICalContent } from "./calendar.utils.js"
@@ -18,7 +18,9 @@ export const ClockComponent = tag(({
 }) => {
   date = new Date(date)
 
-  let showQrCodes = letState(false)(x => [showQrCodes,showQrCodes=x])
+  let showQrCodes = false
+  
+  states(get => showQrCodes = get(showQrCodes))
 
   const estTime = formatTime(date, 'America/New_York'); // Eastern Standard Time
   const cstTime = formatTime(date, 'America/Chicago');  // Central Standard Time

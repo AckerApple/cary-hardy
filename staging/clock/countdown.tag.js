@@ -1,21 +1,16 @@
 import { Subject } from "../web-gems/Subject.js"
-import { watch, letState, html, tag, callbackMaker, onInit } from "../taggedjs/bundle.js"
+import { watch, states, html, tag, callbackMaker, onInit } from "../taggedjs/bundle.js"
 
 export const countdown = tag(({date}) => {
   const callback = callbackMaker()
-  let interval = letState(null)(x => [interval, interval = x])
+  let interval = null
+  states(get => ({interval} = get({interval})))
 
-  onInit(() => {
-    run()
-  })
+  onInit(run)
 
-  watch([date], (x) => {
-    if(interval) {
-      stop()
-      start()
-      return
-    }
-
+  watch.noInit([date], (x) => {
+    console.debug('⏳ date changed, restart clock')
+    start()
     updateCountdown()
   })
 
@@ -27,6 +22,7 @@ export const countdown = tag(({date}) => {
     if ( remaining < 0 ) {
       setTo({days: 0,hours: 0,minutes: 0, seconds: 0})
       stop()
+      console.debug('⌛️ clock stopped, meeting in past')
       return
     }
   

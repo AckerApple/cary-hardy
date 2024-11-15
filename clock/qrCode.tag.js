@@ -27,7 +27,7 @@ export const qrCodeDisplay = tag((url) => {
 
     onQrReady()
   }
-
+  
   return html`
     <div style="border:1px solid red;width:400px;height:400px" id="qrTestElm" oninit=${loadQr}></div>
   `

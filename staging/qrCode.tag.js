@@ -31,12 +31,10 @@ export const qrCodeDisplay = tag(url => {
     
     onQrReady()
   }
-
+    
   watch.noInit([url], () => {
     onQrReady()
   })
 
-  return html`
-    <div id=${id} oninit=${loadQr}></div>
-  `
+  return html`<div id=${id} oninit=${loadQr}></div>`
 })

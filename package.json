@@ -13,8 +13,9 @@
     "build:root": "node --experimental-modules --experimental-json-modules scripts/ack-build.js ack-build.root.json",
     "start": "npm run build:watch & npm run start:server",
     "start:server": "ack-reload --dir ./staging",
-    "build:watch": "npm run build -- --watch",
-    "update": "npm install taggedjs && npm run copy:taggedjs:src && npm run copy:taggedjs:root",
+    "build:watch": "npm run build:src -- --watch",
+    "update": "npm install taggedjs && npm run update:copies",
+    "update:copies": "npm run copy:taggedjs:src && npm run copy:taggedjs:root",
     "copy:taggedjs:src": "cp node_modules/taggedjs/bundle.js src/taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map src/taggedjs/bundle.js.map",
     "copy:taggedjs:root": "cp node_modules/taggedjs/bundle.js ./taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map ./taggedjs/bundle.js.map"
   },
@@ -33,6 +34,6 @@
     "ack-reload": "^4.0.4"
   },
   "dependencies": {
-    "taggedjs": "github:AckerApple/taggedjs"
+    "taggedjs": "file:../../web/taggedjs/dist"
   }
 }
