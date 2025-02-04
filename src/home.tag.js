@@ -1,4 +1,4 @@
-import { ClockComponent } from "./clock/component.js"
+import { ClockComponent } from "./clock/clock.tag.js"
 import { html, tag, states } from "./taggedjs/bundle.js"
 import config from './config.js'
 

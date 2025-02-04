@@ -1,6 +1,6 @@
 import config from './config.js'
 import { html, tag, states } from "./taggedjs/bundle.js"
-import { ClockComponent, content } from "./clock/component.js"
+import { ClockComponent, content } from "./clock/clock.tag.js"
 import { qrCodeDisplay } from "./qrCode.tag.js"
 import { getGoogleInviteLink, getICalContent, getOutlookInviteLink } from './clock/calendar.utils.js'
 import { copyText } from './copyText.function.js'

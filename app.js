@@ -1,5 +1,5 @@
 import { ackApp } from "./web-gems/ackApp.js"
-import { CountClock } from "./clock/component.js"
+import { CountClock } from "./clock/clock.tag.js"
 
 class CaryApp extends HTMLElement {
   now = new Date()

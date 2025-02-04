@@ -1,6 +1,6 @@
 import config from './config.js'
 import { html, tag } from "./taggedjs/bundle.js"
-import { ClockComponent } from "./clock/component.js"
+import { ClockComponent } from "./clock/clock.tag.js"
 
 export const adminTag = tag(() => {
   const {date, time} = timestampToValues(Number(config.nextMeetupDate))

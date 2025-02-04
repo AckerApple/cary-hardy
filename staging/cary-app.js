@@ -1,5 +1,5 @@
 import { ackApp } from "./web-gems/ackApp.js"
-import { ClockComponent } from "./clock/component.js"
+import { ClockComponent } from "./clock/clock.tag.js"
 import config from './config.js'
 import { tagElement } from "./taggedjs/bundle.js"
 import { adminTag } from "./admin.tag.js"
