@@ -5,15 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "deploy": "npm run build && cp -R staging/* ./ && npm run deploy:preview",
+    "deploy": "npm run build && npm run deploy:preview",
     "deploy:preview": "npm run build && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
-    "build": "npm run build:src && npm run build:root",
-    "build:src": "node --experimental-modules --experimental-json-modules scripts/ack-build.js ack-build.json",
-    "build:root": "node --experimental-modules --experimental-json-modules scripts/ack-build.js ack-build.root.json",
-    "start": "npm run build:watch & npm run start:server",
-    "start:server": "ack-reload --dir ./staging",
-    "build:watch": "npm run build:src -- --watch",
+    "build": "ts-node ./scripts/runBundle.script.ts",
     "update": "npm install taggedjs && npm run update:copies",
     "update:copies": "npm run copy:taggedjs:src && npm run copy:taggedjs:root",
     "copy:taggedjs:src": "cp node_modules/taggedjs/bundle.js src/taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map src/taggedjs/bundle.js.map",
@@ -31,7 +26,12 @@
   },
   "homepage": "https://github.com/AckerApple/cary-hardy#readme",
   "devDependencies": {
-    "ack-reload": "^4.0.4"
+    "ack-reload": "^4.0.4",
+    "taggedjs-cli": "^0.1.13",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1"
   },
   "dependencies": {
     "taggedjs": "^2.8.3"

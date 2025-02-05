@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "outDir": "./staging",
-    "baseDir": "src",
-    "wrapFile": "index.html",
-    "appFile": "cary-app.js"
-  }
-}

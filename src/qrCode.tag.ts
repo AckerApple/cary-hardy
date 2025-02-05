@@ -1,8 +1,14 @@
-import { html, tag } from "taggedjs"
+import { watch, html, tag, state } from "taggedjs"
 
-export const qrCodeDisplay = tag((url) => {
+declare const QRCode: any;
+
+export const qrCodeDisplay = tag(url => {  
+  const id = state(() => "qrTestElm" + performance.now())
+
   const onQrReady = () => {
-    new QRCode(document.getElementById("qrTestElm"), {
+    const elm = document.getElementById(id) as HTMLElement
+    elm.innerHTML = ''
+    new QRCode(elm, {
       text: url,
       width: 300,
       height: 300,
@@ -24,11 +30,13 @@ export const qrCodeDisplay = tag((url) => {
       document.head.appendChild(script)
       return
     }
-
+    
     onQrReady()
   }
-  
-  return html`
-    <div style="border:1px solid red;width:400px;height:400px" id="qrTestElm" oninit=${loadQr}></div>
-  `
+    
+  watch.noInit([url], () => {
+    onQrReady()
+  })
+
+  return html`<div id=${id} oninit=${loadQr}></div>`
 })
