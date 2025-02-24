@@ -8,7 +8,8 @@
     "deploy": "npm run build && npm run deploy:preview",
     "deploy:preview": "npm run build && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
-    "build": "ts-node ./scripts/runBundle.script.ts",
+    "build": "npm run build:html && ts-node ./scripts/runBundle.script.ts",
+    "build:html": "node scripts/mergeHtmlFiles.cjs wrap.html ./ .src.html",
     "update": "npm install taggedjs && npm run update:copies",
     "update:copies": "npm run copy:taggedjs:src && npm run copy:taggedjs:root",
     "copy:taggedjs:src": "cp node_modules/taggedjs/bundle.js src/taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map src/taggedjs/bundle.js.map",
@@ -27,6 +28,7 @@
   "homepage": "https://github.com/AckerApple/cary-hardy#readme",
   "devDependencies": {
     "ack-reload": "^4.0.4",
+    "fs-extra": "^11.3.0",
     "taggedjs-cli": "^0.1.13",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",

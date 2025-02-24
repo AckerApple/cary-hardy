@@ -7,6 +7,7 @@ import { meetupTag } from "./meetup.tag"
 import config from './config'
 
 export { countdown, meetupTag, adminTag, homeTag, tagElement, html }
+export * from './admin.tag'
 
 
 const date = new Date(config.nextMeetupDate) // 'July 24, 2023 21:00:00 EDT'
