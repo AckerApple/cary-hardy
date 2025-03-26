@@ -1,14 +1,24 @@
-import { Subject, watch, states, html, tag, callbackMaker, onInit } from "taggedjs"
+import { Subject, watch, state, states, html, tag, callbackMaker, onInit } from "taggedjs"
+
+type DateData = {
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+}
 
 export const countdown = tag(({date}) => {
-  const callback = callbackMaker()
-  let interval: any = null
+  const unique = state(() => performance.now().toString().replace(/\./g,'_'))
+  const time = state(getNewTimeTable)
+
+  // const callback = callbackMaker()
+  let interval: NodeJS.Timeout | undefined
   states(get => ([interval] = get(interval)))
 
   onInit(run)
 
   watch.noInit([date], (x) => {
-    console.debug('⏳ date changed, restart clock')
+    // console.debug('⏳ date changed, restart clock')
     start()
     updateCountdown()
   })
@@ -21,11 +31,11 @@ export const countdown = tag(({date}) => {
     if ( remaining < 0 ) {
       setTo({days: 0,hours: 0,minutes: 0, seconds: 0})
       stop()
-      console.debug('⌛️ clock stopped, meeting in past')
+      // console.debug('⌛️ clock stopped, meeting in past')
       return
     }
   
-    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+    let days = Math.floor(remaining / (1000 * 60 * 60 * 24));
     const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
@@ -34,12 +44,14 @@ export const countdown = tag(({date}) => {
   }
 
   function run() {
-    interval = setInterval(callback(updateCountdown), clockDisplaySpeed)
+    // 3-2025: We only manipulate HTML by Ids, no callback needed?
+    // interval = setInterval(callback(updateCountdown), clockDisplaySpeed)
+    interval = setInterval(updateCountdown, clockDisplaySpeed)
   }
 
   function stop() {
     clearInterval(interval)
-    interval = null
+    interval = undefined
   }
 
   function start() {
@@ -74,19 +86,32 @@ export const countdown = tag(({date}) => {
   }
 
   function setTo(
-    dateData: any // {days,hours,minutes,seconds}
+    dateData: DateData
   ) {
-    Object.entries(dateData).forEach(([key, value]) => {
+    const dateDataClone = {...dateData} // days maybe mutated
+    let { days } = dateDataClone
+
+    const plusElm = document.getElementById(`${unique}-days-plus`) as HTMLElement
+    if(days > 99) {
+      dateDataClone.days = 99
+      
+      plusElm.style.display = ''
+    } else {
+      plusElm.style.display = 'none'
+    }
+
+    Object.entries(dateDataClone).forEach(([key, value]) => {
       const digits = getDigits(value)
-      const scope = time[key]
+      const scope = time[key as 'days' | 'hours' | 'minutes' | 'seconds']
+      
       if (digits[0] != scope[0].value$.value) {
         scope[0].value$.next( digits[0] )
-        changeMe(document.getElementById(`${key}-0`), digits[0], scope[0])
+        changeMe(document.getElementById(`${unique}-${key}-0`), digits[0], scope[0])
       }
 
       if (digits[1] != scope[1].value$.value) {
         scope[1].value$.next(digits[1])
-        changeMe(document.getElementById(`${key}-1`), digits[1], scope[1])
+        changeMe(document.getElementById(`${unique}-${key}-1`), digits[1], scope[1])
       }    
     })
   }
@@ -173,14 +198,15 @@ export const countdown = tag(({date}) => {
         <div class="digit-container">
           <span class="digit">
             <div class="line"></div>
-            <span id="days-0"></span>
+            <span id=${unique + '-days-0'}></span>
             <span class="placeholder">0</span>
           </span>
           <span class="digit">
             <div class="line"></div>
-            <span id="days-1"></span>
+            <span id=${unique + '-days-1'}></span>
             <span class="placeholder">0</span>
           </span>
+          <span  id=${unique + '-days-plus'} class="label" style="display:none">+</span>
         </div>
         <div class="label">Days</div>
       </div>
@@ -189,13 +215,13 @@ export const countdown = tag(({date}) => {
         <div class="digit-container">
           <span class="digit">
             <div class="line"></div>
-            <span id="hours-0"></span>
+            <span id=${unique + '-hours-0'}></span>
             <span class="placeholder">0</span>
           </span>
           
           <span class="digit">
             <div class="line"></div>
-            <span id="hours-1"></span>
+            <span id=${unique + '-hours-1'}></span>
             <span class="placeholder">0</span>
           </span>
         </div>
@@ -206,13 +232,13 @@ export const countdown = tag(({date}) => {
         <div class="digit-container">
           <span class="digit">
             <div class="line"></div>
-            <span id="minutes-0"></span>
+            <span id=${unique + '-minutes-0'}></span>
             <span class="placeholder">0</span>
           </span>
 
           <span class="digit">
             <div class="line"></div>
-            <span id="minutes-1"></span>
+            <span id=${unique + '-minutes-1'}></span>
             <span class="placeholder">0</span>
           </span>
         </div>
@@ -223,13 +249,13 @@ export const countdown = tag(({date}) => {
         <div class="digit-container">
           <span class="digit">
             <div class="line"></div>
-            <span id="seconds-0"></span>
+            <span id=${unique + '-seconds-0'}></span>
             <span class="placeholder">0</span>
           </span>
           
           <span class="digit">
             <div class="line"></div>
-            <span id="seconds-1"></span>
+            <span id=${unique + '-seconds-1'}></span>
             <span class="placeholder">0</span>
           </span>
         </div>
@@ -239,6 +265,7 @@ export const countdown = tag(({date}) => {
   `
 })
 
+/** Returns 2 position array */
 function getDigits(value: any) {
   const d2 = value % 10
   const d1 = Math.floor(value / 10)
@@ -247,33 +274,35 @@ function getDigits(value: any) {
 }
 
 const clockDisplaySpeed = 1000
-const time: any = {
-  days: [{
-    speed: clockDisplaySpeed * 60 * 60 * 24 * 10,
-    value$: new Subject(),
-  },{
-    speed: clockDisplaySpeed * 60 * 60 * 24,
-    value$: new Subject(),
-  }],
-  hours: [{
-    speed: clockDisplaySpeed * 60 * 60 * 10,
-    value$: new Subject(),
-  },{
-    speed: clockDisplaySpeed * 60 * 60,
-    value$: new Subject(),
-  }],
-  minutes: [{
-    speed: clockDisplaySpeed * 60 * 10,
-    value$: new Subject(),
-  },{
-    speed: clockDisplaySpeed * 60,
-    value$: new Subject(),
-  }],
-  seconds: [{
-    speed: clockDisplaySpeed * 10,
-    value$: new Subject(),
-  },{
-    speed: clockDisplaySpeed,
-    value$: new Subject(),
-  }]
+function getNewTimeTable() {
+  return {
+    days: [{
+      speed: clockDisplaySpeed * 60 * 60 * 24 * 10,
+      value$: new Subject(),
+    },{
+      speed: clockDisplaySpeed * 60 * 60 * 24,
+      value$: new Subject(),
+    }],
+    hours: [{
+      speed: clockDisplaySpeed * 60 * 60 * 10,
+      value$: new Subject(),
+    },{
+      speed: clockDisplaySpeed * 60 * 60,
+      value$: new Subject(),
+    }],
+    minutes: [{
+      speed: clockDisplaySpeed * 60 * 10,
+      value$: new Subject(),
+    },{
+      speed: clockDisplaySpeed * 60,
+      value$: new Subject(),
+    }],
+    seconds: [{
+      speed: clockDisplaySpeed * 10,
+      value$: new Subject(),
+    },{
+      speed: clockDisplaySpeed,
+      value$: new Subject(),
+    }]
+  }
 }

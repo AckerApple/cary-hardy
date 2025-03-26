@@ -1,7 +1,7 @@
-import { states, html, tag } from "taggedjs"
-import { countdown } from "./countdown.tag"
-import { qrCodeDisplay } from "../qrCode.tag"
-import { getGoogleInviteLink, getOutlookInviteLink, getICalContent } from "./calendar.utils"
+import { states, html, tag } from 'taggedjs'
+import { qrCodeDisplay } from '../qrCode.tag'
+import { getGoogleInviteLink, getOutlookInviteLink, getICalContent } from './calendar.utils'
+import { labeledCountdown } from './timeZoneTimes.tag'
 
 export const content = {
   subject: 'Cary Hardy Patreon meetup',
@@ -21,13 +21,6 @@ export const ClockComponent = tag(({
   let showQrCodes = false
   
   states(get => [showQrCodes] = get(showQrCodes))
-
-  const estTime = formatTime(date, 'America/New_York'); // Eastern Standard Time
-  const cstTime = formatTime(date, 'America/Chicago');  // Central Standard Time
-  const pstTime = formatTime(date, 'America/Los_Angeles'); // Pacific Standard Time
-
-  // created using https://parcel.io/tools/calendar
-  // Do not forget to update cary-hardy-meetup.ics
 
   const googleLink = getGoogleInviteLink({
     startDateTime: date, message: content.message, subject: content.subject,
@@ -61,16 +54,7 @@ export const ClockComponent = tag(({
       Countdown until the next, Patreon LE only, group meetup
     </div>
 
-    ${countdown({date})}
-
-    <div style="font-size:.65em;opacity:.7">
-      ${estTime} / ${cstTime} / ${pstTime}
-    </div>
-
-    <br />
-    <div>
-      <span>🗓️ ${date.toLocaleString('default', { weekday: 'long' })}, ${ date.toLocaleString('default', { month: 'long' }) } ${ date.getDate() }${getDaySuffix(date)}</span>
-    </div>
+    ${labeledCountdown(date)}
 
     <div style="white-space:nowrap;font-size:.7em;opacity:.8">
       save meetup to your calendar using links below 👇
@@ -136,19 +120,7 @@ export const ClockComponent = tag(({
   `
 })
 
-function formatTime(date: any, timeZone: any) {
-  const options = {
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-    timeZone,
-    timeZoneName: 'short'
-  };
-
-  return new Intl.DateTimeFormat('en-US', options as any).format(date);
-}
-
-export function getDaySuffix(date: any) {
+export function getDaySuffix(date: Date) {
   var day = date.getDate();
   var suffix = 'th';
 

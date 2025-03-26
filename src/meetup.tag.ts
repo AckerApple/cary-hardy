@@ -1,10 +1,21 @@
-import { getDaySuffix } from './clock/clock.tag'
+import { ClockComponent, getDaySuffix } from './clock/clock.tag'
 import config from './config'
-import { html, tag } from "taggedjs"
+import { html, tag, tagElement } from "taggedjs"
 
 const date = new Date(config.nextMeetupDate) // 'July 24, 2023 21:00:00 EDT'
 
 export const meetupTag = tag(() => {
+  const date = new Date(config.nextMeetupDate) // 'July 24, 2023 21:00:00 EDT'
+
+  setTimeout(() => {
+    const clockElm = document.getElementById('count-clock') as HTMLElement
+    console.log('clockElm----', clockElm)
+    tagElement(ClockComponent, clockElm, {
+      date,
+      showLearnMore: !window.location.href.includes('meetup.html')
+    })
+  }, 0)
+  
   return html`
     <!-- TODO: Maybe toggle logic for all Patreon supporters meetings -->
 

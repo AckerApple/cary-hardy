@@ -8,12 +8,13 @@
     "deploy": "npm run build && npm run deploy:preview",
     "deploy:preview": "npm run build && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
+    "watch": "nodemon --watch src --ext '*' --exec 'npm run build'",
     "build": "npm run build:html && ts-node ./scripts/runBundle.script.ts",
     "build:html": "node scripts/mergeHtmlFiles.cjs wrap.html ./ .src.html",
     "update": "npm install taggedjs && npm run update:copies",
     "update:copies": "npm run copy:taggedjs:src && npm run copy:taggedjs:root",
-    "copy:taggedjs:src": "cp node_modules/taggedjs/bundle.js src/taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map src/taggedjs/bundle.js.map",
-    "copy:taggedjs:root": "cp node_modules/taggedjs/bundle.js ./taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map ./taggedjs/bundle.js.map"
+    "copy:taggedjs:src": "mkdir -p src/taggedjs && cp node_modules/taggedjs/bundle.js src/taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map src/taggedjs/bundle.js.map",
+    "copy:taggedjs:root": "mkdir -p taggedjs && cp node_modules/taggedjs/bundle.js ./taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map ./taggedjs/bundle.js.map"
   },
   "repository": {
     "type": "git",
@@ -29,13 +30,14 @@
   "devDependencies": {
     "ack-reload": "^4.0.4",
     "fs-extra": "^11.3.0",
+    "nodemon": "^3.1.9",
     "taggedjs-cli": "^0.1.13",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "webpack": "^5.97.1"
   },
   "dependencies": {
-    "taggedjs": "^2.8.3"
+    "taggedjs": "^2.8.8"
   }
 }
