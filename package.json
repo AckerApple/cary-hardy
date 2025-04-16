@@ -9,7 +9,7 @@
     "deploy:preview": "npm run build && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
     "watch": "nodemon --watch src --ext '*' --exec 'npm run build'",
-    "build": "npm run build:html && ts-node ./scripts/runBundle.script.ts",
+    "build": "npm run build:html && node --loader ts-node/esm ./scripts/runBundle.script.ts",
     "build:html": "node scripts/mergeHtmlFiles.cjs wrap.html ./ .src.html",
     "update": "npm install taggedjs && npm run update:copies",
     "update:copies": "npm run copy:taggedjs:src && npm run copy:taggedjs:root",
