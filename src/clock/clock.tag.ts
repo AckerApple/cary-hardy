@@ -1,4 +1,4 @@
-import { states, html, tag } from 'taggedjs'
+import { states, html, tag, Tag } from 'taggedjs'
 import { qrCodeDisplay } from '../qrCode.tag'
 import { getGoogleInviteLink, getOutlookInviteLink, getICalContent } from './calendar.utils'
 import { labeledCountdown } from './timeZoneTimes.tag'
@@ -66,24 +66,21 @@ export const ClockComponent = tag(({
       
       <div style="display:flex;gap:1em;justify-content: center;">
         ${calLinks.map(item => html`
-            <a href=${item.url} target="_blank"
-              style="color:inherit;text-decoration:none;border:1px solid #666;border-radius:.3em;width:62px;height:62px;display:flex;align-items:center;justify-content: center;"
-            >
-              ${item.type === 'google' && html`<img src="assets/media/gmail-logo-2.png" alt="" width="48" height="48" border="0" />`}
-              ${item.type === 'outlook' && html`<img src="assets/media/outlook-icon.png" alt="" width="48" height="48" border="0" />`}
-            </a>
+          ${item.type === 'google' && getIconAndLabel(item.type, {href:item.url}, html`
+            <img src="assets/media/gmail-logo-2.png" alt="" width="48" height="48" border="0" />
+          `)}
+          ${item.type === 'outlook' && getIconAndLabel(item.type, {href:item.url}, html`
+            <img src="assets/media/outlook-icon.png" alt="" width="48" height="48" border="0" />
+          `)}
           `.key(item)
         )}
 
-        <a href=${downloadString}
-          download="cary-hardy-meetup.ics"
-          style="color:inherit;text-decoration:none;border:1px solid #666;border-radius:.3em;width:62px;height:62px;display:flex;align-items:center;justify-content: center;"
-        >
+        ${getIconAndLabel('ical', {href:downloadString, download:'cary-hardy-meetup.ics'}, html`
           <svg viewBox="0 0 170 170" fill="currentColor" width="48" height="48">
             <title>Apple Logo</title>
             <img src="assets/media/ical.png" alt="" width="48" height="48" border="0" />
           </svg>
-        </a>
+        `)}
       </div>
 
       <br />
@@ -109,7 +106,10 @@ export const ClockComponent = tag(({
       `}
     </div>
 
-    <br />
+    <p style="font-size:0.8em;opacity:0.7;line-height:0.9em;">
+      <small>🔗 A link to virtual meetup is posted on day of meetup,<br />in the LE ONLY 💬 chat on Patreon.</small>
+    </p>
+
     ${showLearnMore && html`
       <div style="padding:.8em;font-size: .7em;">
         <a class="no-a-style" href="meetup.html">
@@ -134,3 +134,17 @@ export function getDaySuffix(date: Date) {
 
   return suffix;
 }
+
+const getIconAndLabel = (
+  label: string,
+  linkAttrs: Record<string, string>,
+  iconHtml: Tag,
+) => 
+  html`
+    <a class="small-icon-link" ${linkAttrs} target="_blank">
+      <div class="small-icon">
+        ${iconHtml}
+      </div>
+      <small style="font-size:0.5em;">${label}</small>
+    </a>
+  `
