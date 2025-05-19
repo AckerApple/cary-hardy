@@ -38,6 +38,6 @@
     "webpack": "^5.97.1"
   },
   "dependencies": {
-    "taggedjs": "^2.8.20"
+    "taggedjs": "^2.8.30"
   }
 }
