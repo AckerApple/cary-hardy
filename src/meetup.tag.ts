@@ -16,8 +16,8 @@ export const meetupTag = tag(() => {
     })
   }, 0)
   
+  /* TODO: Maybe toggle logic for all Patreon supporters meetings */
   return html`
-    <!-- TODO: Maybe toggle logic for all Patreon supporters meetings -->
 
     <img class="bounce-in reflection" alt="Cary Hardy logo" src="https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png"
       style="--fx-index:0;width: 55vw;min-width: 200px;max-width: 400px;"
