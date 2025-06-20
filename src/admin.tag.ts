@@ -42,7 +42,7 @@ export const adminTag = tag(() => {
         <div>
           UTC: ${new Date(config.nextMeetupDate).getTime()}
           <div style="font-size:0.7em;">
-            <small>(📋 copy/paste above value into config.json.js & npm run deploy)</small>
+            <small>(📋 copy/paste above value into config.json.ts & npm run deploy)</small>
           </div>
         </div>
         <br />

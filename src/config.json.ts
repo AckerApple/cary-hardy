@@ -1,5 +1,5 @@
 // generate next meeting by going to https://caryhardy.com/admin.html
 // then run `npm run deploy`
 export default {
-  "nextMeetupDate": 1748307600000
+  "nextMeetupDate": 1750726800000
 }
