@@ -1,14 +1,141 @@
 import { ClockComponent } from "./clock/clock.tag"
-import { html, tag, states } from "taggedjs"
+import { callback, html, tag, states } from "taggedjs"
 import config from './config'
 
 export const homeTag = tag(() => (
   clickCount = 0,
-  _ = states(get => [clickCount] = get(clickCount)),
+  showSticker = true,
+  _ = states(get => ([clickCount, showSticker] = get(clickCount, showSticker))),
+  __ = setTimeout(callback(() => showSticker = false), 5000),
 ) => html`
   <div>
+    <style>
+      .hover-spin {
+        transition: transform 0.3s ease;
+      }
+      .hover-spin:hover {
+        transform: rotate(360deg) scale(1.1);
+      }
+      .merch-section {
+        background: linear-gradient(135deg, rgba(255,0,100,0.1), rgba(0,255,255,0.1));
+        border-radius: 20px;
+        padding: 2em 1em;
+        margin: 0 1em 2em 1em;
+        max-width: calc(100vw - 2em);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+      .merch-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: rotate(45deg);
+        animation: shimmer 3s infinite;
+      }
+      @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+      }
+      .merch-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2em;
+        position: relative;
+        z-index: 1;
+      }
+      .merch-item {
+        position: relative;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      }
+      .merch-item:hover {
+        transform: translateY(-10px) scale(1.05);
+        box-shadow: 0 10px 30px rgba(255,255,255,0.2);
+      }
+      .merch-item img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      .sticker-callout {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 120px;
+        animation: pulse 2s infinite;
+        cursor: pointer;
+        z-index: 100;
+        filter: drop-shadow(0 0 20px rgba(255,255,0,0.5));
+      }
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+      .hero-text {
+        font-size: clamp(1.2em, 3vw, 1.5em);
+        text-align: left;
+        background: linear-gradient(45deg, #ff0080, #00ffff, #ff0080);
+        background-size: 200% 200%;
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        animation: gradient 3s ease infinite;
+        margin: 0.5em 1em;
+        line-height: 1.2;
+        padding: 0;
+        display: inline-block;
+        font-weight: bold;
+      }
+      @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      .welcome-text {
+        font-size: clamp(1.5em, 5vw, 2.5em);
+        text-align: center;
+        background: linear-gradient(90deg, #ff0000, #ffff00, #ff0000);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: welcome-gradient 6s ease infinite;
+        line-height: 1.2;
+        font-weight: bold;
+        font-style: italic;
+      }
+      @keyframes welcome-gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+    </style>
+    
     <br />
     <br />
+    
+    <!-- Floating sticker on corner -->
+    <img src="assets/media/sticker.png" class="sticker-callout" 
+      style="transition: opacity 0.5s ease;"
+      style.opacity=${showSticker ? 1 : 0}
+      onclick=${() => window.scrollTo({
+        top: (document.querySelector('.merch-section') as HTMLElement).offsetTop,
+        behavior: 'smooth',
+      })}
+      alt="Super Wow Limited Edition"
+    />
+    
     <div style="display:flex;gap:1em;justify-content: center;">
       <div class="bounce-in" style="--fx-index:10;" onclick=${() => ++clickCount}>
         <div class="spin-container" style="width:50vw;height:50vw;max-width:400px;max-height:400px;">
@@ -38,8 +165,33 @@ export const homeTag = tag(() => (
         `}
       </div>
     </div>
+    
+    <br />
+
+    <!-- Welcome Quote -->
+    <div class="bounce-in" style="--fx-index:1; text-align: center; max-width: 900px; margin: 0 auto;">
+      <h2 class="welcome-text">
+        Welcome to where I talk and do everything pinball
+      </h2>
+    </div>
+
+    
+    <br />
+    
+    <!-- Standalone Pew Pew Cary Image -->
+    <div style="text-align: center;">
+      <img src="assets/media/pewpew+cary.png" alt="Pew Pew Cary Hardy" 
+        style="max-width: 900px; width: 100%; height: auto;"
+      />
+    </div>
 
     <br /><br /><br />
+
+    <div class="bounce-in" style="--fx-index:5; display: flex; align-items: center; margin: 1em 0;">
+      <div style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
+      <small style="padding: 0 1em; color: rgba(255,255,255,0.8); white-space: nowrap;">links</small>
+      <div style="flex: 1; height: 1px; background: linear-gradient(270deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
+    </div>
 
     <div style="display:flex;flex-wrap:wrap;gap:1em;justify-content: center;">
       <a href="https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA"
@@ -99,11 +251,39 @@ export const homeTag = tag(() => (
         />
       </a>
     </div>
+    <br /><br /><br />
     
+    <!-- Merchandise Showcase Section -->
+    <div class="bounce-in" style="--fx-index:8;">
+      <h2 class="hero-text">PINBALL MERCH & MORE</h2>
+    </div>
+    <div class="merch-section bounce-in" style="--fx-index:9;">
+      <div class="merch-grid">
+        <div class="merch-item" style="max-width: 900px; margin: 0 auto;">
+          <img src="assets/media/merch-on-glass.jpg" alt="Pinball Merchandise" />
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 2em;">
+        <a href="https://silverballswag.com/collections/cary-hardy" 
+          class="bounce-in" style="--fx-index: 10; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease;"
+          onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
+          onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
+        >
+          SHOP MERCH NOW
+        </a>
+      </div>
+    </div>
+        
     <br /><br />
+
+    <div class="bounce-in" style="--fx-index:5; display: flex; align-items: center; margin: 1em 0;">
+      <div style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
+      <small style="padding: 0 1em; color: rgba(255,255,255,0.8); white-space: nowrap;">youtube channel</small>
+      <div style="flex: 1; height: 1px; background: linear-gradient(270deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
+    </div>
     
     <div style="text-align: center;">
-      <!-- YouTube Embed Code with Container -->
+      <!-- 📺 YouTube Embed Code with Container -->
       <div style="max-width: 900px;margin: auto;--fx-index:12" class="bounce-in">
         <iframe src="https://www.youtube.com/embed/JFkiAk44Ntk" frameborder="0" allowfullscreen style="width: 100%;height: 500px;"></iframe>
       </div>
@@ -118,45 +298,64 @@ export const homeTag = tag(() => (
       <br /><br /><br /><br />
       
       <div class="fade-in" style="--fx-index:16">
-        ${Date.now() < config.nextMeetupDate && ClockComponent({date: config.nextMeetupDate})}  
+        ${Date.now() < config.nextMeetupDate && html`
+          <div class="bounce-in" style="--fx-index:5; display: flex; align-items: center; margin: 1em 0;">
+            <div style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
+            <small style="padding: 0 1em; color: rgba(255,255,255,0.8); white-space: nowrap;">live meetups</small>
+            <div style="flex: 1; height: 1px; background: linear-gradient(270deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
+          </div>
+
+          ${ClockComponent({date: config.nextMeetupDate})}
+        `}
       </div>
     
       <br /><br /><br /><br />
 
-      <img class="bounce-in reflection" alt="Cary Hardy logo" src="https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png"
+      <img class="bounce-in reflection" alt="Cary Hardy logo"
+        src="https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png"
         style="--fx-index:12;width: 55vw;min-width: 200px;max-width: 400px;"
       />
 
-      <br /><br /><br /><br />
+      <br /><br /><br /><br /><br />
 
-      <img class="bounce-in reflection"
-        alt="Cary Hardy and Steve Ritchie handshaking"
-        src="assets/media/photo0.jpg"
-        style="--fx-index:13;width: 55vw;min-width: 200px;max-width: 400px;"
-      />
-      <img class="bounce-in reflection"
-        alt="Cary Hardy holding award"
-        src="assets/media/photo2.jpg"
-        style="--fx-index:13;width: 55vw;min-width: 200px;max-width: 400px;"
-      />
-      <img class="bounce-in reflection"
-        alt="Earth Shaker award"
-        src="assets/media/EarthShakerAward.jpg"
-        style="--fx-index:13;width: 55vw;min-width: 200px;max-width: 400px;"
-      />
+      <div class="bounce-in" style="--fx-index:15;">
+        <h2 class="hero-text">TPF 2024</h2>
+      </div>
+      <div class="merch-section bounce-in" style="margin: 2em auto;" style="--fx-index:15;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2em; margin: 2em 0;">
+          <img class="bounce-in reflection"
+            alt="Cary Hardy and Steve Ritchie handshaking"
+            src="assets/media/photo0.jpg"
+            style="--fx-index:13;width: 85vw;max-width: 500px;margin-bottom: 1em;"
+          />
+          <img class="bounce-in reflection"
+            alt="Cary Hardy holding award"
+            src="assets/media/photo2.jpg"
+            style="--fx-index:14;width: 85vw;max-width: 500px;margin-bottom: 1em;"
+          />
+          <img class="bounce-in reflection"
+            alt="Earth Shaker award"
+            src="assets/media/EarthShakerAward.jpg"
+            style="--fx-index:15;width: 85vw;max-width: 500px;margin-bottom: 1em;"
+          />
+        </div>
+      </div>
 
       <br /><br />
 
-      <div class="bounce-in" style="--fx-index:16;">
-        <h2>TPF 2022 WINNER OF GRAND CHAMPION AWARD</h2>
+      <div class="bounce-in" style="--fx-index:15;">
+        <h2 class="hero-text">TPF 2022 WINNER OF GRAND CHAMPION AWARD</h2>
+      </div>
+      <div class="merch-section bounce-in" style="--fx-index:16; margin: 2em 1em;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2em;">
+          <img class="reflection" alt="Cary Hardy owned pinball machine" src="assets/media/photo3.jpg"
+            style="width: 55vw;min-width: 200px;max-width: 400px;"
+          />
 
-        <img class="reflection" alt="Cary Hardy owned pinball machine" src="assets/media/photo3.jpg"
-          style="width: 55vw;min-width: 200px;max-width: 400px;"
-        />
-
-        <img class="reflection" alt="Cary Hardy holding award" src="assets/media/photo1.jpg"
-          style="width: 55vw;min-width: 200px;max-width: 400px;"
-        />
+          <img class="reflection" alt="Cary Hardy holding award" src="assets/media/photo1.jpg"
+            style="width: 55vw;min-width: 200px;max-width: 400px;"
+          />
+        </div>
       </div>
 
       <br /><br /><br /><br />
