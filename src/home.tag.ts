@@ -263,13 +263,20 @@ export const homeTag = tag(() => (
           <img src="assets/media/merch-on-glass.jpg" alt="Pinball Merchandise" />
         </div>
       </div>
-      <div style="text-align: center; margin-top: 2em;">
-        <a href="https://silverballswag.com/collections/cary-hardy" 
-          class="bounce-in" style="--fx-index: 10; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease;"
+      <div style="text-align: center; margin-top: 2em; display: flex; flex-direction: column; gap: 2em; align-items: center;">
+        <a target="_blank" href="https://buy.stripe.com/5kA4j775zaRsdHy9AA" 
+          class="bounce-in" style="--fx-index: 10; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
           onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
           onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
         >
           SHOP MERCH NOW
+        </a>
+        <a target="_blank" href="https://silverballswag.com/collections/cary-hardy" 
+          class="bounce-in" style="--fx-index: 11; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
+          onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
+          onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
+        >
+          SHOP SILVERBALL SWAG
         </a>
       </div>
     </div>
