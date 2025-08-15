@@ -1,0 +1,23 @@
+.spin {
+  animation: spin 8s linear infinite; /* Apply the spinning animation */
+}
+
+.hover-spin:hover {
+  animation: spin 1s linear backwards infinite; /* Apply the spinning animation */
+}
+
+.hover-spin {
+  animation: stop-spinning .5s ease-in-out backwards;
+}
+
+@keyframes spin {
+  to {
+    transform: rotateY(360deg); /* Rotate the image to 360 degrees */
+  }
+}
+
+@keyframes stop-spinning {
+  to {
+    transform: rotateY(360deg);
+  }
+}
