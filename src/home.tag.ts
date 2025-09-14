@@ -270,7 +270,7 @@ export const homeTag = tag(() => (
             onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
             onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
           >
-            Wrong Kong shirt is up!
+            Get your 'Wrong Kong!' T-Shirt
           </a>
         </div>
         <div style="display: flex; flex-direction: column; align-items: center; gap: 1em;">
