@@ -258,21 +258,39 @@ export const homeTag = tag(() => (
       <h2 class="hero-text">PINBALL MERCH & MORE</h2>
     </div>
     <div class="merch-section bounce-in" style="--fx-index:9;">
-      <div class="merch-grid">
-        <div class="merch-item" style="max-width: 900px; margin: 0 auto;">
-          <img src="assets/media/merch-on-glass.jpg" alt="Pinball Merchandise" />
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 3em;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1em;">
+          <div class="merch-item" style="max-width: 900px; margin: 0 auto;">
+            <a href="https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003" target="_blank">
+              <img src="assets/media/wrong_kong_shirts.jpg" alt="Wrong Kong Shirt" />
+            </a>
+          </div>
+          <a target="_blank" href="https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003" 
+            class="bounce-in" style="--fx-index: 10; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
+            onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
+            onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
+          >
+            Wrong Kong! shirt is up!
+          </a>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1em;">
+          <div class="merch-item" style="max-width: 900px; margin: 0 auto;">
+            <a href="https://buy.stripe.com/5kA4j775zaRsdHy9AA" target="_blank">
+              <img src="assets/media/merch-on-glass.jpg" alt="Pinball Merchandise" />
+            </a>
+          </div>
+          <a target="_blank" href="https://buy.stripe.com/5kA4j775zaRsdHy9AA" 
+            class="bounce-in" style="--fx-index: 11; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
+            onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
+            onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
+          >
+            More guns than Wick T-shirt
+          </a>
         </div>
       </div>
       <div style="text-align: center; margin-top: 2em; display: flex; flex-direction: column; gap: 2em; align-items: center;">
-        <a target="_blank" href="https://buy.stripe.com/5kA4j775zaRsdHy9AA" 
-          class="bounce-in" style="--fx-index: 10; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
-          onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
-          onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
-        >
-          SHOP MERCH NOW
-        </a>
         <a target="_blank" href="https://silverballswag.com/collections/cary-hardy" 
-          class="bounce-in" style="--fx-index: 11; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
+          class="bounce-in" style="--fx-index: 12; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
           onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
           onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
         >
