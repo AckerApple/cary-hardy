@@ -303,7 +303,12 @@ export const homeTag = tag(() => (
 
     <div class="bounce-in" style="--fx-index:5; display: flex; align-items: center; margin: 1em 0;">
       <div style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
-      <small style="padding: 0 1em; color: rgba(255,255,255,0.8); white-space: nowrap;">youtube channel</small>
+      <small style="padding: 0 1em; white-space: nowrap;">
+        <a href="https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA" target="_blank" 
+          style="color: rgba(255,255,255,0.8); text-decoration: underline; text-underline-offset: 2px;">
+          youtube channel
+        </a>
+      </small>
       <div style="flex: 1; height: 1px; background: linear-gradient(270deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
     </div>
     
@@ -313,11 +318,14 @@ export const homeTag = tag(() => (
         <iframe src="https://www.youtube.com/embed/JFkiAk44Ntk" frameborder="0" allowfullscreen style="width: 100%;height: 500px;"></iframe>
       </div>
 
-      <div style="--fx-index:0" class="bounce-in">
-        📧
-        <a href="mailto:hardypinball@gmail.com?subject=website contact&body=Hello, found your email through your website%0A%0A%0A"
-          style="color:white"
-        >hardypinball@gmail.com</a>
+      <div style="text-align: center; margin-top: 2em;">
+        <a target="_blank" href="https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA" 
+          class="bounce-in" style="--fx-index: 13; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
+          onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
+          onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
+        >
+          Goto My Channel
+        </a>
       </div>
 
       <br /><br /><br /><br />
@@ -329,8 +337,32 @@ export const homeTag = tag(() => (
             <small style="padding: 0 1em; color: rgba(255,255,255,0.8); white-space: nowrap;">live meetups</small>
             <div style="flex: 1; height: 1px; background: linear-gradient(270deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));"></div>
           </div>
-
-          ${ClockComponent({date: config.nextMeetupDate})}
+          
+          <div style="margin-top: 2em; display: flex; flex-wrap: wrap; justify-content: center; gap: 2em;">
+            <div class="bounce-in" style="--fx-index:17; position: relative; max-width: 500px; width: 90%; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(255,0,100,0.3), 0 15px 40px rgba(0,255,255,0.2); transform: perspective(1000px) rotateX(2deg);">
+              <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, rgba(255,0,100,0.2), rgba(0,255,255,0.2), rgba(255,0,100,0.2)); animation: shimmer 4s infinite;"></div>
+              <img src="assets/media/meetup-screenshot.jpg" alt="Pinball Community Live Meetup" 
+                style="width: 100%; height: auto; display: block; position: relative; z-index: 1;"
+              />
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5em; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 2;">
+                <p style="color: white; font-weight: bold; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-size: 1.1em;">Monthly Live Meetups</p>
+              </div>
+            </div>
+            
+            <div class="bounce-in" style="--fx-index:18; position: relative; max-width: 500px; width: 90%; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,255,255,0.3), 0 15px 40px rgba(255,0,100,0.2); transform: perspective(1000px) rotateX(-2deg);">
+              <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, rgba(0,255,255,0.2), rgba(255,0,100,0.2), rgba(0,255,255,0.2)); animation: shimmer 4s infinite; animation-delay: 2s;"></div>
+              <img src="assets/media/meetup-screenshot2.jpg" alt="Pinball Community Live Meetup 2" 
+                style="width: 100%; height: auto; display: block; position: relative; z-index: 1;"
+              />
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5em; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 2;">
+                <p style="color: white; font-weight: bold; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-size: 1.1em;">Live Discussion & Q&A</p>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top: 2em;">
+            ${ClockComponent({date: config.nextMeetupDate})}
+          </div>
         `}
       </div>
     
@@ -383,6 +415,15 @@ export const homeTag = tag(() => (
         </div>
       </div>
 
+      <br /><br /><br /><br />
+      
+      <div style="--fx-index:0" class="bounce-in">
+        📧
+        <a href="mailto:hardypinball@gmail.com?subject=website contact&body=Hello, found your email through your website%0A%0A%0A"
+          style="color:white"
+        >hardypinball@gmail.com</a>
+      </div>
+      
       <br /><br /><br /><br />
     </div>
   </div>
