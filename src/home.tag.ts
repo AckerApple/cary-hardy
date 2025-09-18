@@ -9,6 +9,16 @@ export const homeTag = tag(() => (
   __ = setTimeout(callback(() => showSticker = false), 5000),
 ) => html`
   <div>
+    <!-- Header Banner -->
+    <div style="
+      width: 100%;
+      height: 175px;
+      background-image: url('https://yt3.googleusercontent.com/4UcHFU5i7IxMHPt9-pTwr2_LBdCrSJ8zJivOe7yZH3cFSiYrKTbi1tSf843feDooFRrJKNRBZRg=w2120-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj');
+      background-size: contain;
+      background-position: top center;
+      background-repeat: repeat-x;
+    "></div>
+
     <style>
       .hover-spin {
         transition: transform 0.3s ease;
@@ -72,7 +82,6 @@ export const homeTag = tag(() => (
         right: 20px;
         width: 120px;
         animation: pulse 2s infinite;
-        cursor: pointer;
         z-index: 100;
         filter: drop-shadow(0 0 20px rgba(255,255,0,0.5));
       }
@@ -122,9 +131,6 @@ export const homeTag = tag(() => (
       }
     </style>
     
-    <br />
-    <br />
-    
     <!-- Floating sticker on corner -->
     <img src="assets/media/sticker.png" class="sticker-callout" 
       style="transition: opacity 0.5s ease;"
@@ -136,38 +142,146 @@ export const homeTag = tag(() => (
       alt="Super Wow Limited Edition"
     />
     
-    <div style="display:flex;gap:1em;justify-content: center;">
-      <div class="bounce-in" style="--fx-index:10;" onclick=${() => ++clickCount}>
-        <div class="spin-container" style="width:50vw;height:50vw;max-width:400px;max-height:400px;">
-          <div>
-            <img border="0" src="assets/media/unnamed.jpg"
-              style="width:50vw;max-width:400px;border-radius: 50%;"
-            />
-          </div>
-          <div style="top:-20px;left:-20px;border: 20px black solid;border-radius: 50%;background-color: black;">
-            <div style="width:50vw;height:50vw;max-width:400px;max-height:400px;"></div>
-          </div>
-          <div style="top:-20px;left:-20px;border: 20px black solid;border-radius: 50%;background-color: black;">
-            <div style="width:50vw;height:50vw;max-width:400px;max-height:400px;"></div>
-          </div>
-          <div>
-            <img border="0" src="assets/media/Cary-Hardy.jpg"
-              style="width:50vw;max-width:400px;border-radius: 50%;"
-            />
+    <!-- 3D Rotating Carousel -->
+    <div onclick=${() => ++clickCount}>
+      <style>
+        .carousel-3d-wrapper {
+          width: 100%;
+          height: 45vh;
+          min-height: 350px;
+          max-height: 450px;
+          position: relative;
+          overflow: hidden;
+          perspective: 1000px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 1em 0;
+        }
+
+        .carousel-3d {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          transform-style: preserve-3d;
+          animation: carousel-rotate 120s infinite linear;
+        }
+
+        .carousel-3d-item {
+          position: absolute;
+          width: 240px;
+          height: 300px;
+          left: 50%;
+          top: 50%;
+          margin-left: -120px;
+          margin-top: -150px;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+          background: #000;
+        }
+
+        .carousel-3d-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .carousel-3d-item:nth-child(1) { transform: rotateY(0deg) translateZ(320px); }
+        .carousel-3d-item:nth-child(2) { transform: rotateY(60deg) translateZ(320px); }
+        .carousel-3d-item:nth-child(3) { transform: rotateY(120deg) translateZ(320px); }
+        .carousel-3d-item:nth-child(4) { transform: rotateY(180deg) translateZ(320px); }
+        .carousel-3d-item:nth-child(5) { transform: rotateY(240deg) translateZ(320px); }
+        .carousel-3d-item:nth-child(6) { transform: rotateY(300deg) translateZ(320px); }
+
+
+        @keyframes carousel-rotate {
+          from { transform: rotateY(0deg); }
+          to { transform: rotateY(-360deg); }
+        }
+
+        .carousel-title {
+          text-align: center;
+          font-size: clamp(2.5em, 7vw, 5em);
+          background: linear-gradient(90deg, #ff0080, #00ffff, #ff0080);
+          background-size: 200% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: shine 3s linear infinite;
+          font-weight: bold;
+          margin: 0 0 0.5em 0;
+          text-transform: uppercase;
+          letter-spacing: 3px;
+        }
+
+        @keyframes shine {
+          to { background-position: 200% center; }
+        }
+
+        .carousel-caption {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+          color: white;
+          padding: 1em;
+          text-align: center;
+          font-weight: bold;
+          transform: translateY(0);
+          opacity: 0.9;
+        }
+
+
+        @media (max-width: 768px) {
+          .carousel-3d-item {
+            width: 200px;
+            height: 250px;
+            margin-left: -100px;
+            margin-top: -125px;
+          }
+          .carousel-3d-item:nth-child(1) { transform: rotateY(0deg) translateZ(250px); }
+          .carousel-3d-item:nth-child(2) { transform: rotateY(60deg) translateZ(250px); }
+          .carousel-3d-item:nth-child(3) { transform: rotateY(120deg) translateZ(250px); }
+          .carousel-3d-item:nth-child(4) { transform: rotateY(180deg) translateZ(250px); }
+          .carousel-3d-item:nth-child(5) { transform: rotateY(240deg) translateZ(250px); }
+          .carousel-3d-item:nth-child(6) { transform: rotateY(300deg) translateZ(250px); }
+        }
+      </style>
+
+      <div class="bounce-in" style="--fx-index:5;">
+        <div class="carousel-3d-wrapper">
+          <div class="carousel-3d">
+            <div class="carousel-3d-item">
+              <img src="assets/media/unnamed.jpg" alt="Cary Hardy" />
+            </div>
+            <div class="carousel-3d-item">
+              <img src="assets/media/Cary-Hardy.jpg" alt="Cary Hardy" />
+            </div>
+            <div class="carousel-3d-item">
+              <img src="assets/media/cool_shots/CH_chill.jpg" alt="Cary Hardy Chill" />
+            </div>
+            <div class="carousel-3d-item">
+              <img src="assets/media/cool_shots/CH_kong.jpg" alt="Cary Hardy Kong" />
+            </div>
+            <div class="carousel-3d-item">
+              <img src="assets/media/cool_shots/CH_machines.jpg" alt="Cary Hardy Machines" />
+            </div>
+            <div class="carousel-3d-item">
+              <img src="assets/media/cool_shots/playfield_red.jpg" alt="Playfield" />
+            </div>
           </div>
         </div>
         ${clickCount > 4 && html`
-          <div class="bounce-in">
-            <br /><br /><br />
-            <a href="./admin.html" style="--fx-index: 0;color:white">admin tools</a>
-            <br /><br /><br />
+          <div style="text-align: center; margin-top: 2em;">
+            <a href="./admin.html" style="color:white; text-decoration: underline;">admin tools</a>
           </div>
         `}
       </div>
     </div>
     
-    <br />
-
     <!-- Welcome Quote -->
     <div class="bounce-in" style="--fx-index:1; text-align: center; max-width: 900px; margin: 0 auto;">
       <h2 class="welcome-text">
@@ -375,49 +489,91 @@ export const homeTag = tag(() => (
 
       <br /><br /><br /><br /><br />
 
-      <div class="bounce-in" style="--fx-index:15;">
-        <h2 class="hero-text">TPF 2024</h2>
+      <div class="bounce-in" style="--fx-index:13;">
+        <h2 class="hero-text">AWARD WINNING WORK & CONTENT</h2>
       </div>
-      <div class="merch-section bounce-in" style="margin: 2em auto;" style="--fx-index:15;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2em; margin: 2em 0;">
-          <img class="bounce-in reflection"
-            alt="Cary Hardy and Steve Ritchie handshaking"
-            src="assets/media/photo0.jpg"
-            style="--fx-index:13;width: 85vw;max-width: 500px;margin-bottom: 1em;"
-          />
-          <img class="bounce-in reflection"
-            alt="Cary Hardy holding award"
-            src="assets/media/photo2.jpg"
-            style="--fx-index:14;width: 85vw;max-width: 500px;margin-bottom: 1em;"
-          />
-          <img class="bounce-in reflection"
-            alt="Earth Shaker award"
-            src="assets/media/EarthShakerAward.jpg"
-            style="--fx-index:15;width: 85vw;max-width: 500px;margin-bottom: 1em;"
-          />
-        </div>
-      </div>
+      <div class="merch-section bounce-in" style="margin: 2em auto;" style="--fx-index:13;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 2em; margin: 1em 0;">
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img
+              alt="PBaTB Award"
+              src="assets/media/awards/PBaTB award.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">PBaTB Award</small>
+          </div>
 
-      <br /><br />
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img
+              alt="Twipy Award"
+              src="assets/media/awards/Twipy.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">Twipy Award</small>
+          </div>
 
-      <div class="bounce-in" style="--fx-index:15;">
-        <h2 class="hero-text">TPF 2022 WINNER OF GRAND CHAMPION AWARD</h2>
-      </div>
-      <div class="merch-section bounce-in" style="--fx-index:16; margin: 2em 1em;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2em;">
-          <img class="reflection" alt="Cary Hardy owned pinball machine" src="assets/media/photo3.jpg"
-            style="width: 55vw;min-width: 200px;max-width: 400px;"
-          />
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img
+              alt="PatB Awards"
+              src="assets/media/awards/PatB awards.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">PatB Awards</small>
+          </div>
 
-          <img class="reflection" alt="Cary Hardy holding award" src="assets/media/photo1.jpg"
-            style="width: 55vw;min-width: 200px;max-width: 400px;"
-          />
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img
+              alt="Cary Hardy and Steve Ritchie handshaking"
+              src="assets/media/awards/photo0.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">TPF 2024</small>
+          </div>
+
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img
+              alt="Cary Hardy holding award"
+              src="assets/media/awards/photo2.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">TPF 2024</small>
+          </div>
+
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img
+              alt="Earth Shaker award"
+              src="assets/media/awards/EarthShakerAward.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">TPF 2024</small>
+          </div>
+
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img alt="TPF 2022" src="assets/media/awards/TPF 2022.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">TPF 2022</small>
+          </div>
+
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img alt="Cary Hardy owned pinball machine" src="assets/media/awards/photo3.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">TPF 2022</small>
+          </div>
+
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img alt="Cary Hardy holding award" src="assets/media/awards/photo1.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">TPF 2022</small>
+          </div>
         </div>
       </div>
 
       <br /><br /><br /><br />
       
-      <div style="--fx-index:0" class="bounce-in">
+      <div>
         📧
         <a href="mailto:hardypinball@gmail.com?subject=website contact&body=Hello, found your email through your website%0A%0A%0A"
           style="color:white"

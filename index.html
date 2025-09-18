@@ -23,6 +23,11 @@
   import { homeTag, tagElement } from './assets/bundle.js'
   tagElement(homeTag, document.getElementById('home-tag'))
 </script>
+  <script type="text/javascript" charset="utf-8">
+    const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='32'>🔫</text></svg>"
+    const url = "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+    document.documentElement.style.cursor = 'url("'+ url + '") 10 24, auto';
+  </script>
 
         </td>
       </tr>
