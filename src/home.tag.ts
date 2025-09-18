@@ -496,11 +496,11 @@ export const homeTag = tag(() => (
         <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 2em; margin: 1em 0;">
           <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
             <img
-              alt="PBaTB Award"
+              alt="PATB Award"
               src="assets/media/awards/PBaTB award.jpg"
               style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
             />
-            <small style="color: white; display: block; text-align: center;">PBaTB Award</small>
+            <small style="color: white; display: block; text-align: center;">PATB Award</small>
           </div>
 
           <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
@@ -514,11 +514,11 @@ export const homeTag = tag(() => (
 
           <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
             <img
-              alt="PatB Awards"
+              alt="PATB Awards"
               src="assets/media/awards/PatB awards.jpg"
               style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
             />
-            <small style="color: white; display: block; text-align: center;">PatB Awards</small>
+            <small style="color: white; display: block; text-align: center;">PATB Awards</small>
           </div>
 
           <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
