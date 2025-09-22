@@ -380,11 +380,18 @@ export const homeTag = tag(() => (
             </a>
           </div>
           <a target="_blank" href="https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003" 
-            class="bounce-in" style="--fx-index: 10; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
+            style="display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
             onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
             onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
           >
             Get your 'Wrong Kong!' T-Shirt
+          </a>
+          <a target="_blank" href="https://buy.stripe.com/test_3cIfZjbYwdAGgUgfob7IY03" 
+            style="display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
+            onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
+            onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
+          >
+            🇦🇺 Wrong Kong for Australia residents
           </a>
         </div>
         <div style="display: flex; flex-direction: column; align-items: center; gap: 1em;">
