@@ -386,7 +386,7 @@ export const homeTag = tag(() => (
           >
             Get your 'Wrong Kong!' T-Shirt
           </a>
-          <a target="_blank" href="https://buy.stripe.com/test_3cIfZjbYwdAGgUgfob7IY03" 
+          <a target="_blank" href="https://buy.stripe.com/5kQdR11My7XGbnPePf00005" 
             style="display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;"
             onmouseover=${(e) => e.target.style.transform = 'scale(1.1)'}
             onmouseout=${(e) => e.target.style.transform = 'scale(1)'}
