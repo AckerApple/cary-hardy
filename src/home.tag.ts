@@ -575,6 +575,16 @@ export const homeTag = tag(() => (
             />
             <small style="color: white; display: block; text-align: center;">TPF 2022</small>
           </div>
+          
+          <div style="flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;">
+            <img
+              alt="Acker Apple and Cary Hardy"
+              src="assets/media/photos/Acker_and_Cary.jpg"
+              style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;"
+            />
+            <small style="color: white; display: block; text-align: center;">Acker & Cary</small>
+          </div>
+
         </div>
       </div>
 
