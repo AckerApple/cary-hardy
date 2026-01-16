@@ -1,4 +1,4 @@
-import { Subject, watch, state, states, div, span, style, noElement, tag, onInit } from "taggedjs"
+import { Subject, watch, state, states, div, span, style, noElement, tag, onInit, callback } from "taggedjs"
 
 type DateData = {
   days: number
@@ -8,19 +8,23 @@ type DateData = {
 }
 
 export const countdown = tag(({date}) => {
-  const unique = state(() => performance.now().toString().replace(/\./g,'_'))
-  const time = state(getNewTimeTable)
+  const unique = performance.now().toString().replace(/\./g,'_')
+  const time = getNewTimeTable()
 
   // const callback = callbackMaker()
   let interval: NodeJS.Timeout | undefined
   states(get => ([interval] = get(interval)))
 
-  onInit(run)
+  run()
 
-  watch.noInit([date], (x) => {
-    // console.debug('⏳ date changed, restart clock')
-    start()
-    updateCountdown()
+  countdown.updates(x => {
+    const oldDate = date;
+    [{date}] = x
+
+    if(date != oldDate) {
+      start()
+      updateCountdown()
+    }
   })
 
   date = date || new Date()
@@ -31,7 +35,6 @@ export const countdown = tag(({date}) => {
     if ( remaining < 0 ) {
       setTo({days: 0,hours: 0,minutes: 0, seconds: 0})
       stop()
-      // console.debug('⌛️ clock stopped, meeting in past')
       return
     }
   
@@ -85,9 +88,9 @@ export const countdown = tag(({date}) => {
     setTimeout(remove, map.speed-1)
   }
 
-  function setTo(
+  const setTo = callback((
     dateData: DateData
-  ) {
+  ) => {
     const dateDataClone = {...dateData} // days maybe mutated
     let { days } = dateDataClone
 
@@ -112,9 +115,9 @@ export const countdown = tag(({date}) => {
       if (digits[1] != scope[1].value$.value) {
         scope[1].value$.next(digits[1])
         changeMe(document.getElementById(`${unique}-${key}-1`), digits[1], scope[1])
-      }    
+      }
     })
-  }
+  })
 
   return noElement(
     style(`
@@ -252,7 +255,7 @@ export const countdown = tag(({date}) => {
             span({class: 'placeholder'}, '0')
           )
         ),
-        div({class: 'label', contextmenu: stop}, 'Seconds')
+        div.class`label`.contextMenu(stop)('Seconds')
       )
     )
   )
