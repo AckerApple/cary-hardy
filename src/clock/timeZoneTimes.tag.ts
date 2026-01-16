@@ -1,26 +1,28 @@
 import { countdown } from './countdown.tag'
 import { getDaySuffix } from './clock.tag'
-import { html } from 'taggedjs'
+import { div, span } from 'taggedjs'
 
 export function labeledCountdown(date: Date | number) {
   const d = new Date(date)
-  return html`
-    <div style="text-align:center;">
-      <div>
-        <span>🗓️ ${d.toLocaleString('default', { weekday: 'long' })}, ${ d.toLocaleString('default', { month: 'long' }) } ${ d.getDate() }${getDaySuffix(d)}</span>
-      </div>
-      ${countdown({date})}
-      ${smallTimeZoneTimes(d)}
-    </div>
-  `
+  return div({style: 'text-align:center;'},
+    div(
+      span(
+        '🗓️ ',
+        d.toLocaleString('default', { weekday: 'long' }),
+        ', ',
+        d.toLocaleString('default', { month: 'long' }),
+        ' ',
+        d.getDate(),
+        getDaySuffix(d)
+      )
+    ),
+    countdown({date}),
+    smallTimeZoneTimes(d)
+  )
 }
 
 export function smallTimeZoneTimes(date: Date) {
-  return html`
-    <div style="font-size:.65em;opacity:.7">
-      ${timeZoneTimes(date)}
-    </div>
-  `
+  return div({style: 'font-size:.65em;opacity:.7'}, timeZoneTimes(date))
 }
 function formatTime(date: Date | number, timeZone: any) {
   const options = {

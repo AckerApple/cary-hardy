@@ -1,4 +1,4 @@
-import { Subject, watch, state, states, html, tag, callbackMaker, onInit } from "taggedjs"
+import { Subject, watch, state, states, div, span, style, noElement, tag, onInit } from "taggedjs"
 
 type DateData = {
   days: number
@@ -116,8 +116,8 @@ export const countdown = tag(({date}) => {
     })
   }
 
-  return html`
-    <style>
+  return noElement(
+    style(`
       .countdown {
         /*line-height: 1.75em;*/
         background: black;
@@ -191,78 +191,71 @@ export const countdown = tag(({date}) => {
           opacity: 1;
         }
       }
-    </style>
-
-    <div class="countdown">
-      <div>
-        <div class="digit-container">
-          <span class="digit">
-            <div class="line"></div>
-            <span id=${unique + '-days-0'}></span>
-            <span class="placeholder">0</span>
-          </span>
-          <span class="digit">
-            <div class="line"></div>
-            <span id=${unique + '-days-1'}></span>
-            <span class="placeholder">0</span>
-          </span>
-          <span  id=${unique + '-days-plus'} class="label" style="display:none">+</span>
-        </div>
-        <div class="label">Days</div>
-      </div>
-
-      <div>
-        <div class="digit-container">
-          <span class="digit">
-            <div class="line"></div>
-            <span id=${unique + '-hours-0'}></span>
-            <span class="placeholder">0</span>
-          </span>
-          
-          <span class="digit">
-            <div class="line"></div>
-            <span id=${unique + '-hours-1'}></span>
-            <span class="placeholder">0</span>
-          </span>
-        </div>
-        <div class="label">Hours</div>
-      </div>
-
-      <div>
-        <div class="digit-container">
-          <span class="digit">
-            <div class="line"></div>
-            <span id=${unique + '-minutes-0'}></span>
-            <span class="placeholder">0</span>
-          </span>
-
-          <span class="digit">
-            <div class="line"></div>
-            <span id=${unique + '-minutes-1'}></span>
-            <span class="placeholder">0</span>
-          </span>
-        </div>
-        <div class="label" oncontextmenu=${start}>Minutes</div>
-      </div>
-
-      <div>
-        <div class="digit-container">
-          <span class="digit">
-            <div class="line"></div>
-            <span id=${unique + '-seconds-0'}></span>
-            <span class="placeholder">0</span>
-          </span>
-          
-          <span class="digit">
-            <div class="line"></div>
-            <span id=${unique + '-seconds-1'}></span>
-            <span class="placeholder">0</span>
-          </span>
-        </div>
-        <div class="label" oncontextmenu=${stop}>Seconds</div>
-      </div>
-    </div>
-  `
+    `),
+    div({class: 'countdown'},
+      div(
+        div({class: 'digit-container'},
+          span({class: 'digit'},
+            div({class: 'line'}),
+            span({id: unique + '-days-0'}),
+            span({class: 'placeholder'}, '0')
+          ),
+          span({class: 'digit'},
+            div({class: 'line'}),
+            span({id: unique + '-days-1'}),
+            span({class: 'placeholder'}, '0')
+          ),
+          span({id: unique + '-days-plus', class: 'label', style: 'display:none'}, '+')
+        ),
+        div({class: 'label'}, 'Days')
+      ),
+      div(
+        div({class: 'digit-container'},
+          span({class: 'digit'},
+            div({class: 'line'}),
+            span({id: unique + '-hours-0'}),
+            span({class: 'placeholder'}, '0')
+          ),
+          span({class: 'digit'},
+            div({class: 'line'}),
+            span({id: unique + '-hours-1'}),
+            span({class: 'placeholder'}, '0')
+          )
+        ),
+        div({class: 'label'}, 'Hours')
+      ),
+      div(
+        div({class: 'digit-container'},
+          span({class: 'digit'},
+            div({class: 'line'}),
+            span({id: unique + '-minutes-0'}),
+            span({class: 'placeholder'}, '0')
+          ),
+          span({class: 'digit'},
+            div({class: 'line'}),
+            span({id: unique + '-minutes-1'}),
+            span({class: 'placeholder'}, '0')
+          )
+        ),
+        div({class: 'label', contextmenu: start}, 'Minutes')
+      ),
+      div(
+        div({class: 'digit-container'},
+          span({class: 'digit'},
+            div({class: 'line'}),
+            span({id: unique + '-seconds-0'}),
+            span({class: 'placeholder'}, '0')
+          ),
+          span({class: 'digit'},
+            div({class: 'line'}),
+            span({id: unique + '-seconds-1'}),
+            span({class: 'placeholder'}, '0')
+          )
+        ),
+        div({class: 'label', contextmenu: stop}, 'Seconds')
+      )
+    )
+  )
 })
 
 /** Returns 2 position array */

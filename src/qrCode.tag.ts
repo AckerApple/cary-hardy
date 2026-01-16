@@ -1,4 +1,4 @@
-import { watch, html, tag, state } from "taggedjs"
+import { watch, div, tag, state } from "taggedjs"
 
 declare const QRCode: any;
 
@@ -38,5 +38,5 @@ export const qrCodeDisplay = tag(url => {
     onQrReady()
   })
 
-  return html`<div id=${id} oninit=${loadQr}></div>`
+  return div({id, oninit: loadQr})
 })
