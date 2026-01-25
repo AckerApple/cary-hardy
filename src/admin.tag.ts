@@ -14,8 +14,8 @@ import {
   small,
   tag,
   htmlTag,
-  states,
   watch,
+  output,
 } from "taggedjs"
 import { ClockComponent, content } from "./clock/clock.tag"
 import { qrCodeDisplay } from "./qrCode.tag"
@@ -29,10 +29,16 @@ const rect = htmlTag('rect')
 const title = htmlTag('title')
 
 export const adminTag = tag(() => {
-  const {date, time} = timestampToValues(Number(config.nextMeetupDate))
+  let {date, time} = timestampToValues(Number(config.nextMeetupDate))
+  
+  function updateDateTime() {
+    const x = timestampToValues(Number(config.nextMeetupDate))
+    date = x.date
+    time = x.time
+    console.log('updated')
+  }
 
   let qrUrl = ''
-  states(get => ([{qrUrl}] = get({qrUrl})))
 
   return div(
     h3('Hardy Tools'),
@@ -50,7 +56,14 @@ export const adminTag = tag(() => {
       ),
       fieldset.style`flex-grow:2`(
         legend('Invite Maker'),
-        inviteMaker(date, time, dateNum => config.nextMeetupDate = dateNum)
+        _=> inviteMaker(
+          date,
+          time,
+          dateNum => {
+            config.nextMeetupDate = dateNum
+            updateDateTime()
+          }
+        )
       ),
       fieldset.style`flex-grow:2`(
         legend('Calendar Links'),
@@ -94,11 +107,17 @@ export function timestampToValues(timestamp: any) {
   };
 }
 
-export function inviteMaker(
+export const inviteMaker = tag((
   date: string,
   time: string,
   onDate: (dateNum: number) => any,
-) {
+) => {
+  inviteMaker.updates(x => {
+    [date,time,onDate]=x
+    onDate = output(onDate)
+  })
+  onDate = output(onDate)
+
   const elmChangeDate = (event: any) => {
     const newDateString = event.target.value
     onDate(new Date(newDateString + ' ' + time).getTime())
@@ -136,10 +155,10 @@ export function inviteMaker(
     ),
     div(
       label.attr('for', 'time')('UTC'),
-      div(dateTime)
+      div(_=> dateTime)
     )
   )
-}
+})
 
 function calendarLinks(qrUrl: string) {
   const googleLink = getGoogleInviteLink({

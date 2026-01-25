@@ -3,7 +3,7 @@ import TerserPlugin from 'terser-webpack-plugin'
 // import CompressionPlugin from 'compression-webpack-plugin'
 
 import { fileURLToPath } from 'url'
-// import ResolveTsForJsPlugin from './ResolveTsForJsPlugin.class.js'
+import ResolveTsForJsPlugin from './ResolveTsForJsPlugin'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -26,6 +26,8 @@ export default {
   target: 'node',
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    // Keep file: dependencies in node_modules path (avoid resolving to real path).
+    symlinks: false,
     alias: {
       // taggedjs: path.resolve(__dirname, '../main/ts'),
     }
@@ -51,7 +53,7 @@ export default {
     },*/
   },
   plugins: [
-    // new ResolveTsForJsPlugin(),
+    new ResolveTsForJsPlugin(),
     /*
     new CompressionPlugin({
         algorithm: 'gzip',

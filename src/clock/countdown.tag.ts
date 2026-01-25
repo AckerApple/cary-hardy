@@ -1,4 +1,4 @@
-import { Subject, watch, state, states, div, span, style, noElement, tag, onInit, callback } from "taggedjs"
+import { Subject, states, div, span, style, noElement, tag, callback } from "taggedjs"
 
 type DateData = {
   days: number
@@ -195,64 +195,64 @@ export const countdown = tag(({date}) => {
         }
       }
     `),
-    div({class: 'countdown'},
+    div.class`countdown`(
       div(
-        div({class: 'digit-container'},
-          span({class: 'digit'},
-            div({class: 'line'}),
-            span({id: unique + '-days-0'}),
-            span({class: 'placeholder'}, '0')
+        div.class`digit-container`(
+          span.class`digit`(
+            div.class`line`,
+            span.id`${unique}-days-0`,
+            span.class`placeholder`('0')
           ),
-          span({class: 'digit'},
-            div({class: 'line'}),
-            span({id: unique + '-days-1'}),
-            span({class: 'placeholder'}, '0')
+          span.class`digit`(
+            div.class`line`,
+            span.id`${unique}-days-1`,
+            span.class`placeholder`('0')
           ),
-          span({id: unique + '-days-plus', class: 'label', style: 'display:none'}, '+')
+          span.id`${unique}-days-plus`.class`label`.style`display:none`('+')
         ),
-        div({class: 'label'}, 'Days')
+        div.class`label`('Days')
       ),
       div(
-        div({class: 'digit-container'},
-          span({class: 'digit'},
-            div({class: 'line'}),
-            span({id: unique + '-hours-0'}),
-            span({class: 'placeholder'}, '0')
+        div.class`digit-container`(
+          span.class`digit`(
+            div.class`line`,
+            span.id`${unique}-hours-0`,
+            span.class`placeholder`('0')
           ),
-          span({class: 'digit'},
-            div({class: 'line'}),
-            span({id: unique + '-hours-1'}),
-            span({class: 'placeholder'}, '0')
+          span.class`digit`(
+            div.class`line`,
+            span.id`${unique}-hours-1`,
+            span.class`placeholder`('0')
           )
         ),
-        div({class: 'label'}, 'Hours')
+        div.class`label`('Hours')
       ),
       div(
-        div({class: 'digit-container'},
-          span({class: 'digit'},
-            div({class: 'line'}),
-            span({id: unique + '-minutes-0'}),
-            span({class: 'placeholder'}, '0')
+        div.class`digit-container`(
+          span.class`digit`(
+            div.class`line`,
+            span.id`${unique}-minutes-0`,
+            span.class`placeholder`('0')
           ),
-          span({class: 'digit'},
-            div({class: 'line'}),
-            span({id: unique + '-minutes-1'}),
-            span({class: 'placeholder'}, '0')
+          span.class`digit`(
+            div.class`line`,
+            span.id`${unique}-minutes-1`,
+            span.class`placeholder`('0')
           )
         ),
-        div({class: 'label', contextmenu: start}, 'Minutes')
+        div.class`label`.contextMenu(start)('Minutes')
       ),
       div(
-        div({class: 'digit-container'},
-          span({class: 'digit'},
-            div({class: 'line'}),
-            span({id: unique + '-seconds-0'}),
-            span({class: 'placeholder'}, '0')
+        div.class`digit-container`(
+          span.class`digit`(
+            div.class`line`,
+            span.id`${unique}-seconds-0`,
+            span.class`placeholder`('0')
           ),
-          span({class: 'digit'},
-            div({class: 'line'}),
-            span({id: unique + '-seconds-1'}),
-            span({class: 'placeholder'}, '0')
+          span.class`digit`(
+            div.class`line`,
+            span.id`${unique}-seconds-1`,
+            span.class`placeholder`('0')
           )
         ),
         div.class`label`.contextMenu(stop)('Seconds')
@@ -274,31 +274,31 @@ function getNewTimeTable() {
   return {
     days: [{
       speed: clockDisplaySpeed * 60 * 60 * 24 * 10,
-      value$: new Subject(),
+      value$: new Subject,
     },{
       speed: clockDisplaySpeed * 60 * 60 * 24,
-      value$: new Subject(),
+      value$: new Subject,
     }],
     hours: [{
       speed: clockDisplaySpeed * 60 * 60 * 10,
-      value$: new Subject(),
+      value$: new Subject,
     },{
       speed: clockDisplaySpeed * 60 * 60,
-      value$: new Subject(),
+      value$: new Subject,
     }],
     minutes: [{
       speed: clockDisplaySpeed * 60 * 10,
-      value$: new Subject(),
+      value$: new Subject,
     },{
       speed: clockDisplaySpeed * 60,
-      value$: new Subject(),
+      value$: new Subject,
     }],
     seconds: [{
       speed: clockDisplaySpeed * 10,
-      value$: new Subject(),
+      value$: new Subject,
     },{
       speed: clockDisplaySpeed,
-      value$: new Subject(),
+      value$: new Subject,
     }]
   }
 }

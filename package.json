@@ -41,6 +41,6 @@
     "webpack": "^5.97.1"
   },
   "dependencies": {
-    "taggedjs": "^3.1.9"
+    "taggedjs": "file:../../web/taggedjs/main/dist"
   }
 }
