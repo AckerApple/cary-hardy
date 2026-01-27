@@ -1,8 +1,10 @@
 import { countdown } from './countdown.tag'
 import { getDaySuffix } from './clock.tag'
-import { div, span } from 'taggedjs'
+import { div, span, tag } from 'taggedjs'
 
-export function labeledCountdown(date: Date | number) {
+export const labeledCountdown = tag((date: Date | number) => {
+  labeledCountdown.updates(x => [date] = x)
+
   const d = new Date(date)
   return div({style: 'text-align:center;'},
     div(
@@ -16,10 +18,10 @@ export function labeledCountdown(date: Date | number) {
         getDaySuffix(d)
       )
     ),
-    countdown({date}),
+    _=> countdown({date}),
     smallTimeZoneTimes(d)
   )
-}
+})
 
 export function smallTimeZoneTimes(date: Date) {
   return div({style: 'font-size:.65em;opacity:.7'}, timeZoneTimes(date))

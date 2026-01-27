@@ -23,7 +23,7 @@ export default {
   experiments: {
     outputModule: true,
   },
-  target: 'node',
+  target: 'web',
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
     // Keep file: dependencies in node_modules path (avoid resolving to real path).

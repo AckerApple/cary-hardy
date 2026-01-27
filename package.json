@@ -41,6 +41,7 @@
     "webpack": "^5.97.1"
   },
   "dependencies": {
+    "firebase": "^12.7.0",
     "taggedjs": "file:../../web/taggedjs/main/dist"
   }
 }

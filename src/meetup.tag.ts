@@ -1,22 +1,40 @@
 import { ClockComponent, getDaySuffix } from './clock/clock.tag'
-import config from './config'
-import { a, b, br, button, div, h1, h2, li, noElement, p, span, tag, tagElement, ul, htmlTag } from "taggedjs"
+import { a, b, br, button, div, h1, h2, li, noElement, p, span, tag, tagElement, ul, htmlTag, callback } from "taggedjs"
+import { loadNextMeetupDate } from "./firebase"
 
 const img = htmlTag('img')
-
-const date = new Date(config.nextMeetupDate) // 'July 24, 2023 21:00:00 EDT'
+let meetupLoaded = false
 
 export const meetupTag = tag(() => {
-  const date = new Date(config.nextMeetupDate) // 'July 24, 2023 21:00:00 EDT'
+  let meetupDate = Date.now() - 1000
+  const refreshMeetup = callback(() => {})
+  const getMeetupDate = () => new Date(meetupDate)
 
-  setTimeout(() => {
+  const renderClock = () => {
     const clockElm = document.getElementById('count-clock') as HTMLElement
-    console.log('clockElm----', clockElm)
+    if (!clockElm) return
     tagElement(ClockComponent, clockElm, {
-      date,
+      date: getMeetupDate(),
       showLearnMore: !window.location.href.includes('meetup.html')
     })
-  }, 0)
+  }
+
+  setTimeout(renderClock, 0)
+
+  if (!meetupLoaded) {
+    meetupLoaded = true
+    tag.promise = loadNextMeetupDate()
+      .then((loadedDate) => {
+        if (typeof loadedDate === "number") {
+          meetupDate = loadedDate
+          refreshMeetup()
+          renderClock()
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load next meetup date", error)
+      })
+  }
   
   /* TODO: Maybe toggle logic for all Patreon supporters meetings */
   return noElement(
@@ -47,10 +65,10 @@ export const meetupTag = tag(() => {
                 'By becoming a ',
                 a({class: 'color-inherit', href: 'https://www.patreon.com/caryhardy/membership'}, 'Cary Hardy LE supporter'),
                 ' before ',
-                date.toLocaleString('default', { month: 'long' }),
+                _=> getMeetupDate().toLocaleString('default', { month: 'long' }),
                 ' ',
-                date.getDate(),
-                getDaySuffix(date),
+                _=> getMeetupDate().getDate(),
+                _=> getDaySuffix(getMeetupDate()),
                 ', you will receive an LE only Patreon ',
                 span({style: 'white-space: nowrap;'}, '💬 message'),
                 ', ',

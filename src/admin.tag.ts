@@ -1,4 +1,3 @@
-import config from './config'
 import {
   a,
   br,
@@ -14,13 +13,20 @@ import {
   small,
   tag,
   htmlTag,
-  watch,
   output,
+  noElement,
+  style,
+  callback,
 } from "taggedjs"
 import { ClockComponent, content } from "./clock/clock.tag"
 import { qrCodeDisplay } from "./qrCode.tag"
 import { getGoogleInviteLink, getICalContent, getOutlookInviteLink } from './clock/calendar.utils'
 import { copyText } from './copyText.function'
+import { signIn, signOutUser, loadNextMeetupDate, saveNextMeetupDate } from "./firebase"
+import { startAuthFlow } from "./auth-flow"
+import { handleAdminAuthUser } from "./auth-handler"
+import { SsoPanel } from "./sso.tag"
+import type { AuthStatus } from "./auth.types"
 
 const svg = htmlTag('svg')
 const path = htmlTag('path')
@@ -28,69 +34,220 @@ const polygon = htmlTag('polygon')
 const rect = htmlTag('rect')
 const title = htmlTag('title')
 
+let authInitialized = false
+let meetupLoaded = false
+
 export const adminTag = tag(() => {
-  let {date, time} = timestampToValues(Number(config.nextMeetupDate))
-  
-  function updateDateTime() {
-    const x = timestampToValues(Number(config.nextMeetupDate))
-    date = x.date
-    time = x.time
-    console.log('updated')
+  let authStatus: AuthStatus = "loading"
+  let deniedEmail = ""
+  let currentUser: { email: string; photoURL?: string } | null = null
+
+  const mountSso = callback((status: typeof authStatus, email = "", _reason = "") => {
+    authStatus = status
+    deniedEmail = email
+  })
+
+  const setCurrentUser = callback((user: { email: string; photoURL?: string } | null) => {
+    currentUser = user
+    if(user) {
+      authStatus = 'authorized'
+    } else {
+      authStatus = 'login'
+    }
+  })
+
+  const onSignedOut = () => {
+    mountSso("login", "", "auth:logged-out")
   }
 
-  let qrUrl = ''
+  const onDenied = () => {
+    mountSso("denied", currentUser?.email || "", "auth:denied")
+  }
+
+  const onAuthorized = (user: any, _reason = "") => {
+    authStatus = "authorized"
+    deniedEmail = user?.email || ""
+  }
+
+  if (!authInitialized) {
+    authInitialized = true
+    startAuthFlow({
+      onUser: (user, reason) => {
+        handleAdminAuthUser({
+          user,
+          mountSso,
+          setCurrentUser,
+          onSignedOut,
+          onDenied,
+          onAuthorized,
+          reason,
+        })
+      },
+      toast: {
+        error: (message) => console.warn(message),
+      },
+    })
+  }
+
+  return noElement(
+    style(`
+      .auth-panel {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 1.5em;
+        background: rgba(0, 0, 0, 0.6);
+        max-width: 520px;
+        margin: 0 auto 2em auto;
+      }
+
+      .auth-actions {
+        margin-top: 1em;
+        display: flex;
+        gap: 0.75em;
+      }
+
+      .auth-warning {
+        color: #f6c177;
+      }
+    `),
+    _=> authOutput(authStatus, deniedEmail, onSignedOut)
+  )
+})
+
+
+export const adminTools = tag((
+  onSignedOut
+) => (
+  nextMeetupDate = Date.now(),
+  qrUrl = '',
+  {date, time} = timestampToValues(Number(nextMeetupDate))
+) => {
+  adminTools.inputs(([_onSignedOut]) => {
+    onSignedOut = output(_onSignedOut)
+  })
+
+  function updateDateTime() {
+    const x = timestampToValues(Number(nextMeetupDate))
+    date = x.date
+    time = x.time
+  }
+
+  if (!meetupLoaded) {
+    meetupLoaded = true
+    tag.promise = loadNextMeetupDate()
+      .then((loadedDate) => {
+        if (typeof loadedDate === "number") {
+          nextMeetupDate = loadedDate
+          updateDateTime()
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load next meetup date", error)
+      })
+  }
+
+  const saveMeetupDate = () =>
+    saveNextMeetupDate(Number(nextMeetupDate))
+      .then(() => {
+        alert("saved")
+      })
+      .catch((error) => {
+        console.error("Failed to save meetup date", error)
+      })
+
+  const signoutClick = () => signOutUser().then(onSignedOut).catch((error) => {
+    console.error("Failed to sign out", error)
+  })
+
+  signoutClick.acker = 22
 
   return div(
-    h3('Hardy Tools'),
-    div.style`display:flex;flex-wrap:wrap;gap:1em;text-align:left;`(
-      fieldset.style`flex-grow:1`(
-        legend('QR Maker'),
-        input
-          .type`text`
-          .value(_=> qrUrl)
-          .attr('maxlength', '1000')
-          .onKeyup((e: any) => qrUrl = e.target.value),
-        div.style`display:flex;justify-content: center;`(
-          _=> qrUrl && qrCodeDisplay(qrUrl)
-        )
-      ),
-      fieldset.style`flex-grow:2`(
-        legend('Invite Maker'),
-        _=> inviteMaker(
-          date,
-          time,
-          dateNum => {
-            config.nextMeetupDate = dateNum
-            updateDateTime()
-          }
-        )
-      ),
-      fieldset.style`flex-grow:2`(
-        legend('Calendar Links'),
-        _=> calendarLinks(qrUrl)
-      ),
-      fieldset.style`flex:1`(
-        legend('meeting tools'),
-        div(
-          'UTC: ',
-          _=> new Date(config.nextMeetupDate).getTime(),
-          div.style`font-size:0.7em;`(
-            small('(📋 copy/paste above value into config.json.ts & npm run deploy)')
-          )
-        ),
-        br,
-        hr,
-        br,
-        div.style`text-align:center;`(
-          ClockComponent({date: config.nextMeetupDate})
-        )
+  h3('Hardy Tools'),
+  div.style`display:flex;flex-wrap:wrap;gap:1em;text-align:left;`(
+    fieldset.style`flex-grow:1`(
+      legend('QR Maker'),
+      input
+        .type`text`
+        .value(_=> qrUrl)
+        .attr('maxlength', '1000')
+        .onKeyup((e: any) => qrUrl = e.target.value),
+      div.style`display:flex;justify-content: center;`(
+        _=> qrUrl && qrCodeDisplay(qrUrl)
       )
     ),
-    br,
+    fieldset.style`flex-grow:2`(
+      legend('Invite Maker'),
+      _=> {
+        return inviteMaker({
+          nextMeetupDate,
+          date,
+          time,
+          onDate: dateNum => {
+            nextMeetupDate = dateNum
+            updateDateTime()
+          }
+        })
+      },
+      div.style`margin-top:0.6em;`(
+        button.onClick(saveMeetupDate)('save to firestore')
+      )
+    ),
+    fieldset.style`flex-grow:2`(
+      legend('Calendar Links'),
+      _=> calendarLinks(qrUrl, nextMeetupDate)
+    ),
+    fieldset.style`flex:1`(
+      legend('meeting tools'),
+      div(
+        'UTC: ',
+        _=> new Date(nextMeetupDate).getTime(),
+        div.style`font-size:0.7em;`(
+          small('(📋 copy/paste above value into config.json.ts & npm run deploy)')
+        )
+      ),
+      br,
+      hr,
+      br,
+      div.style`text-align:center;`(
+        _=> ClockComponent({date: nextMeetupDate})
+      )
+    )
+  ),
+  br,
+  div.style`display:flex;gap:0.6em;align-items:center;flex-wrap:wrap;`(
     a.href`./index.html`.style`color:white;`('🏠 home'),
-    '\u00A0\u00A0\u00A0',
-    a.href`https://github.com/AckerApple/cary-hardy`.style`color:white;`('🔗 code base')
+    a.href`https://github.com/AckerApple/cary-hardy`.style`color:white;`('🔗 code base'),
+    button.onClick(signoutClick)('🚪 logout')
   )
+)})
+
+
+export const authOutput = tag((
+  authStatus,
+  deniedEmail,
+  onSignedOut,
+) => {
+  authOutput.inputs((x) => {
+    [authStatus, deniedEmail, onSignedOut] = x
+    onSignedOut = output(onSignedOut)
+  })
+
+  return [() => {
+    return authStatus === "authorized"
+  ? adminTools(onSignedOut)
+  : div(
+      SsoPanel(
+        authStatus,
+        deniedEmail,
+        "",
+        () => signIn().catch((error) => {
+          console.error("Failed to sign in", error)
+        }),
+        () => signOutUser().catch((error) => {
+          console.error("Failed to sign out", error)
+        })
+      )
+    )}]
 })
 
 export function timestampToValues(timestamp: any) {
@@ -107,16 +264,21 @@ export function timestampToValues(timestamp: any) {
   };
 }
 
-export const inviteMaker = tag((
+export const inviteMaker = tag(({
+  date, time, onDate, nextMeetupDate
+}: {
   date: string,
   time: string,
   onDate: (dateNum: number) => any,
-) => {
-  inviteMaker.updates(x => {
-    [date,time,onDate]=x
+  nextMeetupDate: number,
+}) => {
+  let dateTime = new Date(date + ' ' + time).getTime()
+
+  inviteMaker.inputs(x => {
+    [{date,time,onDate, nextMeetupDate}]=x
     onDate = output(onDate)
+    dateTime = new Date(date + ' ' + time).getTime()
   })
-  onDate = output(onDate)
 
   const elmChangeDate = (event: any) => {
     const newDateString = event.target.value
@@ -128,17 +290,13 @@ export const inviteMaker = tag((
     onDate(new Date(date + ' ' + newTimeString).getTime())
   }
 
-  const dateTime = watch([date, time], () => {
-    return new Date(date + ' ' + time).getTime()
-  })
-
   return div.style`display:flex;flex-wrap:wrap;gap:1em`(
     div(
       label('Date'),
       div(
         input
           .type`date`
-          .value(date)
+          .value(_=> date)
           .onChange(elmChangeDate)
           .style`width:100%`
       )
@@ -148,7 +306,7 @@ export const inviteMaker = tag((
       div(
         input
           .type`time`
-          .value(time)
+          .value(_=> time)
           .onChange(elmChangeTime)
           .style`width:100%`
       )
@@ -160,17 +318,20 @@ export const inviteMaker = tag((
   )
 })
 
-function calendarLinks(qrUrl: string) {
+function calendarLinks(
+  qrUrl: string,
+  nextMeetupDate: number
+) {
   const googleLink = getGoogleInviteLink({
-    startDateTime: config.nextMeetupDate, message: content.message, subject: content.subject,
+    startDateTime: nextMeetupDate, message: content.message, subject: content.subject,
   })
 
   const outlookLink = getOutlookInviteLink({
-    startDateTime: config.nextMeetupDate, message: content.message, subject: content.subject,
+    startDateTime: nextMeetupDate, message: content.message, subject: content.subject,
   })
 
   const iCalLink = getICalContent({
-    startDateTime: config.nextMeetupDate, message: content.message, subject: content.subject,
+    startDateTime: nextMeetupDate, message: content.message, subject: content.subject,
   })
 
   return div(

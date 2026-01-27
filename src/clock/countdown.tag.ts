@@ -1,4 +1,4 @@
-import { Subject, states, div, span, style, noElement, tag, callback } from "taggedjs"
+import { Subject, div, span, style, noElement, tag, callback } from "taggedjs"
 
 type DateData = {
   days: number
@@ -9,12 +9,13 @@ type DateData = {
 
 export const countdown = tag(({date}) => {
   const unique = performance.now().toString().replace(/\./g,'_')
+  const elmId = `${unique}-days-plus`
   const time = getNewTimeTable()
 
   // const callback = callbackMaker()
   let interval: NodeJS.Timeout | undefined
-  states(get => ([interval] = get(interval)))
 
+  // when html ready, start
   run()
 
   countdown.updates(x => {
@@ -57,6 +58,8 @@ export const countdown = tag(({date}) => {
     interval = undefined
   }
 
+  tag.onDestroy(stop)
+
   function start() {
     stop()
     run()
@@ -92,9 +95,13 @@ export const countdown = tag(({date}) => {
     dateData: DateData
   ) => {
     const dateDataClone = {...dateData} // days maybe mutated
-    let { days } = dateDataClone
+    let { days } = dateDataClone    
+    const plusElm = document.getElementById(elmId) as HTMLElement
+    
+    if(!plusElm) {
+      return // still setting up
+    }
 
-    const plusElm = document.getElementById(`${unique}-days-plus`) as HTMLElement
     if(days > 99) {
       dateDataClone.days = 99
       

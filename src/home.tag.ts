@@ -1,20 +1,48 @@
 import { ClockComponent } from "./clock/clock.tag"
-import { a, br, div, h2, htmlTag, small, style, tag, states, callback, noElement } from "taggedjs"
-import config from './config'
+import { iframe, img, a, br, div, h2, small, style, tag, callback, noElement } from "taggedjs"
+import { loadNextMeetupDate } from "./firebase"
 
-const img = htmlTag('img')
-const iframe = htmlTag('iframe')
+let meetupLoaded = false
 
 export const homeTag = tag(() => (
   clickCount = 0,
   showSticker = true,
+  nextMeetupDate = Date.now() - 1000,
+  refreshMeetup = callback(() => {}),
   __ = setTimeout(callback(() => showSticker = false), 5000),
+  _load = !meetupLoaded && (() => {
+    meetupLoaded = true
+    tag.promise = loadNextMeetupDate()
+      .then((loadedDate) => {
+        if (typeof loadedDate === "number") {
+          nextMeetupDate = loadedDate
+          refreshMeetup()
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load next meetup date", error)
+      })
+  })(),
 ) => div(
+  div.class`top-nav top-nav-fixed`(
+    a.href`#links`.class`top-nav-pill`('links'),
+    a.href`#merch`.class`top-nav-pill`('merch & more'),
+    a.href`#youtube`.class`top-nav-pill`('youtube'),
+    a.href`#awards`.class`top-nav-pill`('awards'),
+    a.href`./admin.html`.class`top-nav-pill`('👤')
+  ),
+  div.class`top-nav top-nav-spacer`(
+    a.href`#links`.class`top-nav-pill`('links'),
+    a.href`#merch`.class`top-nav-pill`('merch & more'),
+    a.href`#youtube`.class`top-nav-pill`('youtube'),
+    a.href`#awards`.class`top-nav-pill`('awards'),
+    a.href`./admin.html`.class`top-nav-pill`('👤')
+  ),
   div(
     div.style`
       width: 100%;
       height: 175px;
-      background-image: url('https://yt3.googleusercontent.com/4UcHFU5i7IxMHPt9-pTwr2_LBdCrSJ8zJivOe7yZH3cFSiYrKTbi1tSf843feDooFRrJKNRBZRg=w2120-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj');
+      background-image: url('assets/media/youtube-channel-banner.jpg');
       background-size: contain;
       background-position: top center;
       background-repeat: repeat-x;
@@ -128,6 +156,55 @@ export const homeTag = tag(() => (
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
+      }
+      .top-nav {
+        background: rgba(0, 0, 0, 0.95);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        gap: 0.45em;
+        justify-content: center;
+        align-items: center;
+        padding: 0.45em 0.8em;
+        z-index: 200;
+        flex-wrap: wrap;
+      }
+      .top-nav-fixed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+      .top-nav-spacer {
+        visibility: hidden;
+      }
+      .top-nav-pill {
+        padding: 0.12em 0.55em;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 0.5em;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+      .top-nav-pill:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.2);
+      }
+      @media (max-height: 450px) {
+        .top-nav {
+          padding: 0.3em 0.6em;
+          gap: 0.35em;
+        }
+        .top-nav-pill {
+          font-size: 0.45em;
+          padding: 0.1em 0.45em;
+        }
+      }
+      .section-anchor {
+        scroll-margin-top: 70px;
       }
     `),
     img
@@ -292,7 +369,8 @@ export const homeTag = tag(() => (
     br,
     br,
     div
-      .class`bounce-in`
+      .class`bounce-in section-anchor`
+      .attr('id', 'links')
       .style`--fx-index:5; display: flex; align-items: center; margin: 1em 0;`(
         div
           .style`flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));`,
@@ -359,7 +437,7 @@ export const homeTag = tag(() => (
     br,
     br,
     br,
-    div.class`bounce-in`.style`--fx-index:8;`(
+    div.class`bounce-in section-anchor`.attr('id', 'merch').style`--fx-index:8;`(
       h2.class`hero-text`('PINBALL MERCH & MORE')
     ),
     div.class`merch-section bounce-in`.style`--fx-index:9;`(
@@ -418,7 +496,7 @@ export const homeTag = tag(() => (
     ),
     br,
     br,
-    div.class`bounce-in`.style`--fx-index:5; display: flex; align-items: center; margin: 1em 0;`(
+    div.class`bounce-in section-anchor`.attr('id', 'youtube').style`--fx-index:5; display: flex; align-items: center; margin: 1em 0;`(
       div
         .style`flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));`,
       small.style`padding: 0 1em; white-space: nowrap;`(
@@ -456,7 +534,7 @@ export const homeTag = tag(() => (
       br,
       br,
       div.class`fade-in`.style`--fx-index:16`(
-        _=> Date.now() < config.nextMeetupDate && noElement(
+        _=> Date.now() < nextMeetupDate && noElement(
           div.class`bounce-in`.style`--fx-index:5; display: flex; align-items: center; margin: 1em 0;`(
             div
               .style`flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));`,
@@ -487,7 +565,7 @@ export const homeTag = tag(() => (
             )
           ),
           div.style`margin-top: 2em;`(
-            ClockComponent({date: config.nextMeetupDate})
+            _=> ClockComponent({date: nextMeetupDate, showLearnMore: true})
           )
         )
       ),
@@ -505,7 +583,7 @@ export const homeTag = tag(() => (
       br,
       br,
       br,
-      div.class`bounce-in`.style`--fx-index:13;`(
+      div.class`bounce-in section-anchor`.attr('id', 'awards').style`--fx-index:13;`(
         h2.class`hero-text`('AWARD WINNING WORK & CONTENT')
       ),
       div.class`merch-section bounce-in`.style`margin: 2em auto; --fx-index:13;`(

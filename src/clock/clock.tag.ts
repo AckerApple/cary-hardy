@@ -23,9 +23,10 @@ export const ClockComponent = tag(({
 }: any) => {
   date = new Date(date)
 
+  ClockComponent.updates(x => [{date, showLearnMore}] = x)
+
   let showQrCodes = false
   
-  states(get => [showQrCodes] = get(showQrCodes))
 
   const googleLink = getGoogleInviteLink({
     startDateTime: date, message: content.message, subject: content.subject,
@@ -58,7 +59,7 @@ export const ClockComponent = tag(({
     div({style: 'padding:.5em;'},
       'Countdown until the next, Patreon LE only, group meetup'
     ),
-    labeledCountdown(date),
+    _=> labeledCountdown(date),
     div({style: 'white-space:nowrap;font-size:.7em;opacity:.8'},
       'save meetup to your calendar using links below 👇'
     ),
