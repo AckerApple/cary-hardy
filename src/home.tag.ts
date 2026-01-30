@@ -166,7 +166,10 @@ export const homeTag = tag(() => (
         align-items: center;
         padding: 0.45em 0.8em;
         z-index: 200;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
       }
       .top-nav-fixed {
         position: fixed;
@@ -188,6 +191,8 @@ export const homeTag = tag(() => (
         text-transform: uppercase;
         text-decoration: none;
         transition: transform 0.2s ease, background 0.2s ease;
+        white-space: nowrap;
+        flex: 0 0 auto;
       }
       .top-nav-pill:hover {
         transform: translateY(-1px);
@@ -322,6 +327,11 @@ export const homeTag = tag(() => (
           .carousel-3d-item:nth-child(4) { transform: rotateY(180deg) translateZ(250px); }
           .carousel-3d-item:nth-child(5) { transform: rotateY(240deg) translateZ(250px); }
           .carousel-3d-item:nth-child(6) { transform: rotateY(300deg) translateZ(250px); }
+        }
+        @media (max-width: 520px) {
+          .carousel-3d-wrapper {
+            margin: 0.35em 0 0.6em;
+          }
         }
       `),
       div.class`bounce-in`.style`--fx-index:5;`(

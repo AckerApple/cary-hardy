@@ -106,11 +106,16 @@ export const signIn = async () => {
   }
 }
 
-export const signOutUser = () => signOut(getAuthInstance())
+export const signOutUser = () => {
+  console.log('start signout')
+  return signOut(getAuthInstance()).then(()=> {
+    console.log('signout completed')
+  })
+}
 export const onAuthChanged = (callback: (user: any) => void) =>
   onAuthStateChanged(getAuthInstance(), callback)
 
-const loadAdmins = async () => {
+export const loadAdmins = async () => {
   const snapshot = await getDoc(getAdminsDoc())
   if (!snapshot.exists()) {
     return []
@@ -123,6 +128,16 @@ export const isAdminEmail = async (email = "") => {
   const list = await loadAdmins()
   return list.map(normalizeEmail).includes(normalizeEmail(email))
 }
+
+export const saveAdminEmails = async (items: string[]) =>
+  setDoc(
+    getAdminsDoc(),
+    {
+      items: items.map(normalizeEmail).filter(Boolean),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
 
 export const loadNextMeetupDate = async () => {
   const snapshot = await getDoc(getMeetupDoc())

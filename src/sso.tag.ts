@@ -1,20 +1,26 @@
-import { tag, section, div, h2, p, button } from "taggedjs"
+import { tag, section, div, h2, p, button, output, onDestroy } from "taggedjs"
 import type { AuthStatus } from "./auth.types"
 
-export const SsoPanel = tag(
-  (
-    status: AuthStatus,
-    userEmail: string,
-    _adminEmail: string,
-    onSignIn: () => void,
-    onSignOut: () => void
-  ) => {
-    SsoPanel.updates((args) => {
-      ;[status, userEmail, _adminEmail, onSignIn, onSignOut] = args
-    })
+export const SsoPanel = tag(({
+  status,
+  userEmail,
+  adminEmail,
+  onSignIn,
+  onSignOut,
+}: {
+  status: AuthStatus
+  userEmail: string
+  adminEmail?: string
+  onSignIn: () => void
+  onSignOut: () => void
+}) => {
+  SsoPanel.inputs((args) => {
+    ;[{ status, userEmail, adminEmail, onSignIn, onSignOut }] = args
+    onSignIn = output(onSignIn)
+    onSignOut = output(onSignOut)
+  })
 
-
-    return [() => {
+  return [() => {
       if (status === "loading") {
         return section.class`panel auth-panel`(p("Checking login..."))
       }
@@ -53,6 +59,5 @@ export const SsoPanel = tag(
           )
         )
       )
-    }]
-  }
-)
+  }]
+})

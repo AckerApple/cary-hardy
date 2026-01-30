@@ -27,11 +27,6 @@ export const handleAdminAuthUser = async ({
     return false
   }
 
-  setCurrentUser?.({
-    email: user.email || "",
-    photoURL: user.photoURL || "",
-  })
-
   const isAllowed = await ensureAdminAccess({
     user,
     mountSso,
@@ -41,6 +36,8 @@ export const handleAdminAuthUser = async ({
   })
   if (!isAllowed) return false
 
+  setCurrentUser?.(user)
   onAuthorized?.(user, reason)
+  
   return true
 }

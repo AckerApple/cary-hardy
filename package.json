@@ -6,14 +6,10 @@
   "type": "module",
   "scripts": {
     "deploy": "npm run build && npm run save",
-    "deploy:preview": "npm run build:preview && npm run save",
     "save": "git add . && git commit -m \"update\" && git push",
-    "watch": "nodemon --watch src --ext '*' --exec 'npm run build'",
-    "build": "npm run build:html && node --loader ts-node/esm ./scripts/runBundle.script.ts",
-    "build:preview": "node --loader ts-node/esm ./scripts/buildPreview.ts && npm run build:preview:webpack && npm run build:preview:html",
-    "build:preview:webpack": "node --loader ts-node/esm ./scripts/runBundlePreview.script.ts",
-    "build:html": "node scripts/mergeHtmlFiles.cjs wrap.html ./ .src.html",
-    "build:preview:html": "node scripts/mergeHtmlFiles.cjs preview/wrap.html ./preview .src.html",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "update": "npm install taggedjs && npm run update:copies",
     "update:copies": "npm run copy:taggedjs:src && npm run copy:taggedjs:root",
     "copy:taggedjs:src": "mkdir -p src/taggedjs && cp node_modules/taggedjs/bundle.js src/taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map src/taggedjs/bundle.js.map",
@@ -33,11 +29,10 @@
   "devDependencies": {
     "ack-reload": "^4.0.4",
     "fs-extra": "^11.3.0",
-    "nodemon": "^3.1.9",
-    "taggedjs-cli": "^0.1.13",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
+    "vite": "^6.4.1",
     "webpack": "^5.97.1"
   },
   "dependencies": {
