@@ -1,4 +1,4 @@
-import { button, div, output, tag } from 'taggedjs'
+import { button, output, tag } from 'taggedjs'
 
 export const adminNavButtons = tag((onSignout) => {
   adminNavButtons.inputs(([_onSignout]) => {
@@ -6,16 +6,44 @@ export const adminNavButtons = tag((onSignout) => {
   })
 
   const goHome = () => {
-    window.location.href = './index.html'
+    window.location.href = '/index.html'
   }
 
   const openRepo = () => {
     window.open('https://github.com/AckerApple/cary-hardy', '_blank')
   }
 
-  return div.style`display:flex;gap:0.6em;align-items:center;flex-wrap:wrap;justify-content:center;width:100%;`(
-    button.onClick(goHome)('🏠 home'),
-    button.onClick(openRepo)('🔗 code base'),
-    button.onClick(onSignout)('🚪 logout')
-  )
+  const goUsers = () => {
+    window.location.href = '/admin/user.html'
+  }
+
+  return [
+    button({
+      type: 'button',
+      class: 'top-nav-pill',
+      onClick: goHome,
+    }, '🏠 home'),
+    button({
+      type: 'button',
+      class: 'top-nav-pill',
+      onClick: () => {
+        window.location.href = '/admin.html'
+      },
+    }, '⭐️ admin home'),
+    button({
+      type: 'button',
+      class: 'top-nav-pill',
+      onClick: openRepo,
+    }, '🔗 code base'),
+    button({
+      type: 'button',
+      class: 'top-nav-pill',
+      onClick: goUsers,
+    }, '👥 users'),
+    button({
+      type: 'button',
+      class: 'top-nav-pill',
+      onClick: onSignout,
+    }, '🚪 logout'),
+  ]
 })

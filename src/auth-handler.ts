@@ -1,5 +1,6 @@
 import { ensureAdminAccess } from "./admin-access"
 import type { AuthStatus } from "./auth.types"
+import { ensureUserProfile } from "./firebase"
 
 export const handleAdminAuthUser = async ({
   user,
@@ -25,6 +26,12 @@ export const handleAdminAuthUser = async ({
     onSignedOut?.()
     mountSso?.("login", "", "auth:logged-out")
     return false
+  }
+
+  try {
+    await ensureUserProfile(user)
+  } catch (error) {
+    console.warn("Failed to ensure user profile", error)
   }
 
   const isAllowed = await ensureAdminAccess({

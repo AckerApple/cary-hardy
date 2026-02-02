@@ -1,4 +1,4 @@
-import { button, div, fieldset, hr, input, label, output, tag } from 'taggedjs'
+import { button, div, fieldset, hr, input, label, onDestroy, output, tag } from 'taggedjs'
 import { ClockComponent } from '../clock/clock.tag'
 
 export const meetingToolsSection = tag(({
@@ -23,7 +23,6 @@ export const meetingToolsSection = tag(({
   return fieldset.style`border:0;padding:0;margin:0;`(
     _ => {
       return inviteMaker({
-        nextMeetupDate,
         date,
         time,
         onDate,
@@ -43,17 +42,15 @@ export const inviteMaker = tag(({
   date,
   time,
   onDate,
-  nextMeetupDate,
 }: {
   date: string
   time: string
   onDate: (dateNum: number) => any
-  nextMeetupDate: number
 }) => {
   let dateTime = new Date(date + ' ' + time).getTime()
 
   inviteMaker.inputs(x => {
-    ;[{ date, time, onDate, nextMeetupDate }] = x
+    ;[{ date, time, onDate }] = x
     onDate = output(onDate)
     dateTime = new Date(date + ' ' + time).getTime()
   })

@@ -1,25 +1,42 @@
-import { button, div, fieldset, input, output, tag } from 'taggedjs'
+import { button, callback, div, fieldset, input, tag } from 'taggedjs'
+import { loadAdmins, saveAdminEmails } from '../firebase'
 
-export const adminUsersSection = tag(({
-  users,
-  onChange,
-  onAdd,
-  onRemove,
-  onSave,
-}: {
-  users: string[]
-  onChange: (index: number, value: string) => void
-  onAdd: () => void
-  onRemove: (index: number) => void
-  onSave: () => void
-}) => {
-  adminUsersSection.inputs((x) => {
-    ;[{ users, onChange, onAdd, onRemove, onSave }] = x
-    onChange = output(onChange)
-    onAdd = output(onAdd)
-    onRemove = output(onRemove)
-    onSave = output(onSave)
-  })
+export const adminUsersSection = tag(() => {
+  let users: string[] = []
+  const refresh = callback(() => {})
+
+  tag.promise = loadAdmins()
+    .then((loadedAdmins) => {
+      users = Array.isArray(loadedAdmins) ? loadedAdmins : []
+      refresh()
+    })
+    .catch((error) => {
+      console.error('Failed to load admin list', error)
+    })
+
+  const onChange = (index: number, value: string) => {
+    users = users.map((entry, i) => (i === index ? value : entry))
+    refresh()
+  }
+
+  const onAdd = () => {
+    users = [...users, '']
+    refresh()
+  }
+
+  const onRemove = (index: number) => {
+    users = users.filter((_, i) => i !== index)
+    refresh()
+  }
+
+  const onSave = () =>
+    saveAdminEmails(users)
+      .then(() => {
+        alert('saved')
+      })
+      .catch((error) => {
+        console.error('Failed to save admin list', error)
+      })
 
   return fieldset.style`border:0;padding:0;margin:0;`(
     div.style`display:flex;flex-direction:column;gap:0.6em;`(

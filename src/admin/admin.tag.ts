@@ -12,6 +12,8 @@ import { handleAdminAuthUser } from '../auth-handler'
 import { SsoPanel } from '../sso.tag'
 import type { AuthStatus } from '../auth.types'
 import { adminTools } from './adminTools.tag'
+import { adminNavButtons } from './adminNavButtons.tag'
+import { topNavBar } from '../ui/topNav.tag'
 
 let authInitialized = false
 export const adminTag = tag(() => {
@@ -103,9 +105,19 @@ export const authOutput = tag((
     onSignedOut = output(onSignedOut)
   })
 
+  const signoutClick = () =>
+    signOutUser()
+      .then(onSignedOut)
+      .catch((error) => {
+        console.error('Failed to sign out', error)
+      })
+
   return [() => {
     return authStatus === 'authorized'
-      ? adminTools(onSignedOut)
+      ? noElement(
+          topNavBar(() => adminNavButtons(signoutClick)),
+          adminTools(onSignedOut)
+        )
       : div(
           SsoPanel({
             status: authStatus,

@@ -32,6 +32,15 @@ async function setupPreviewAndBuild() {
   // Copy source HTML files and static assets to preview
   await fs.copyFile(path.join(projectRoot, 'index.src.html'), path.join(previewDir, 'index.src.html'))
   await fs.copyFile(path.join(projectRoot, 'admin.src.html'), path.join(previewDir, 'admin.src.html'))
+  await fs.mkdir(path.join(previewDir, 'admin'), { recursive: true })
+  try {
+    await fs.copyFile(
+      path.join(projectRoot, 'admin', 'user.src.html'),
+      path.join(previewDir, 'admin', 'user.src.html')
+    )
+  } catch {
+    // File doesn't exist, skip
+  }
   await fs.copyFile(path.join(projectRoot, 'wrap.html'), path.join(previewDir, 'wrap.html'))
   
   // Copy CSS and other static files

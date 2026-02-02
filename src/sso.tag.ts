@@ -32,6 +32,7 @@ export const SsoPanel = tag(({
             () => userEmail || "This account",
             " is not authorized."
           ),
+          p("Please be patient as we review your account to become verified status."),
           div.class`auth-actions`(
             button(
               {

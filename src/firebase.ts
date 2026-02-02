@@ -12,8 +12,23 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth"
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
+import {
+  addDoc,
+  collection,
+  doc,
+  deleteDoc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+} from "firebase/firestore"
+import { ValueSubject } from "taggedjs"
 import firebaseConfig from "./firebase.config"
+import type { NewOrderInput, UserProfileInput } from "./commerce.types"
 
 let app: ReturnType<typeof initializeApp> | null = null
 let auth: ReturnType<typeof getAuth> | null = null
@@ -50,6 +65,9 @@ const getDb = () => {
 
 const getAdminsDoc = () => doc(getDb(), "admins", "list")
 const getMeetupDoc = () => doc(getDb(), "config", "site")
+const getUserDoc = (userId: string) => doc(getDb(), "users", userId)
+const getUsersCollection = () => collection(getDb(), "users")
+const getOrdersCollection = () => collection(getDb(), "orders")
 
 const normalizeEmail = (email = "") => email.trim().toLowerCase()
 
@@ -157,3 +175,109 @@ export const saveNextMeetupDate = async (nextMeetupDate: number) =>
     },
     { merge: true }
   )
+
+export const upsertUserProfile = async (user: UserProfileInput) => {
+  const userDoc = getUserDoc(user.id)
+  const snapshot = await getDoc(userDoc)
+  const payload = {
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    ...(user.userType ? { userType: user.userType } : {}),
+    updatedAt: serverTimestamp(),
+  }
+
+  if (!snapshot.exists()) {
+    return setDoc(userDoc, { ...payload, createdAt: serverTimestamp() })
+  }
+
+  return setDoc(userDoc, payload, { merge: true })
+}
+
+export const ensureUserProfile = async (user: {
+  uid?: string
+  email?: string
+  displayName?: string
+}) => {
+  const userId = user?.uid
+  if (!userId) return false
+
+  const userDoc = getUserDoc(userId)
+  const snapshot = await getDoc(userDoc)
+  if (snapshot.exists()) return true
+
+  const email = (user.email || "").trim().toLowerCase()
+  if (email) {
+    const existingByEmail = await getDocs(
+      query(getUsersCollection(), where("email", "==", email))
+    )
+    if (!existingByEmail.empty) {
+      return true
+    }
+  }
+
+  const displayName = user.displayName || ""
+  const [firstName = "", ...rest] = displayName.trim().split(/\s+/)
+  const lastName = rest.join(" ")
+
+  await setDoc(userDoc, {
+    email,
+    firstName,
+    lastName,
+    userType: "unverified",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+
+  return true
+}
+
+export const listUsers = async () => {
+  const snapshot = await getDocs(getUsersCollection())
+  return snapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    ...docSnapshot.data(),
+  }))
+}
+
+export const listenUsers$ = () => {
+  const users$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    getUsersCollection(),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      }))
+      items.sort((a, b) => {
+        const aTime = a?.createdAt?.seconds
+          ? a.createdAt.seconds * 1000
+          : (a?.createdAt?.toDate?.() as Date | undefined)?.getTime?.() ?? 0
+        const bTime = b?.createdAt?.seconds
+          ? b.createdAt.seconds * 1000
+          : (b?.createdAt?.toDate?.() as Date | undefined)?.getTime?.() ?? 0
+        return bTime - aTime
+      })
+      users$.next(items)
+    },
+    (error) => {
+      console.error("Failed to listen to users", error)
+    }
+  )
+
+  ;(users$ as any).unsubscribe = unsubscribe
+  return users$
+}
+
+export const deleteUser = async (userId: string) => {
+  if (!userId) return false
+  await deleteDoc(getUserDoc(userId))
+  return true
+}
+
+export const createOrder = async (order: NewOrderInput) =>
+  addDoc(getOrdersCollection(), {
+    ...order,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })

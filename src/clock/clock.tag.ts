@@ -1,12 +1,6 @@
-import { a, br, button, div, p, small, tag, noElement, htmlTag, states, Tag } from 'taggedjs'
-import { qrCodeDisplay } from '../qrCode.tag'
+import { noElement, img, svg, title, u, button, a, br, div, p, small, tag, htmlTag, onDestroy } from 'taggedjs'
 import { getGoogleInviteLink, getOutlookInviteLink, getICalContent } from './calendar.utils'
 import { labeledCountdown } from './timeZoneTimes.tag'
-
-const img = htmlTag('img')
-const svg = htmlTag('svg')
-const title = htmlTag('title')
-const u = htmlTag('u')
 
 export const content = {
   subject: 'Cary Hardy Patreon meetup',
@@ -23,7 +17,9 @@ export const ClockComponent = tag(({
 }: any) => {
   date = new Date(date)
 
-  ClockComponent.updates(x => [{date, showLearnMore}] = x)
+  ClockComponent.updates(x => {
+    [{date, showLearnMore}] = x
+  })
 
   let showQrCodes = false
   
@@ -59,8 +55,8 @@ export const ClockComponent = tag(({
     div({style: 'padding:.5em;'},
       'Countdown until the next, Patreon LE only, group meetup'
     ),
-    _=> labeledCountdown(date),
-    div({style: 'white-space:nowrap;font-size:.7em;opacity:.8'},
+    () => labeledCountdown(date),
+    div.style`white-space:nowrap;font-size:.7em;opacity:.8`(
       'save meetup to your calendar using links below 👇'
     ),
     div({style: 'background-color:black;padding:0 0 .2em 0;'},
@@ -75,6 +71,7 @@ export const ClockComponent = tag(({
             ? img({src: 'assets/media/gmail-logo-2.png', alt: '', width: '48', height: '48', border: '0'})
             : img({src: 'assets/media/outlook-icon.png', alt: '', width: '48', height: '48', border: '0'})
         ).key(item)),
+        
         getIconAndLabel(
           'ical',
           {href: downloadString, download: 'cary-hardy-meetup.ics'},
@@ -92,6 +89,7 @@ export const ClockComponent = tag(({
           )
         )
       ),
+      /*
       _=> showQrCodes && noElement(
         br,
         div({style: 'display:flex;flex-wrap:wrap;gap:1em;text-align:center;justify-content: center;'},
@@ -104,14 +102,14 @@ export const ClockComponent = tag(({
             img({src: 'assets/media/outlook-icon.png', alt: '', width: '48', height: '48', border: '0'})
           )
         )
-      )
+      )*/
     ),
     p({style: 'font-size:0.8em;opacity:0.7;line-height:0.9em;'},
       small('🔗 A link to virtual meetup is posted on day of meetup,', br, 'in the LE ONLY 💬 chat on Patreon.')
     ),
-    _=> showLearnMore && div({style: 'padding:.8em;font-size: .7em;'},
-      a({class: 'no-a-style', href: 'meetup.html'},
-        button({type: 'button'}, 'learn more')
+    () => showLearnMore && div.style`padding:.8em;font-size: .7em;`(
+      a.class`no-a-style`.href`meetup.html`(
+        button.type`button`('learn more')
       )
     )
   )
@@ -135,9 +133,9 @@ export function getDaySuffix(date: Date) {
 const getIconAndLabel = (
   label: string,
   linkAttrs: Record<string, string>,
-  iconHtml: Tag,
+  iconHtml: any,
 ) => 
   a({class: 'small-icon-link', ...linkAttrs, target: '_blank'},
-    div({class: 'small-icon'}, iconHtml),
+    div.class`small-icon`(iconHtml),
     small({style: 'font-size:0.5em;'}, label)
   )

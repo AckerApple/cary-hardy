@@ -1,15 +1,14 @@
 import {
+  a,
   br,
-  details,
+  callback,
   div,
   h3,
   img,
   output,
-  summary,
   tag,
 } from 'taggedjs'
-import { loadAdmins, loadNextMeetupDate, saveAdminEmails, saveNextMeetupDate, signOutUser } from '../firebase'
-import { adminNavButtons } from './adminNavButtons.tag'
+import { loadNextMeetupDate, saveNextMeetupDate, signOutUser } from '../firebase'
 import { adminUsersSection } from './adminUsers.tag'
 import { calendarLinksSection } from './calendarLinks.tag'
 import { meetingToolsSection } from './meetingTools.tag'
@@ -23,8 +22,7 @@ export const adminTools = tag((
 ) => (
   nextMeetupDate = Date.now(),
   qrUrl = '',
-  { date, time } = timestampToValues(Number(nextMeetupDate)),
-  adminUsers = [] as string[]
+  { date, time } = timestampToValues(Number(nextMeetupDate))
 ) => {
   adminTools.inputs(([_onSignedOut]) => {
     onSignedOut = output(_onSignedOut)
@@ -50,14 +48,6 @@ export const adminTools = tag((
       })
   }
 
-  tag.promise = loadAdmins()
-    .then((loadedAdmins) => {
-      adminUsers = Array.isArray(loadedAdmins) ? loadedAdmins : []
-    })
-    .catch((error) => {
-      console.error('Failed to load admin list', error)
-    })
-
   const saveMeetupDate = () =>
     saveNextMeetupDate(Number(nextMeetupDate))
       .then(() => {
@@ -71,16 +61,7 @@ export const adminTools = tag((
     console.error('Failed to sign out', error)
   })
 
-  const saveAdminUsers = () =>
-    saveAdminEmails(adminUsers)
-      .then(() => {
-        alert('saved')
-      })
-      .catch((error) => {
-        console.error('Failed to save admin list', error)
-      })
-
-  const collapsibleSection = ({
+  const collapsibleSection = tag(({
     labelText,
     flex,
     contentNode,
@@ -88,22 +69,39 @@ export const adminTools = tag((
     labelText: string
     flex: string
     contentNode: any
-  }) => details.style`flex:${flex};min-width:500px;background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
-    summary.style`cursor:pointer;padding:0.75em 1em;color:#fff;user-select:none;font-weight:600;`(
-      labelText
-    ),
-    div.style`padding:0.8em 1em;border-top:1px solid rgba(255,255,255,0.2);`(contentNode),
-  )
+  }) => {
+    collapsibleSection.inputs(x => [{
+      labelText,
+      flex,
+      contentNode,
+    }] = x)
+
+    let show = false
+
+    const toggle = () => {
+      show = !show
+    }
+
+    return div.style`flex:${flex};min-width:500px;background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
+      div.onClick(toggle).style`cursor:pointer;padding:0.75em 1em;color:#fff;user-select:none;font-weight:600;display:flex;gap:0.6em;align-items:center;`(
+        div.style`width:1em;text-align:center;`(() => (show ? '▼' : '▶')),
+        div(labelText)
+      ),
+      () => show
+        ? div.style`padding:0.8em 1em;border-top:1px solid rgba(255,255,255,0.2);`(
+            _=> contentNode
+          )
+        : ''
+    )
+  })
 
   return div.style`max-width:1200px;margin:0 auto;padding:0 1em;`(
     h3(
       img.src`assets/media/icon.png`.style`width:40px;margin-right:10px;`,
       'Hardy Tools'
     ),
-    adminNavButtons(signoutClick),
-    br,
     div.style`display:flex;flex-wrap:wrap;gap:1em;text-align:left;`(
-      collapsibleSection({
+      _=> collapsibleSection({
         labelText: 'QR Maker',
         flex: '1',
         contentNode: qrMakerSection({
@@ -113,7 +111,7 @@ export const adminTools = tag((
           },
         }),
       }),
-      collapsibleSection({
+      _=> collapsibleSection({
         labelText: 'Calendar Links',
         flex: '2',
         contentNode: calendarLinksSection({
@@ -123,7 +121,7 @@ export const adminTools = tag((
           },
         }),
       }),
-      collapsibleSection({
+      _=> collapsibleSection({
         labelText: 'meeting tools',
         flex: '1',
         contentNode: meetingToolsSection({
@@ -137,25 +135,19 @@ export const adminTools = tag((
           onSave: saveMeetupDate,
         }),
       }),
-      collapsibleSection({
+      
+      _=> collapsibleSection({
         labelText: 'admin users',
         flex: '1',
-        contentNode: () => adminUsersSection({
-          users: adminUsers,
-          onChange: (index, value) => {
-            adminUsers = adminUsers.map((entry, i) => (i === index ? value : entry))
-          },
-          onAdd: () => {
-            adminUsers = [...adminUsers, '']
-          },
-          onRemove: (index) => {
-            adminUsers = adminUsers.filter((_, i) => i !== index)
-          },
-          onSave: saveAdminUsers,
-        }),
-      })
+        contentNode: adminUsersSection,
+      }),
+      div.style`flex:1;min-width:320px;background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
+        a({
+          href: 'admin/user.html',
+          style: 'display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:600;text-align:center;',
+        }, 'Open Users Admin')
+      )
     ),
-    br,
-    adminNavButtons(signoutClick)
+    br
   )
 })
