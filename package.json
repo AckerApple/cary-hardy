@@ -1,7 +1,7 @@
 {
   "name": "cary-hardy",
   "version": "1.0.0",
-  "description": "",
+  "description": "Website for content creator",
   "main": "index.js",
   "type": "module",
   "scripts": {
