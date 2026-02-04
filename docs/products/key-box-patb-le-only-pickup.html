@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Key Box - PATB LE Pickup</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1" />
+    <link rel="icon" href="../assets/media/icon_64w.png" />
+    <link href="../document.css" type="text/css" rel="stylesheet" />
+    <link href="../spin.css" type="text/css" rel="stylesheet" />
+    <link href="../bounce-in.css" type="text/css" rel="stylesheet" />
+    <style>
+      body {
+        background: #0b0b0b;
+        color: #fff;
+      }
+      .product-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5em 1.25em 3em;
+      }
+      .product-hero {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 2em;
+        align-items: center;
+      }
+      .product-media {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "main"
+          "thumbs";
+        gap: 0.6em;
+        align-items: start;
+      }
+      .product-info h1 {
+        margin: 0.2em 0 0.3em;
+        font-size: clamp(1.6em, 3vw, 2.4em);
+        line-height: 1.25;
+      }
+      .product-info h2 {
+        margin: 0.6em 0 0.8em;
+        font-size: 1.4em;
+      }
+      .patb-logo {
+        width: 140px;
+        height: auto;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.2);
+        display: block;
+      }
+      .buy-button {
+        display: inline-block;
+        padding: 0.7em 1.4em;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 700;
+        background: linear-gradient(45deg, #ff0080, #00ffff);
+      }
+      .main-image {
+        grid-area: main;
+        width: 100%;
+        height: auto;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .gallery {
+        grid-area: thumbs;
+        margin-top: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35em;
+        justify-content: flex-start;
+        align-content: flex-start;
+      }
+      .gallery-item {
+        background: #121212;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.12);
+        padding: 0.2em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 89px;
+        height: 89px;
+        flex: 0 0 auto;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .gallery-item.is-active {
+        border-color: rgba(255,255,255,0.6);
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+      }
+      .gallery-image {
+        width: 100%;
+        height: 100%;
+        max-height: 81px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.15);
+        object-fit: contain;
+        cursor: pointer;
+      }
+      @media (max-width: 900px) {
+        .product-hero {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 599px) {
+        .gallery {
+          justify-content: center;
+          align-content: center;
+        }
+      }
+      @media (min-width: 600px) {
+        .product-media {
+          grid-template-columns: 97px 1fr;
+          grid-template-areas: "thumbs main";
+          align-items: start;
+        }
+        .gallery {
+          flex-direction: column;
+          align-items: stretch;
+          width: 97px;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="../assets/keyBoxPatb-B2qCDBcx.js"></script>
+    <link rel="modulepreload" crossorigin href="../assets/key-box-patb-le-only-pickup.tag-BpME7fOX.js">
+  </head>
+  <body>
+    <noscript style="color:red">Javascript is required but is turned off on your device</noscript>
+    <div id="key-box-tag"></div>
+  </body>
+</html>
