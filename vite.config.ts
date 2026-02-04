@@ -3,15 +3,18 @@ import { resolve } from 'path'
 
 export default defineConfig({
   base: './',
-  publicDir: 'public',
+  root: 'src',
+  publicDir: resolve(__dirname, 'public'),
   build: {
-    outDir: 'docs',
+    outDir: '../docs',
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        admin: resolve(__dirname, 'admin.html'),
-        meetup: resolve(__dirname, 'meetup.html'),
+        main: resolve(__dirname, 'src/index.html'),
+        admin: resolve(__dirname, 'src/admin.html'),
+        meetup: resolve(__dirname, 'src/meetup.html'),
+        thankYou: resolve(__dirname, 'src/key-box-patb/thank-you.html'),
+        keyBoxPatb: resolve(__dirname, 'src/products/key-box-patb-le-only-pickup.html'),
       },
     },
   },
