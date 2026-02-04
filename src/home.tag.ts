@@ -1,6 +1,7 @@
 import { ClockComponent } from "./clock/clock.tag"
 import { iframe, img, a, br, div, h2, small, style, tag, callback, noElement } from "taggedjs"
 import { topNavBar } from "./ui/topNav.tag"
+import { publicNavButtons } from "./ui/publicNavButtons.tag"
 import { loadNextMeetupDate } from "./firebase"
 
 let meetupLoaded = false
@@ -25,13 +26,7 @@ export const homeTag = tag(() => (
       })
   })(),
 ) => div(
-  topNavBar(() => [
-    a.href`#links`.class`top-nav-pill`('links'),
-    a.href`#merch`.class`top-nav-pill`('merch & more'),
-    a.href`#youtube`.class`top-nav-pill`('youtube'),
-    a.href`#awards`.class`top-nav-pill`('awards'),
-    a.href`./admin.html`.class`top-nav-pill`('👤'),
-  ]),
+  topNavBar(() => publicNavButtons()),
   div(
     div.style`
       width: 100%;

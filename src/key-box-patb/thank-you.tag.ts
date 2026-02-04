@@ -1,18 +1,13 @@
 import { a, div, h1, p, tag } from 'taggedjs'
 import { topNavBar } from '../ui/topNav.tag'
+import { publicNavButtons } from '../ui/publicNavButtons.tag'
 
 export const thankYouTag = tag(() => {
   const params = new URLSearchParams(window.location.search)
   const sessionId = params.get('session_id') || ''
 
   return div(
-    topNavBar(() => [
-      a.href`#links`.class`top-nav-pill`('links'),
-      a.href`#merch`.class`top-nav-pill`('merch & more'),
-      a.href`#youtube`.class`top-nav-pill`('youtube'),
-      a.href`#awards`.class`top-nav-pill`('awards'),
-      a.href`/admin.html`.class`top-nav-pill`('👤'),
-    ]),
+    topNavBar(() => publicNavButtons()),
     div.class`wrap`(
       div.class`card`(
         h1('Thank you!'),
