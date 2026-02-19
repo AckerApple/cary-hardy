@@ -187,6 +187,7 @@ export const adminUsersPage = tag((
   let editingId: string | null = null
   let editCreatedAt: any = null
   let editUser: UserRecord | null = null
+  const refresh = callback(() => {})
 
   const formatCreatedAt = (value: any) => {
     if (!value) return '-'
@@ -222,6 +223,7 @@ export const adminUsersPage = tag((
     }
     isLoading = true
     errorMessage = ''
+    refresh()
     users$ = listenUsers$()
     usersUnsubscribe = (users$ as any)?.unsubscribe || null
   }
@@ -230,18 +232,21 @@ export const adminUsersPage = tag((
     editingId = user.id
     editCreatedAt = user.createdAt ?? null
     editUser = { ...user }
+    refresh()
   }
 
   const closeEdit = () => {
     editingId = null
     editCreatedAt = null
     editUser = null
+    refresh()
   }
 
   const saveUser = () => {
     if (!editingId || isSaving) return
     isSaving = true
     errorMessage = ''
+    refresh()
     const payload = {
       id: editingId,
       email: (editUser?.email || '').trim(),
@@ -256,9 +261,11 @@ export const adminUsersPage = tag((
       .catch((error) => {
         console.error('Failed to save user', error)
         errorMessage = 'Failed to save user.'
+        refresh()
       })
       .finally(() => {
         isSaving = false
+        refresh()
       })
   }
 
@@ -267,6 +274,7 @@ export const adminUsersPage = tag((
     if (!confirm('Delete this user?')) return
     isDeleting = true
     errorMessage = ''
+    refresh()
     tag.promise = deleteUser(editingId)
       .then(() => {
         closeEdit()
@@ -274,9 +282,11 @@ export const adminUsersPage = tag((
       .catch((error) => {
         console.error('Failed to delete user', error)
         errorMessage = 'Failed to delete user.'
+        refresh()
       })
       .finally(() => {
         isDeleting = false
+        refresh()
       })
   }
 
@@ -333,6 +343,7 @@ export const adminUsersPage = tag((
               isDeleting,
               onChange: (nextUser) => {
                 editUser = nextUser
+                refresh()
               },
               onSave: saveUser,
               onDelete: removeUser,
