@@ -38,5 +38,5 @@ export const qrCodeDisplay = tag(url => {
     onQrReady()
   })
 
-  return div({id, oninit: loadQr})
+  return div.id`${id}`.attr('oninit', loadQr)
 })

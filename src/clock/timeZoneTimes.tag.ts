@@ -6,7 +6,7 @@ export const labeledCountdown = tag((date: Date | number) => {
   labeledCountdown.updates(x => [date] = x)
 
   const d = new Date(date)
-  return div({style: 'text-align:center;'},
+  return div.style`text-align:center;`(
     div(
       span(
         '🗓️ ',
@@ -24,7 +24,7 @@ export const labeledCountdown = tag((date: Date | number) => {
 })
 
 export function smallTimeZoneTimes(date: Date) {
-  return div({style: 'font-size:.65em;opacity:.7'}, timeZoneTimes(date))
+  return div.style`font-size:.65em;opacity:.7`(timeZoneTimes(date))
 }
 function formatTime(date: Date | number, timeZone: any) {
   const options = {

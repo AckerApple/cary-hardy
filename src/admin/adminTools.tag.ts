@@ -142,10 +142,10 @@ export const adminTools = tag((
         contentNode: adminUsersSection,
       }),
       div.style`flex:1;min-width:320px;background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
-        a({
-          href: 'admin/user.html',
-          style: 'display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:600;text-align:center;',
-        }, 'Open Users Admin')
+        a
+          .href`admin/user.html`
+          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:600;text-align:center;`
+          ('Open Users Admin')
       )
     ),
     br

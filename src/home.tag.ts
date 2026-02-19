@@ -400,16 +400,16 @@ export const homeTag = tag(() => (
             .attr('target', '_blank')
             .href`https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003`
             .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
-            .onMouseover((e: any) => e.target.style.transform = 'scale(1.1)')
-            .onMouseout((e: any) => e.target.style.transform = 'scale(1)')(
+            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
               "Get your 'Wrong Kong!' T-Shirt"
             ),
           a
             .attr('target', '_blank')
             .href`https://buy.stripe.com/5kQdR11My7XGbnPePf00005`
             .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
-            .onMouseover((e: any) => e.target.style.transform = 'scale(1.1)')
-            .onMouseout((e: any) => e.target.style.transform = 'scale(1)')(
+            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
               '🇦🇺 Wrong Kong for Australia residents'
             )
         ),
@@ -424,8 +424,8 @@ export const homeTag = tag(() => (
             .href`https://buy.stripe.com/5kA4j775zaRsdHy9AA`
             .class`bounce-in`
             .style`--fx-index: 11; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
-            .onMouseover((e: any) => e.target.style.transform = 'scale(1.1)')
-            .onMouseout((e: any) => e.target.style.transform = 'scale(1)')(
+            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
               'More guns than Wick T-shirt'
             )
         )
@@ -436,8 +436,8 @@ export const homeTag = tag(() => (
           .href`https://silverballswag.com/collections/cary-hardy`
           .class`bounce-in`
           .style`--fx-index: 12; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
-          .onMouseover((e: any) => e.target.style.transform = 'scale(1.1)')
-          .onMouseout((e: any) => e.target.style.transform = 'scale(1)')(
+          .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+          .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
             'SHOP SILVERBALL SWAG'
           )
       )
@@ -472,8 +472,8 @@ export const homeTag = tag(() => (
           .href`https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA`
           .class`bounce-in`
           .style`--fx-index: 13; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
-          .onMouseover((e: any) => e.target.style.transform = 'scale(1.1)')
-          .onMouseout((e: any) => e.target.style.transform = 'scale(1)')(
+          .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+          .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
             'Goto My Channel'
           )
       ),

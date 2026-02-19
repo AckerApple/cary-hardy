@@ -34,14 +34,11 @@ export const SsoPanel = tag(({
           ),
           p("Please be patient as we review your account to become verified status."),
           div.class`auth-actions`(
-            button(
-              {
-                type: "button",
-                class: "add-button",
-                onClick: onSignOut,
-              },
-              "Sign out"
-            )
+            button
+              .type`button`
+              .class`add-button`
+              .onClick(onSignOut)
+              ("Sign out")
           )
         )
       }
@@ -50,15 +47,12 @@ export const SsoPanel = tag(({
         h2("Sign in"),
         p("Use Google to access admin tools."),
         div.class`auth-actions`(
-          button(
-            {
-              type: "button",
-              class: "add-button",
-              onClick: onSignIn,
-            },
-            "Sign in with Google"
+          button
+            .type`button`
+            .class`add-button`
+            .onClick(onSignIn)
+            ("Sign in with Google")
           )
-        )
       )
   }]
 })
