@@ -19,7 +19,7 @@ export const qrMakerSection = tag(({
       .attr('placeholder', 'paste website address')
       .value(_ => qrUrl)
       .attr('maxlength', '1000')
-      .onKeyup((e: any) => onQrUrlChange(e.target.value)),
+      .onKeyUp((e: any) => onQrUrlChange(e.target.value)),
     div.style`display:flex;justify-content: center;`(
       _ => qrUrl && qrCodeDisplay(qrUrl)
     )

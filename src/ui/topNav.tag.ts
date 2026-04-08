@@ -9,6 +9,7 @@ export const topNavStyles = tag(() => {
   return style(`
     .top-nav-shell {
       width: 100%;
+      max-width: 100vw;
       box-sizing: border-box;
       background: #000;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -17,20 +18,30 @@ export const topNavStyles = tag(() => {
     .top-nav {
       width: 100%;
       max-width: 100%;
+      min-width: 0;
       box-sizing: border-box;
       background: rgba(0, 0, 0, 0.95);
-      display: flex;
-      gap: 0.45em;
-      justify-content: flex-start;
-      align-items: center;
       padding: 0.45em 0.8em;
       z-index: 200;
-      flex-wrap: nowrap;
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
     }
+    .top-nav-row {
+      width: max-content;
+      min-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      gap: 0.45em;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
     .top-nav-fixed {
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
       position: sticky;
       top: 0;
     }
@@ -61,6 +72,8 @@ export const topNavStyles = tag(() => {
     @media (max-height: 450px) {
       .top-nav {
         padding: 0.3em 0.6em;
+      }
+      .top-nav-row {
         gap: 0.35em;
       }
       .top-nav-pill {
@@ -88,7 +101,9 @@ export const topNav = tag(({
   })
 
   return div.class`${className}`(
-    typeof content === 'function' ? content() : content
+    div.class`top-nav-row`(
+      typeof content === 'function' ? content() : content
+    )
   )
 })
 

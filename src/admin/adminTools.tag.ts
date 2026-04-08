@@ -82,16 +82,20 @@ export const adminTools = tag((
       show = !show
     }
 
-    return div.style`flex:${flex};min-width:500px;background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
-      div.onClick(toggle).style`cursor:pointer;padding:0.75em 1em;color:#fff;user-select:none;font-weight:600;display:flex;gap:0.6em;align-items:center;`(
-        div.style`width:1em;text-align:center;`(() => (show ? '▼' : '▶')),
-        div(labelText)
-      ),
-      () => show
+    return div.style`flex:${flex};min-width:min(500px, 100%);background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
+      div
+        .onClick(toggle)
+        .style`cursor:pointer;padding:0.75em 1em;color:#fff;user-select:none;font-weight:600;display:flex;gap:0.6em;align-items:center;`
+        (
+          div.style`width:1em;text-align:center;`(() => (show ? '▼' : '▶')),
+          div(labelText)
+        ),
+      () => {
+        return show
         ? div.style`padding:0.8em 1em;border-top:1px solid rgba(255,255,255,0.2);`(
             _=> contentNode
           )
-        : ''
+        : ''}
     )
   })
 
@@ -141,7 +145,7 @@ export const adminTools = tag((
         flex: '1',
         contentNode: adminUsersSection,
       }),
-      div.style`flex:1;min-width:320px;background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
+      div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
         a
           .href`/admin/user.html`
           .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:600;text-align:center;`
