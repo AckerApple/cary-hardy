@@ -399,7 +399,7 @@ export const homeTag = tag(() => (
           a
             .attr('target', '_blank')
             .href`https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003`
-            .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
+            .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
             .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
             .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
               "Get your 'Wrong Kong!' T-Shirt"
@@ -407,7 +407,7 @@ export const homeTag = tag(() => (
           a
             .attr('target', '_blank')
             .href`https://buy.stripe.com/5kQdR11My7XGbnPePf00005`
-            .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
+            .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
             .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
             .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
               '🇦🇺 Wrong Kong for Australia residents'
@@ -423,7 +423,7 @@ export const homeTag = tag(() => (
             .attr('target', '_blank')
             .href`https://buy.stripe.com/5kA4j775zaRsdHy9AA`
             .class`bounce-in`
-            .style`--fx-index: 11; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
+            .style`--fx-index: 11; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
             .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
             .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
               'More guns than Wick T-shirt'
@@ -435,7 +435,7 @@ export const homeTag = tag(() => (
           .attr('target', '_blank')
           .href`https://silverballswag.com/collections/cary-hardy`
           .class`bounce-in`
-          .style`--fx-index: 12; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
+          .style`--fx-index: 12; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
           .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
           .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
             'SHOP SILVERBALL SWAG'
@@ -471,7 +471,7 @@ export const homeTag = tag(() => (
           .attr('target', '_blank')
           .href`https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA`
           .class`bounce-in`
-          .style`--fx-index: 13; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: 250px; text-align: center;`
+          .style`--fx-index: 13; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
           .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
           .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
             'Goto My Channel'
@@ -536,63 +536,63 @@ export const homeTag = tag(() => (
       ),
       div.class`merch-section bounce-in`.style`margin: 2em auto; --fx-index:13;`(
         div.style`display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 2em; margin: 1em 0;`(
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'PATB Award')
               .attr('src', 'assets/media/awards/PBaTB award.jpg')
               .style`width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;`,
             small.style`color: white; display: block; text-align: center;`('PATB Award')
           ),
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'Twipy Award')
               .attr('src', 'assets/media/awards/Twipy.jpg')
               .style`width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;`,
             small.style`color: white; display: block; text-align: center;`('Twipy Award')
           ),
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'PATB Awards')
               .attr('src', 'assets/media/awards/PatB awards.jpg')
               .style`width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;`,
             small.style`color: white; display: block; text-align: center;`('PATB Awards')
           ),
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'Cary Hardy and Steve Ritchie handshaking')
               .attr('src', 'assets/media/awards/photo0.jpg')
               .style`width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;`,
             small.style`color: white; display: block; text-align: center;`('TPF 2024')
           ),
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'Cary Hardy holding award')
               .attr('src', 'assets/media/awards/photo2.jpg')
               .style`width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;`,
             small.style`color: white; display: block; text-align: center;`('TPF 2024')
           ),
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'Earth Shaker award')
               .attr('src', 'assets/media/awards/EarthShakerAward.jpg')
               .style`width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;`,
             small.style`color: white; display: block; text-align: center;`('TPF 2024')
           ),
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'TPF 2022')
               .attr('src', 'assets/media/awards/TPF 2022.jpg')
               .style`width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;`,
             small.style`color: white; display: block; text-align: center;`('TPF 2022')
           ),
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'Cary Hardy owned pinball machine')
               .attr('src', 'assets/media/awards/photo3.jpg')
               .style`width: 100%; height: auto; max-height: 550px; object-fit: contain; margin-bottom: 0.25em;`,
             small.style`color: white; display: block; text-align: center;`('TPF 2022')
           ),
-          div.style`flex: 0 1 calc(90% - 1.5em); min-width: 250px; max-width: 500px; max-height: 600px; overflow: hidden;`(
+          div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
               .attr('alt', 'Cary Hardy holding award')
               .attr('src', 'assets/media/awards/photo1.jpg')

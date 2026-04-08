@@ -8,11 +8,14 @@ export const topNavStyles = tag(() => {
 
   return style(`
     .top-nav {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
       background: rgba(0, 0, 0, 0.95);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       gap: 0.45em;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       padding: 0.45em 0.8em;
       z-index: 200;
@@ -22,13 +25,11 @@ export const topNavStyles = tag(() => {
       -webkit-overflow-scrolling: touch;
     }
     .top-nav-fixed {
-      position: fixed;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
+      position: sticky;
       top: 0;
-      left: 0;
-      right: 0;
-    }
-    .top-nav-spacer {
-      visibility: hidden;
     }
     .top-nav-pill {
       padding: 0.12em 0.55em;
@@ -86,10 +87,6 @@ export const topNavBar = tag((content) => {
     topNavStyles(),
     topNav({
       className: 'top-nav top-nav-fixed',
-      content,
-    }),
-    topNav({
-      className: 'top-nav top-nav-spacer',
       content,
     })
   )

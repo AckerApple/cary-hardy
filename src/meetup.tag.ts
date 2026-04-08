@@ -47,7 +47,7 @@ export const meetupTag = tag(() => {
       .src`https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png`
       .style`--fx-index:0;width: 55vw;min-width: 200px;max-width: 400px;`,
     div.class`bounce-in`.style`--fx-index:1`(
-      h1('Meet & talk everything pinball!'),
+      h1.style`line-height: 1.3;`('Meet & talk everything pinball!'),
       p('for Patreon LE supporters'),
       // <p>👉 LIT SPECIAL: <u>One time only</u> end of the year meetup is for <u>ALL Patreon supporters</u>!! 👈</p>
       div.style`font-size:.8em;opacity: .7;`('😎 come experience the hype')
