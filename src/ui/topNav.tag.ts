@@ -7,12 +7,18 @@ export const topNavStyles = tag(() => {
   stylesInjected = true
 
   return style(`
+    .top-nav-shell {
+      width: 100%;
+      box-sizing: border-box;
+      background: #000;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 200;
+    }
     .top-nav {
       width: 100%;
       max-width: 100%;
       box-sizing: border-box;
       background: rgba(0, 0, 0, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       gap: 0.45em;
       justify-content: flex-start;
@@ -25,11 +31,14 @@ export const topNavStyles = tag(() => {
       -webkit-overflow-scrolling: touch;
     }
     .top-nav-fixed {
-      width: 100%;
-      max-width: 100vw;
-      box-sizing: border-box;
       position: sticky;
       top: 0;
+    }
+    .top-nav-inner {
+      width: 100%;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
     }
     .top-nav-pill {
       padding: 0.12em 0.55em;
@@ -59,6 +68,11 @@ export const topNavStyles = tag(() => {
         padding: 0.1em 0.45em;
       }
     }
+    @media (min-width: 1024px) {
+      .top-nav-inner {
+        max-width: 900px;
+      }
+    }
   `)
 })
 
@@ -85,9 +99,11 @@ export const topNavBar = tag((content) => {
 
   return noElement(
     topNavStyles(),
-    topNav({
-      className: 'top-nav top-nav-fixed',
-      content,
-    })
+    div.class`top-nav-shell top-nav-fixed`(
+      topNav({
+        className: 'top-nav top-nav-inner',
+        content,
+      })
+    )
   )
 })
