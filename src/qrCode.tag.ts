@@ -1,4 +1,4 @@
-import { watch, div, tag } from 'taggedjs'
+import { div, tag, watch } from 'taggedjs'
 
 type QrCodeCtor = {
   CorrectLevel: { L: unknown }
@@ -42,8 +42,17 @@ const ensureQrCodeLib = () => {
 }
 
 export const qrCodeDisplay = tag((url: string) => {
-  qrCodeDisplay.updates(x => [url] = x)
+  qrCodeDisplay.updates(x => {
+    if(x[0] !== url) {
+      [url] = x
+      loadAndRenderQr()
+    }
+  })
   const id = `qr-code-${Math.random().toString(36).slice(2, 12)}`
+
+  const scheduleQrRender = () => {
+    window.requestAnimationFrame(loadAndRenderQr)
+  }
 
   const renderQr = () => {
     const qrCodeCtor = window.QRCode
@@ -75,9 +84,7 @@ export const qrCodeDisplay = tag((url: string) => {
       })
   }
 
-  watch.noInit([url], () => {
-    loadAndRenderQr()
-  })
+  watch([url], scheduleQrRender)
 
-  return div.id`${id}`.attr('oninit', loadAndRenderQr)
+  return div.id`${id}`
 })

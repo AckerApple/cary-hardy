@@ -97,20 +97,6 @@ export const ClockComponent = tag(({
           )
         )
       ),
-      /*
-      _=> showQrCodes && noElement(
-        br,
-        div.style`display:flex;flex-wrap:wrap;gap:1em;text-align:center;justify-content: center;`(
-          div(
-            qrCodeDisplay(googleLink),
-            img.src`assets/media/gmail-logo-2.png`.alt``.attr('width', '48').attr('height', '48').attr('border', '0')
-          ),
-          div(
-            qrCodeDisplay(outlookLink),
-            img.src`assets/media/outlook-icon.png`.alt``.attr('width', '48').attr('height', '48').attr('border', '0')
-          )
-        )
-      )*/
     ),
     p.style`font-size:0.8em;opacity:0.7;line-height:0.9em;`(
       small('🔗 A link to virtual meetup is posted on day of meetup,', br, 'in the LE ONLY 💬 chat on Patreon.')
