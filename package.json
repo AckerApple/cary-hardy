@@ -10,6 +10,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "firestore:rules:check": "node scripts/deployFirestoreRules.cjs check",
+    "firestore:rules:deploy": "node scripts/deployFirestoreRules.cjs deploy",
     "update": "npm install taggedjs && npm run update:copies",
     "update:copies": "npm run copy:taggedjs:src && npm run copy:taggedjs:root",
     "copy:taggedjs:src": "mkdir -p src/taggedjs && cp node_modules/taggedjs/bundle.js src/taggedjs/bundle.js && cp node_modules/taggedjs/bundle.js.map src/taggedjs/bundle.js.map",

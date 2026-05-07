@@ -17,11 +17,16 @@ export const adminNavButtons = tag((onSignout) => {
     window.location.href = '/admin/user.html'
   }
 
+  const goCurrentGames = () => {
+    window.location.href = '/admin/current-games.html'
+  }
+
   return [
     button.type`button`.class`top-nav-pill`.onClick(goHome)('🏠 home'),
     button.type`button`.class`top-nav-pill`.onClick(() => {
         window.location.href = '/admin.html'
       })('⭐️ admin home'),
+    button.type`button`.class`top-nav-pill`.onClick(goCurrentGames)('🎮 lineup'),
     button.type`button`.class`top-nav-pill`.onClick(openRepo)('🔗 code base'),
     button.type`button`.class`top-nav-pill`.onClick(goUsers)('👥 users'),
     button.type`button`.class`top-nav-pill`.onClick(onSignout)('🚪 logout'),

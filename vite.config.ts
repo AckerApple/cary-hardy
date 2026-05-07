@@ -13,6 +13,8 @@ export default defineConfig({
         main: resolve(__dirname, 'src/index.html'),
         admin: resolve(__dirname, 'src/admin.html'),
         adminUsers: resolve(__dirname, 'src/admin/user.html'),
+        adminCurrentGames: resolve(__dirname, 'src/admin/current-games.html'),
+        lineup: resolve(__dirname, 'src/lineup.html'),
         meetup: resolve(__dirname, 'src/meetup.html'),
         thankYou: resolve(__dirname, 'src/key-box-patb/thank-you.html'),
         thankYouSandbox: resolve(__dirname, 'src/key-box-patb/thank-you.sandbox.html'),

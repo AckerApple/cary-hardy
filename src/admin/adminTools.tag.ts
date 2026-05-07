@@ -116,6 +116,12 @@ export const adminTools = tag((
           .href`/admin/user.html`
           .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:600;text-align:center;`
           ('Open Users Admin')
+      ),
+      div.style`flex:1;min-width:min(320px, 100%);background:linear-gradient(135deg, rgba(185,28,28,0.58), rgba(249,115,22,0.42), rgba(250,204,21,0.24));border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
+        a
+          .href`/admin/current-games.html`
+          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
+          ('Current Game Lineup')
       )
     ),
     br

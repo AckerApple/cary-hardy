@@ -13,10 +13,10 @@ import {
   p,
   select,
   small,
-  subscribe,
   style,
   tag,
   subscribeWith,
+  ValueSubject,
 } from 'taggedjs'
 import { deleteUser, listenUsers$, signIn, signOutUser, upsertUserProfile } from '../firebase'
 import { startAuthFlow } from '../auth-flow'
@@ -30,9 +30,8 @@ import { userEdit } from './userEdit.tag'
 
 let authInitialized = false
 let usersLoaded = false
-let users$ = listenUsers$()
-let usersUnsubscribe: (() => void) | null =
-  (users$ as any)?.unsubscribe || null
+let users$ = new ValueSubject<Array<{ id: string } & Record<string, any>> | null>(null)
+let usersUnsubscribe: (() => void) | null = null
 
 export const adminUsersPageTag = tag(() => {
   let authStatus: AuthStatus = 'loading'

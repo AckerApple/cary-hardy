@@ -29,6 +29,7 @@ import {
 import { ValueSubject } from "taggedjs"
 import firebaseConfig from "./firebase.config"
 import type { NewOrderInput, UserProfileInput } from "./commerce.types"
+import type { CurrentGameInput } from "./currentGames.types"
 
 let app: ReturnType<typeof initializeApp> | null = null
 let auth: ReturnType<typeof getAuth> | null = null
@@ -68,6 +69,8 @@ const getMeetupDoc = () => doc(getDb(), "config", "site")
 const getUserDoc = (userId: string) => doc(getDb(), "users", userId)
 const getUsersCollection = () => collection(getDb(), "users")
 const getOrdersCollection = () => collection(getDb(), "orders")
+const getCurrentGamesCollection = () => collection(getDb(), "currentGames")
+const getCurrentGameDoc = (gameId: string) => doc(getDb(), "currentGames", gameId)
 
 const normalizeEmail = (email = "") => email.trim().toLowerCase()
 
@@ -281,3 +284,112 @@ export const createOrder = async (order: NewOrderInput) =>
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   })
+
+export const listenCurrentGames$ = () => {
+  const games$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    getCurrentGamesCollection(),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      }))
+      games$.next(sortCurrentGames(items))
+    },
+    (error) => {
+      console.error("Failed to listen to current games", error)
+    }
+  )
+
+  ;(games$ as any).unsubscribe = unsubscribe
+  return games$
+}
+
+export const listenVisibleCurrentGames$ = () => {
+  const games$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    query(getCurrentGamesCollection(), where("isVisible", "==", true)),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      }))
+      games$.next(sortCurrentGames(items))
+    },
+    (error) => {
+      console.error("Failed to listen to visible current games", error)
+    }
+  )
+
+  ;(games$ as any).unsubscribe = unsubscribe
+  return games$
+}
+
+export const listCurrentGames = async () => {
+  const snapshot = await getDocs(getCurrentGamesCollection())
+  const items = snapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    ...docSnapshot.data(),
+  }))
+  return sortCurrentGames(items)
+}
+
+export const upsertCurrentGame = async (game: CurrentGameInput) => {
+  const payload = cleanCurrentGamePayload(game)
+
+  if (game.id) {
+    return setDoc(
+      getCurrentGameDoc(game.id),
+      {
+        ...payload,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+  }
+
+  return addDoc(getCurrentGamesCollection(), {
+    ...payload,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export const deleteCurrentGame = async (gameId: string) => {
+  if (!gameId) return false
+  await deleteDoc(getCurrentGameDoc(gameId))
+  return true
+}
+
+const cleanCurrentGamePayload = (game: CurrentGameInput) => {
+  const payload: Record<string, any> = {
+    title: (game.title || "").trim(),
+    dateAddedToCollection: game.dateAddedToCollection,
+    imageUrl: (game.imageUrl || "").trim(),
+    manufacturer: (game.manufacturer || "").trim(),
+    notes: (game.notes || "").trim(),
+    isVisible: game.isVisible !== false,
+  }
+
+  if (typeof game.yearReleased === "number" && !Number.isNaN(game.yearReleased)) {
+    payload.yearReleased = game.yearReleased
+  } else {
+    payload.yearReleased = null
+  }
+
+  return payload
+}
+
+const currentGameDateTime = (value: any) => {
+  if (!value) return 0
+  if (typeof value.toDate === "function") return value.toDate().getTime()
+  if (typeof value === "number") return value
+  if (value.seconds) return value.seconds * 1000
+  const parsed = new Date(value).getTime()
+  return Number.isNaN(parsed) ? 0 : parsed
+}
+
+const sortCurrentGames = <T extends Record<string, any>>(items: T[]) =>
+  [...items].sort((a, b) =>
+    currentGameDateTime(b.dateAddedToCollection) - currentGameDateTime(a.dateAddedToCollection)
+  )
