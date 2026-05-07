@@ -1,5 +1,6 @@
 import {
   a,
+  callback,
   div,
   h2,
   img,
@@ -10,9 +11,7 @@ import {
   span,
   strong,
   style,
-  subscribeWith,
   tag,
-  ValueSubject,
 } from 'taggedjs'
 import { listenVisibleCurrentGames$ } from './firebase'
 import { topNavBar } from './ui/topNav.tag'
@@ -20,17 +19,34 @@ import { publicNavButtons } from './ui/publicNavButtons.tag'
 import type { CurrentGame } from './currentGames.types'
 
 let lineupLoaded = false
-let games$ = new ValueSubject<Array<{ id: string } & Record<string, any>> | null>(null)
 let gamesUnsubscribe: (() => void) | null = null
+let gamesValueUnsubscribe: (() => void) | null = null
 
-export const currentLineupTag = tag(() => {
+export const currentLineupTag = tag((
+  lineupItems = null as Array<{ id: string } & Record<string, any>> | null,
+  refreshLineup = callback(() => {})
+) => {
   const startLineupListener = () => {
     if (gamesUnsubscribe) {
       gamesUnsubscribe()
       gamesUnsubscribe = null
     }
-    games$ = listenVisibleCurrentGames$()
-    gamesUnsubscribe = (games$ as any)?.unsubscribe || null
+    if (gamesValueUnsubscribe) {
+      gamesValueUnsubscribe()
+      gamesValueUnsubscribe = null
+    }
+
+    const liveGames$ = listenVisibleCurrentGames$()
+    gamesUnsubscribe = (liveGames$ as any)?.unsubscribe || null
+    const valueSubscription = liveGames$.subscribe((items) => {
+      lineupItems = items
+      console.debug('Visible current lineup games', {
+        count: items?.length || 0,
+        games: items,
+      })
+      refreshLineup()
+    })
+    gamesValueUnsubscribe = () => valueSubscription.unsubscribe()
   }
 
   if (!lineupLoaded) {
@@ -44,6 +60,10 @@ export const currentLineupTag = tag(() => {
     if (gamesUnsubscribe) {
       gamesUnsubscribe()
       gamesUnsubscribe = null
+    }
+    if (gamesValueUnsubscribe) {
+      gamesValueUnsubscribe()
+      gamesValueUnsubscribe = null
     }
     lineupLoaded = false
   })
@@ -246,29 +266,25 @@ export const currentLineupTag = tag(() => {
           a.href`/index.html`.class`top-nav-pill`('Back Home')
         )
       ),
-      subscribeWith(games$, null, (items) => {
-        if (items === null) {
-          return div.class`lineup-results`.key('lineup-loading')(
+      _ => {
+        if (lineupItems === null) {
+          return div.class`lineup-results`(
             div.class`lineup-empty`('Loading current lineup...')
           )
         }
 
-        const visibleGames = items.filter((game) => game.isVisible !== false)
-        console.debug('Visible current lineup games', {
-          count: visibleGames.length,
-          games: visibleGames,
-        })
+        const visibleGames = lineupItems.filter((game) => game.isVisible !== false)
 
         return visibleGames.length
-          ? div.class`lineup-results`.key('lineup-grid-results')(
+          ? div.class`lineup-results`(
               div.class`lineup-grid`(
                 visibleGames.map((game) => lineupGameCard(game as CurrentGame).key(game.id))
               )
             )
-          : div.class`lineup-results`.key('lineup-empty-results')(
+          : div.class`lineup-results`(
               div.class`lineup-empty`('No current lineup games are visible yet.')
             )
-      })
+      }
     )
   )
 })
