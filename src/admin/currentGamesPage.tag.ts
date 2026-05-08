@@ -15,10 +15,8 @@ import {
   span,
   strong,
   style,
-  subscribeWith,
   tag,
   textarea,
-  ValueSubject,
 } from 'taggedjs'
 import {
   deleteCurrentGame,
@@ -48,8 +46,9 @@ const emptyGame = (): CurrentGameInput => ({
 
 let authInitialized = false
 let gamesLoaded = false
-let games$ = new ValueSubject<Array<{ id: string } & Record<string, any>> | null>(null)
+let latestGames: Array<{ id: string } & Record<string, any>> | null = null
 let gamesUnsubscribe: (() => void) | null = null
+let gamesValueUnsubscribe: (() => void) | null = null
 
 export const currentGamesAdminPageTag = tag(() => {
   let authStatus: AuthStatus = 'loading'
@@ -341,6 +340,7 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
   let modalOpen = false
   let editingId: string | null = null
   let editGame: CurrentGameInput = emptyGame()
+  let currentGames = latestGames
   const refresh = callback(() => {})
 
   const startGamesListener = () => {
@@ -348,10 +348,27 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
       gamesUnsubscribe()
       gamesUnsubscribe = null
     }
+    if (gamesValueUnsubscribe) {
+      gamesValueUnsubscribe()
+      gamesValueUnsubscribe = null
+    }
+    currentGames = null
+    latestGames = null
     errorMessage = ''
     refresh()
-    games$ = listenCurrentGames$()
-    gamesUnsubscribe = (games$ as any)?.unsubscribe || null
+
+    const liveGames$ = listenCurrentGames$()
+    gamesUnsubscribe = (liveGames$ as any)?.unsubscribe || null
+    const valueSubscription = liveGames$.subscribe((items) => {
+      currentGames = items
+      latestGames = items
+      console.debug('Current games list updated', {
+        count: items?.length || 0,
+        items,
+      })
+      refresh()
+    })
+    gamesValueUnsubscribe = () => valueSubscription.unsubscribe()
   }
 
   const refreshGamesList = () =>
@@ -361,7 +378,9 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
           count: items.length,
           items,
         })
-        games$.next(items)
+        currentGames = items
+        latestGames = items
+        refresh()
       })
       .catch((error) => {
         console.error('Failed to refresh current games list', error)
@@ -514,7 +533,12 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
       gamesUnsubscribe()
       gamesUnsubscribe = null
     }
+    if (gamesValueUnsubscribe) {
+      gamesValueUnsubscribe()
+      gamesValueUnsubscribe = null
+    }
     gamesLoaded = false
+    latestGames = null
   })
 
   return noElement(
@@ -528,18 +552,18 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
         p.style`margin-top:0;opacity:0.78;`('Manage the Firestore currentGames collection used by the public lineup page.'),
         _ => errorMessage && !modalOpen ? p.style`color:#f6c177;`(errorMessage) : '',
         div.class`games-admin-list`(
-          subscribeWith(games$, null, (items) => {
-            if (items === null) {
+          _ => {
+            if (currentGames === null) {
               return small.style`opacity:0.7;`('Loading games...')
             }
 
-            return items.length
-              ? items.map((game) => gameAdminRow({
+            return currentGames.length
+              ? currentGames.map((game) => gameAdminRow({
                   game: game as CurrentGame,
                   onClick: () => openEdit(game as CurrentGame),
                 }).key(game.id))
               : small.style`opacity:0.7;`('No games found. Use Add Game to create the first one.')
-          })
+          }
         ),
         div.style`margin-top:1em;display:flex;gap:0.75em;flex-wrap:wrap;`(
           a.href`../admin.html`.class`admin-secondary-button`('Back to Admin Tools'),
