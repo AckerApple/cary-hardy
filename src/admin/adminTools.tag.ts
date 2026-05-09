@@ -115,13 +115,31 @@ export const adminTools = tag((
         a
           .href`/admin/user.html`
           .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:600;text-align:center;`
-          ('Open Users Admin')
+          ('👥 Open Users Admin')
       ),
       div.style`flex:1;min-width:min(320px, 100%);background:linear-gradient(135deg, rgba(185,28,28,0.58), rgba(249,115,22,0.42), rgba(250,204,21,0.24));border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
         a
           .href`/admin/current-games.html`
           .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
-          ('Current Game Lineup')
+          ('🎮 Current Game Lineup')
+      ),
+      div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
+        a
+          .href`/admin/games.html`
+          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
+          ('🕹️ Games Database')
+      ),
+      div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
+        a
+          .href`/admin/manufacturers.html`
+          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
+          ('🏭 Manufacturers Database')
+      ),
+      div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
+        a
+          .href`/admin/game-ratings.html`
+          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
+          ('⭐ Game Ratings')
       )
     ),
     br

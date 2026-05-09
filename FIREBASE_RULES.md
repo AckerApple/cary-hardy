@@ -27,9 +27,9 @@ This repo is wired to manage Firestore security rules locally for the Firebase p
 
 The current `firestore.rules` file is intentionally locked down until the current production rules are pasted into it. The deploy script refuses to deploy while the placeholder marker is present.
 
-## Current Games Rule To Merge
+## Games And Current Games Rules To Merge
 
-The public lineup page needs read access to visible documents in `currentGames`, and admins need write access. Merge this into the production rules once the current rules have been copied into `firestore.rules`:
+The public lineup page needs read access to the canonical `games` collection plus visible documents in `currentGames`, and admins need write access. Merge this into the production rules once the current rules have been copied into `firestore.rules`:
 
 ```js
 function isSignedIn() {
@@ -44,6 +44,21 @@ function signedInEmail() {
 
 function isAdmin() {
   return signedInEmail() in get(/databases/$(database)/documents/admins/list).data.items;
+}
+
+match /games/{gameId} {
+  allow read: if true;
+  allow create, update, delete: if isAdmin();
+}
+
+match /manufacturers/{manufacturerId} {
+  allow read: if true;
+  allow create, update, delete: if isAdmin();
+}
+
+match /gameRatings/{gameId} {
+  allow read: if resource.data.isVisible == true || isAdmin();
+  allow create, update, delete: if isAdmin();
 }
 
 match /currentGames/{gameId} {

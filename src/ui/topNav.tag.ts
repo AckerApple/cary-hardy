@@ -69,6 +69,54 @@ export const topNavStyles = tag(() => {
       transform: translateY(-1px);
       background: rgba(255, 255, 255, 0.2);
     }
+    .admin-nav-layout {
+      position: relative;
+      width: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.6em;
+      align-items: center;
+    }
+    .admin-nav-left,
+    .admin-nav-right {
+      display: flex;
+      gap: 0.45em;
+      align-items: center;
+      min-width: 0;
+    }
+    .admin-nav-right {
+      justify-content: flex-end;
+    }
+    .admin-menu-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 240;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      background: rgba(0,0,0,0.18);
+      cursor: default;
+    }
+    .admin-menu-panel {
+      position: fixed;
+      left: 0.8em;
+      top: 3.1em;
+      z-index: 260;
+      min-width: 190px;
+      padding: 0.5em;
+      display: grid;
+      gap: 0.35em;
+      background: rgba(8, 8, 8, 0.98);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 0.7em;
+      box-shadow: 0 18px 42px rgba(0,0,0,0.5);
+    }
+    .admin-menu-panel .top-nav-pill {
+      width: 100%;
+      text-align: left;
+      font-size: 0.56em;
+      padding: 0.45em 0.7em;
+    }
     @media (max-height: 450px) {
       .top-nav {
         padding: 0.3em 0.6em;

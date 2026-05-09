@@ -1,6 +1,7 @@
 export type CurrentGameInput = {
   id?: string
-  title: string
+  gameId?: string
+  title?: string
   dateAddedToCollection: string
   imageUrl?: string
   manufacturer?: string

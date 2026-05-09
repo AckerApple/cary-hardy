@@ -30,6 +30,9 @@ import { ValueSubject } from "taggedjs"
 import firebaseConfig from "./firebase.config"
 import type { NewOrderInput, UserProfileInput } from "./commerce.types"
 import type { CurrentGameInput } from "./currentGames.types"
+import type { GameRatingInput } from "./gameRatings.types"
+import type { GameInput } from "./games.types"
+import type { ManufacturerInput } from "./manufacturers.types"
 
 let app: ReturnType<typeof initializeApp> | null = null
 let auth: ReturnType<typeof getAuth> | null = null
@@ -69,6 +72,12 @@ const getMeetupDoc = () => doc(getDb(), "config", "site")
 const getUserDoc = (userId: string) => doc(getDb(), "users", userId)
 const getUsersCollection = () => collection(getDb(), "users")
 const getOrdersCollection = () => collection(getDb(), "orders")
+const getGamesCollection = () => collection(getDb(), "games")
+const getGameDoc = (gameId: string) => doc(getDb(), "games", gameId)
+const getManufacturersCollection = () => collection(getDb(), "manufacturers")
+const getManufacturerDoc = (manufacturerId: string) => doc(getDb(), "manufacturers", manufacturerId)
+const getGameRatingsCollection = () => collection(getDb(), "gameRatings")
+const getGameRatingDoc = (gameId: string) => doc(getDb(), "gameRatings", gameId)
 const getCurrentGamesCollection = () => collection(getDb(), "currentGames")
 const getCurrentGameDoc = (gameId: string) => doc(getDb(), "currentGames", gameId)
 
@@ -240,7 +249,7 @@ export const listUsers = async () => {
   return snapshot.docs.map((docSnapshot) => ({
     id: docSnapshot.id,
     ...docSnapshot.data(),
-  }))
+  } as { id: string } & Record<string, any>))
 }
 
 export const listenUsers$ = () => {
@@ -251,7 +260,7 @@ export const listenUsers$ = () => {
       const items = snapshot.docs.map((docSnapshot) => ({
         id: docSnapshot.id,
         ...docSnapshot.data(),
-      }))
+      } as { id: string } & Record<string, any>))
       items.sort((a, b) => {
         const aTime = a?.createdAt?.seconds
           ? a.createdAt.seconds * 1000
@@ -285,6 +294,193 @@ export const createOrder = async (order: NewOrderInput) =>
     updatedAt: serverTimestamp(),
   })
 
+export const listenGames$ = () => {
+  const games$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    getGamesCollection(),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      } as { id: string } & Record<string, any>))
+      games$.next(sortGamesByTitle(items))
+    },
+    (error) => {
+      console.error("Failed to listen to games", error)
+    }
+  )
+
+  ;(games$ as any).unsubscribe = unsubscribe
+  return games$
+}
+
+export const listenManufacturers$ = () => {
+  const manufacturers$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    getManufacturersCollection(),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      } as { id: string } & Record<string, any>))
+      manufacturers$.next(sortManufacturersByName(items))
+    },
+    (error) => {
+      console.error("Failed to listen to manufacturers", error)
+    }
+  )
+
+  ;(manufacturers$ as any).unsubscribe = unsubscribe
+  return manufacturers$
+}
+
+export const listManufacturers = async () => {
+  const snapshot = await getDocs(getManufacturersCollection())
+  const items = snapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    ...docSnapshot.data(),
+  } as { id: string } & Record<string, any>))
+  return sortManufacturersByName(items)
+}
+
+export const upsertManufacturer = async (manufacturer: ManufacturerInput) => {
+  const payload = cleanManufacturerPayload(manufacturer)
+
+  if (manufacturer.id) {
+    return setDoc(
+      getManufacturerDoc(manufacturer.id),
+      {
+        ...payload,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+  }
+
+  return addDoc(getManufacturersCollection(), {
+    ...payload,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export const deleteManufacturer = async (manufacturerId: string) => {
+  if (!manufacturerId) return false
+  await deleteDoc(getManufacturerDoc(manufacturerId))
+  return true
+}
+
+export const listGames = async () => {
+  const snapshot = await getDocs(getGamesCollection())
+  const items = snapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    ...docSnapshot.data(),
+  } as { id: string } & Record<string, any>))
+  return sortGamesByTitle(items)
+}
+
+export const upsertGame = async (game: GameInput) => {
+  const payload = cleanGamePayload(game)
+
+  if (game.id) {
+    return setDoc(
+      getGameDoc(game.id),
+      {
+        ...payload,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+  }
+
+  return addDoc(getGamesCollection(), {
+    ...payload,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export const deleteGame = async (gameId: string) => {
+  if (!gameId) return false
+  await deleteDoc(getGameDoc(gameId))
+  return true
+}
+
+export const listenGameRatings$ = () => {
+  const ratings$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    getGameRatingsCollection(),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      } as { id: string } & Record<string, any>))
+      ratings$.next(sortGameRatings(items))
+    },
+    (error) => {
+      console.error("Failed to listen to game ratings", error)
+    }
+  )
+
+  ;(ratings$ as any).unsubscribe = unsubscribe
+  return ratings$
+}
+
+export const listenVisibleGameRatings$ = () => {
+  const ratings$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    query(getGameRatingsCollection(), where("isVisible", "==", true)),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      } as { id: string } & Record<string, any>))
+      ratings$.next(sortGameRatings(items))
+    },
+    (error) => {
+      console.error("Failed to listen to visible game ratings", error)
+    }
+  )
+
+  ;(ratings$ as any).unsubscribe = unsubscribe
+  return ratings$
+}
+
+export const listGameRatings = async () => {
+  const snapshot = await getDocs(getGameRatingsCollection())
+  const items = snapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    ...docSnapshot.data(),
+  } as { id: string } & Record<string, any>))
+  return sortGameRatings(items)
+}
+
+export const upsertGameRating = async (rating: GameRatingInput) => {
+  const payload = cleanGameRatingPayload(rating)
+  const ratingId = rating.id || rating.gameId
+
+  if (!ratingId) {
+    throw new Error("Game rating requires a gameId.")
+  }
+
+  const existingRating = await getDoc(getGameRatingDoc(ratingId))
+  return setDoc(
+    getGameRatingDoc(ratingId),
+    {
+      ...payload,
+      updatedAt: serverTimestamp(),
+      ...(existingRating.exists() ? {} : { createdAt: serverTimestamp() }),
+    },
+    { merge: true }
+  )
+}
+
+export const deleteGameRating = async (gameId: string) => {
+  if (!gameId) return false
+  await deleteDoc(getGameRatingDoc(gameId))
+  return true
+}
+
 export const listenCurrentGames$ = () => {
   const games$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
   const unsubscribe = onSnapshot(
@@ -293,7 +489,7 @@ export const listenCurrentGames$ = () => {
       const items = snapshot.docs.map((docSnapshot) => ({
         id: docSnapshot.id,
         ...docSnapshot.data(),
-      }))
+      } as { id: string } & Record<string, any>))
       games$.next(sortCurrentGames(items))
     },
     (error) => {
@@ -313,7 +509,7 @@ export const listenVisibleCurrentGames$ = () => {
       const items = snapshot.docs.map((docSnapshot) => ({
         id: docSnapshot.id,
         ...docSnapshot.data(),
-      }))
+      } as { id: string } & Record<string, any>))
       games$.next(sortCurrentGames(items))
     },
     (error) => {
@@ -330,7 +526,7 @@ export const listCurrentGames = async () => {
   const items = snapshot.docs.map((docSnapshot) => ({
     id: docSnapshot.id,
     ...docSnapshot.data(),
-  }))
+  } as { id: string } & Record<string, any>))
   return sortCurrentGames(items)
 }
 
@@ -363,12 +559,29 @@ export const deleteCurrentGame = async (gameId: string) => {
 
 const cleanCurrentGamePayload = (game: CurrentGameInput) => {
   const payload: Record<string, any> = {
-    title: (game.title || "").trim(),
+    gameId: (game.gameId || "").trim(),
     dateAddedToCollection: game.dateAddedToCollection,
+    notes: (game.notes || "").trim(),
+    isVisible: game.isVisible !== false,
+  }
+
+  if (game.title) payload.title = game.title.trim()
+  if (game.imageUrl) payload.imageUrl = game.imageUrl.trim()
+  if (game.manufacturer) payload.manufacturer = game.manufacturer.trim()
+  if (typeof game.yearReleased === "number" && !Number.isNaN(game.yearReleased)) {
+    payload.yearReleased = game.yearReleased
+  }
+
+  return payload
+}
+
+const cleanGamePayload = (game: GameInput) => {
+  const payload: Record<string, any> = {
+    title: (game.title || "").trim(),
+    manufacturerId: (game.manufacturerId || "").trim(),
     imageUrl: (game.imageUrl || "").trim(),
     manufacturer: (game.manufacturer || "").trim(),
     notes: (game.notes || "").trim(),
-    isVisible: game.isVisible !== false,
   }
 
   if (typeof game.yearReleased === "number" && !Number.isNaN(game.yearReleased)) {
@@ -378,6 +591,34 @@ const cleanCurrentGamePayload = (game: CurrentGameInput) => {
   }
 
   return payload
+}
+
+const cleanManufacturerPayload = (manufacturer: ManufacturerInput) => ({
+  name: (manufacturer.name || "").trim(),
+  logoUrl: (manufacturer.logoUrl || "").trim(),
+  opinions: (manufacturer.opinions || "").trim(),
+})
+
+const cleanGameRatingPayload = (rating: GameRatingInput) => {
+  const ratingValue = typeof rating.rating === "number" && !Number.isNaN(rating.rating)
+    ? Math.max(0, Math.min(10, rating.rating))
+    : null
+  const videos = Array.isArray(rating.videos)
+    ? rating.videos
+        .map((video) => ({
+          url: (video?.url || "").trim(),
+          description: (video?.description || "").trim(),
+        }))
+        .filter((video) => video.url || video.description)
+    : []
+
+  return {
+    gameId: (rating.gameId || "").trim(),
+    rating: ratingValue,
+    review: (rating.review || "").trim(),
+    videos,
+    isVisible: rating.isVisible !== false,
+  }
 }
 
 const currentGameDateTime = (value: any) => {
@@ -393,3 +634,19 @@ const sortCurrentGames = <T extends Record<string, any>>(items: T[]) =>
   [...items].sort((a, b) =>
     currentGameDateTime(b.dateAddedToCollection) - currentGameDateTime(a.dateAddedToCollection)
   )
+
+const sortGamesByTitle = <T extends Record<string, any>>(items: T[]) =>
+  [...items].sort((a, b) =>
+    String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" })
+  )
+
+const sortManufacturersByName = <T extends Record<string, any>>(items: T[]) =>
+  [...items].sort((a, b) =>
+    String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" })
+  )
+
+const sortGameRatings = <T extends Record<string, any>>(items: T[]) =>
+  [...items].sort((a, b) => {
+    const ratingSort = Number(b.rating || 0) - Number(a.rating || 0)
+    return ratingSort || String(a.gameId || "").localeCompare(String(b.gameId || ""), undefined, { sensitivity: "base" })
+  })

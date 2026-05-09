@@ -13,7 +13,7 @@ import {
   style,
   tag,
 } from 'taggedjs'
-import { listenVisibleCurrentGames$ } from './firebase'
+import { listenGames$, listenVisibleCurrentGames$ } from './firebase'
 import { topNavBar } from './ui/topNav.tag'
 import { publicNavButtons } from './ui/publicNavButtons.tag'
 import type { CurrentGame } from './currentGames.types'
@@ -21,9 +21,12 @@ import type { CurrentGame } from './currentGames.types'
 let lineupLoaded = false
 let gamesUnsubscribe: (() => void) | null = null
 let gamesValueUnsubscribe: (() => void) | null = null
+let gameLibraryUnsubscribe: (() => void) | null = null
+let gameLibraryValueUnsubscribe: (() => void) | null = null
 
 export const currentLineupTag = tag((
   lineupItems = null as Array<{ id: string } & Record<string, any>> | null,
+  gameLibrary = null as Array<{ id: string } & Record<string, any>> | null,
   refreshLineup = callback(() => {})
 ) => {
   const startLineupListener = () => {
@@ -34,6 +37,14 @@ export const currentLineupTag = tag((
     if (gamesValueUnsubscribe) {
       gamesValueUnsubscribe()
       gamesValueUnsubscribe = null
+    }
+    if (gameLibraryUnsubscribe) {
+      gameLibraryUnsubscribe()
+      gameLibraryUnsubscribe = null
+    }
+    if (gameLibraryValueUnsubscribe) {
+      gameLibraryValueUnsubscribe()
+      gameLibraryValueUnsubscribe = null
     }
 
     const liveGames$ = listenVisibleCurrentGames$()
@@ -47,6 +58,18 @@ export const currentLineupTag = tag((
       refreshLineup()
     })
     gamesValueUnsubscribe = () => valueSubscription.unsubscribe()
+
+    const libraryGames$ = listenGames$()
+    gameLibraryUnsubscribe = (libraryGames$ as any)?.unsubscribe || null
+    const librarySubscription = libraryGames$.subscribe((items) => {
+      gameLibrary = items
+      console.debug('Current lineup game library', {
+        count: items?.length || 0,
+        games: items,
+      })
+      refreshLineup()
+    })
+    gameLibraryValueUnsubscribe = () => librarySubscription.unsubscribe()
   }
 
   if (!lineupLoaded) {
@@ -64,6 +87,14 @@ export const currentLineupTag = tag((
     if (gamesValueUnsubscribe) {
       gamesValueUnsubscribe()
       gamesValueUnsubscribe = null
+    }
+    if (gameLibraryUnsubscribe) {
+      gameLibraryUnsubscribe()
+      gameLibraryUnsubscribe = null
+    }
+    if (gameLibraryValueUnsubscribe) {
+      gameLibraryValueUnsubscribe()
+      gameLibraryValueUnsubscribe = null
     }
     lineupLoaded = false
   })
@@ -273,7 +304,9 @@ export const currentLineupTag = tag((
           )
         }
 
-        const visibleGames = lineupItems.filter((game) => game.isVisible !== false)
+        const visibleGames = lineupItems
+          .filter((game) => game.isVisible !== false)
+          .map((game) => resolveLineupGame(game as CurrentGame, gameLibrary || []))
 
         return visibleGames.length
           ? div.class`lineup-results`(
@@ -289,6 +322,20 @@ export const currentLineupTag = tag((
   )
 })
 
+const resolveLineupGame = (
+  lineupGame: CurrentGame,
+  gameLibrary: Array<{ id: string } & Record<string, any>>
+) => {
+  const libraryGame = gameLibrary.find((game) => game.id === lineupGame.gameId)
+  return {
+    ...lineupGame,
+    title: libraryGame?.title || lineupGame.title || '',
+    imageUrl: libraryGame?.imageUrl || lineupGame.imageUrl || '',
+    manufacturer: libraryGame?.manufacturer || lineupGame.manufacturer || '',
+    yearReleased: libraryGame?.yearReleased ?? lineupGame.yearReleased ?? null,
+  } as CurrentGame
+}
+
 const lineupGameCard = tag((game: CurrentGame) => {
   lineupGameCard.inputs(([nextGame]) => {
     game = nextGame
@@ -300,7 +347,7 @@ const lineupGameCard = tag((game: CurrentGame) => {
       : div.class`lineup-placeholder`(span('PB')),
     div.class`lineup-card-copy`(
       strong.class`lineup-card-title`(game.title || 'Untitled Game'),
-      small.class`lineup-card-date`('Added ', formatDate(game.dateAddedToCollection))
+      small.class`lineup-card-date`('Collected ', formatDate(game.dateAddedToCollection))
     )
   )
 })
