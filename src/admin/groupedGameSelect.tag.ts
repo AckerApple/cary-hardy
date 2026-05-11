@@ -51,8 +51,8 @@ const gameSelectOptions = (
     !selectedGameExists
       ? option.value`${selectedGameId}`(selectedGameId)
       : '',
-    ...groups.map(({ manufacturer, items }) =>
-      optgroup.attr('label', manufacturer)(
+    groups.map(({ manufacturer, items }) =>
+      optgroup.label(manufacturer)(
         items.map((game) => option.value`${game.id}`(gameMachineLabel(game)))
       )
     ),
