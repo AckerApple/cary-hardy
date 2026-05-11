@@ -509,13 +509,16 @@ const gameModal = tag(({
         })(),
 
         label.attr('style.color', _ => labelColor('manufacturerId'))('Manufacturer'),
-        select.value(_ => editGame.manufacturerId || '').onChange((event: any) => {
-          updateGame({ manufacturerId: event?.target?.value || '' })
-        }).attr('aria-invalid', _ => fieldErrors.manufacturerId ? 'true' : 'false').attr('title', _ => fieldErrors.manufacturerId || '').attr('style.borderColor', _ => invalidBorder('manufacturerId'))(
-          [
-            option.value``(manufacturers.length ? 'Select a manufacturer' : 'Add a manufacturer first'),
-            ...manufacturers.map((manufacturer) => option.value`${manufacturer.id}`(manufacturer.name || 'Untitled manufacturer')),
-          ]
+        div.class`admin-field-with-link`(
+          select.value(_ => editGame.manufacturerId || '').onChange((event: any) => {
+            updateGame({ manufacturerId: event?.target?.value || '' })
+          }).attr('aria-invalid', _ => fieldErrors.manufacturerId ? 'true' : 'false').attr('title', _ => fieldErrors.manufacturerId || '').attr('style.borderColor', _ => invalidBorder('manufacturerId'))(
+            [
+              option.value``(manufacturers.length ? 'Select a manufacturer' : 'Add a manufacturer first'),
+              ...manufacturers.map((manufacturer) => option.value`${manufacturer.id}`(manufacturer.name || 'Untitled manufacturer')),
+            ]
+          ),
+          a.href`/admin/manufacturers.html`.class`admin-inline-edit-link`('edit manufacturers')
         ),
 
         label.attr('style.color', _ => labelColor('yearReleased'))('Year Released'),

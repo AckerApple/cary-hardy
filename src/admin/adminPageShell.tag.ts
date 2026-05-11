@@ -154,6 +154,24 @@ export const adminCrudStyles = `
     resize: vertical;
   }
 
+  .admin-field-with-link {
+    display: grid;
+    gap: 0.22em;
+  }
+
+  .admin-inline-edit-link {
+    justify-self: end;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.72em;
+    line-height: 1.2;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .admin-inline-edit-link:hover {
+    color: #f6c177;
+  }
+
   .admin-crud-modal-actions {
     margin-top: 1em;
     display: flex;

@@ -1,4 +1,4 @@
-import { option, optgroup, output, select, tag } from 'taggedjs'
+import { a, div, option, optgroup, output, select, tag } from 'taggedjs'
 
 type GameOption = { id: string } & Record<string, any>
 
@@ -28,10 +28,13 @@ export const groupedGameSelect = tag(({
 
   const invalidBorder = () => fieldError ? '#f87171' : 'rgba(255,255,255,0.2)'
 
-  return select.value(_ => value || '').onChange((event: any) => {
-    onChange(event?.target?.value || '')
-  }).attr('aria-invalid', _ => fieldError ? 'true' : 'false').attr('title', _ => fieldError || '').attr('style.borderColor', _ => invalidBorder())(
-    _ => gameSelectOptions(value, games, isLoaded)
+  return div.class`admin-field-with-link`(
+    select.value(_ => value || '').onChange((event: any) => {
+      onChange(event?.target?.value || '')
+    }).attr('aria-invalid', _ => fieldError ? 'true' : 'false').attr('title', _ => fieldError || '').attr('style.borderColor', _ => invalidBorder())(
+      _ => gameSelectOptions(value, games, isLoaded)
+    ),
+    a.href`/admin/games.html`.class`admin-inline-edit-link`('edit games')
   )
 })
 
