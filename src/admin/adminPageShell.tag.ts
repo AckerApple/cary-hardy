@@ -187,6 +187,10 @@ export const adminCrudStyles = `
     .admin-crud-row > small {
       grid-column: 2;
     }
+    .admin-crud-row > .admin-rating-badge-cell {
+      grid-column: 2;
+      justify-self: end;
+    }
     .admin-crud-thumb {
       width: 58px;
       height: 58px;

@@ -129,11 +129,6 @@ export const topNavStyles = tag(() => {
         padding: 0.1em 0.45em;
       }
     }
-    @media (min-width: 1024px) {
-      .top-nav-inner {
-        max-width: 900px;
-      }
-    }
   `)
 })
 

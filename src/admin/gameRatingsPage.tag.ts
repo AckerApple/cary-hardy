@@ -29,6 +29,7 @@ import type { GameRating, GameRatingInput } from '../gameRatings.types'
 import { createAdminAuthTag } from './adminPageShell.tag'
 import { adminNavButtons } from './adminNavButtons.tag'
 import { groupedGameSelect } from './groupedGameSelect.tag'
+import { ratingBadge } from '../ui/ratingBadge.tag'
 import { topNavBar } from '../ui/topNav.tag'
 
 const emptyRating = (): GameRatingInput => ({
@@ -329,10 +330,13 @@ const ratingAdminRow = tag(({
         ].filter(Boolean).join(' - ') || 'No manufacturer/year')
       )
     ),
-    small.style`opacity:0.72;text-align:right;display:grid;gap:0.1em;`(
-      span.style`font-size:0.78em;text-transform:uppercase;`('Rating'),
-      span(_ => rating?.rating !== null && typeof rating?.rating !== 'undefined' ? `${rating.rating}/10` : 'Not rated'),
-      _ => rating?.isVisible === false ? span('Hidden') : ''
+    div.class`admin-rating-badge-cell`.style`display:grid;justify-items:end;gap:0.25em;`(
+      _ => typeof rating?.rating === 'number' && !Number.isNaN(rating.rating)
+        ? ratingBadge({ rating: rating.rating })
+        : small.style`opacity:0.72;`('Not rated'),
+      _ => rating?.isVisible === false
+        ? small.style`opacity:0.72;`('Hidden')
+        : ''
     )
   )
 })

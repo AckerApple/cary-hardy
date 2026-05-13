@@ -3,18 +3,18 @@ import {
   callback,
   div,
   h2,
-  img,
+  iframe,
   noElement,
   onDestroy,
   p,
   small,
-  span,
   strong,
   style,
   tag,
 } from 'taggedjs'
 import { listenGames$, listenVisibleGameRatings$ } from './firebase'
 import { publicNavButtons } from './ui/publicNavButtons.tag'
+import { ratingBadge } from './ui/ratingBadge.tag'
 import { topNavBar } from './ui/topNav.tag'
 import type { GameRating } from './gameRatings.types'
 
@@ -23,6 +23,8 @@ let ratingsUnsubscribe: (() => void) | null = null
 let ratingsValueUnsubscribe: (() => void) | null = null
 let gamesUnsubscribe: (() => void) | null = null
 let gamesValueUnsubscribe: (() => void) | null = null
+let ratingsSnapshotLoaded = false
+let gamesSnapshotLoaded = false
 
 export const gameRatingsTag = tag((
   ratings = null as Array<{ id: string } & Record<string, any>> | null,
@@ -36,9 +38,16 @@ export const gameRatingsTag = tag((
     if (gamesValueUnsubscribe) gamesValueUnsubscribe()
 
     const ratings$ = listenVisibleGameRatings$()
+    let skippedInitialRatingsSeed = false
     ratingsUnsubscribe = (ratings$ as any)?.unsubscribe || null
     const ratingsSubscription = ratings$.subscribe((items) => {
+      if (!skippedInitialRatingsSeed && ratings === null && Array.isArray(items) && !items.length) {
+        skippedInitialRatingsSeed = true
+        return
+      }
+      skippedInitialRatingsSeed = true
       ratings = items
+      ratingsSnapshotLoaded = true
       console.debug('Visible game ratings', {
         count: items?.length || 0,
         ratings: items,
@@ -48,9 +57,16 @@ export const gameRatingsTag = tag((
     ratingsValueUnsubscribe = () => ratingsSubscription.unsubscribe()
 
     const games$ = listenGames$()
+    let skippedInitialGamesSeed = false
     gamesUnsubscribe = (games$ as any)?.unsubscribe || null
     const gamesSubscription = games$.subscribe((items) => {
+      if (!skippedInitialGamesSeed && games === null && Array.isArray(items) && !items.length) {
+        skippedInitialGamesSeed = true
+        return
+      }
+      skippedInitialGamesSeed = true
       games = items
+      gamesSnapshotLoaded = true
       console.debug('Game ratings library', {
         count: items?.length || 0,
         games: items,
@@ -75,6 +91,8 @@ export const gameRatingsTag = tag((
     gamesUnsubscribe = null
     gamesValueUnsubscribe = null
     ratingsLoaded = false
+    ratingsSnapshotLoaded = false
+    gamesSnapshotLoaded = false
   })
 
   return noElement(
@@ -155,6 +173,11 @@ export const gameRatingsTag = tag((
           linear-gradient(145deg, #111, #250909 52%, #3a1c00);
       }
 
+      .rating-card-media .rating-video-frame {
+        border-radius: 0;
+        min-height: 260px;
+      }
+
       .rating-card-media img {
         width: 100%;
         height: 100%;
@@ -174,9 +197,9 @@ export const gameRatingsTag = tag((
       }
 
       .rating-card-copy {
-        padding: 0.9em;
+        padding: 1.1em 0.9em;
         display: grid;
-        gap: 0.45em;
+        gap: 0.75em;
       }
 
       .rating-card-title {
@@ -185,10 +208,34 @@ export const gameRatingsTag = tag((
         line-height: 1.1;
       }
 
+      .rating-summary {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1em;
+      }
+
       .rating-score {
-        color: #f6c177;
-        font-size: 1.15em;
-        font-weight: 900;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex: 0 0 auto;
+      }
+
+      .rating-details {
+        min-width: 0;
+        display: grid;
+        gap: 0.35em;
+        justify-items: start;
+        text-align: left;
+        align-content: center;
+      }
+
+      .rating-meta {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.05em;
+        line-height: 1.2;
+        font-weight: 800;
       }
 
       .rating-review {
@@ -198,10 +245,23 @@ export const gameRatingsTag = tag((
       }
 
       .rating-videos {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5em;
+        display: grid;
+        gap: 0.75em;
         margin-top: 0.25em;
+      }
+
+      .rating-video {
+        display: grid;
+        gap: 0.35em;
+      }
+
+      .rating-video-frame {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border: 0;
+        border-radius: 12px;
+        background: #000;
+        display: block;
       }
 
       .rating-video-link {
@@ -244,26 +304,24 @@ export const gameRatingsTag = tag((
           padding-left: 0.65em;
           padding-right: 0.65em;
         }
+        .rating-summary {
+          justify-content: flex-start;
+        }
       }
     `),
     div.class`ratings-page`(
       div.class`ratings-brand-strip`(),
       div.class`ratings-hero`(
         h2.class`ratings-title`("Cary's Game Ratings"),
-        p.class`ratings-subtitle`('Rated games from the collection.'),
-        div.style`margin-top:0.9em;`(
-          a.href`/index.html`.class`top-nav-pill`('Back Home')
-        )
       ),
       _ => {
-        if (ratings === null || games === null) {
+        if (!ratingsSnapshotLoaded || !gamesSnapshotLoaded || ratings === null || games === null) {
           return div.class`ratings-empty`('Loading game ratings...')
         }
 
         const visibleRatings = ratings
           .filter((rating) => rating.isVisible !== false)
           .map((rating) => resolveRating(rating as GameRating, games || []))
-          .filter((rating) => rating.game)
 
         return visibleRatings.length
           ? div.class`ratings-grid`(
@@ -278,10 +336,14 @@ export const gameRatingsTag = tag((
 const resolveRating = (
   rating: GameRating,
   games: Array<{ id: string } & Record<string, any>>
-) => ({
-  ...rating,
-  game: games.find((game) => game.id === rating.gameId),
-})
+) => {
+  const gameId = rating.gameId || rating.id
+  return {
+    ...rating,
+    gameId,
+    game: games.find((game) => game.id === gameId),
+  }
+}
 
 const ratingCard = tag((rating: GameRating & { game?: Record<string, any> }) => {
   ratingCard.inputs(([nextRating]) => {
@@ -289,43 +351,114 @@ const ratingCard = tag((rating: GameRating & { game?: Record<string, any> }) => 
   })
 
   const game = rating.game || {}
+  const title = String(game.title || 'Untitled game')
+  const videos = ratingVideosList(rating)
+  const featuredVideo = latestYoutubeVideo(videos)
+  const secondaryVideos = featuredVideo
+    ? videos.filter((video) => video !== featuredVideo).reverse()
+    : videos.reverse()
 
   return div.class`rating-card bounce-in`(
     div.class`rating-card-media`(
-      game.imageUrl
-        ? img.src`${game.imageUrl}`.attr('alt', game.title || 'Pinball game')
-        : div.class`rating-card-placeholder`('PB')
+      featuredVideo
+        ? ratingVideoEmbed(featuredVideo)
+        : div.class`rating-card-placeholder`(title.slice(0, 2).toUpperCase())
     ),
     div.class`rating-card-copy`(
-      strong.class`rating-card-title`(game.title || 'Untitled game'),
-      small([
-        game.manufacturer || '',
-        game.yearReleased ? String(game.yearReleased) : '',
-      ].filter(Boolean).join(' - ') || 'No manufacturer/year'),
-      span.class`rating-score`(formatRating(rating.rating)),
-      rating.review ? p.class`rating-review`(rating.review) : '',
-      ratingVideos(rating)
+      div.class`rating-summary`(
+        div.class`rating-score`(
+          typeof rating.rating === 'number' && !Number.isNaN(rating.rating)
+            ? ratingBadge({ rating: rating.rating, size: 108 })
+            : small.style`color:#f6c177;font-weight:900;`('Not rated')
+        ),
+        div.class`rating-details`(
+          // strong.class`rating-card-title`(title),
+          game.title
+            ? small.class`rating-meta`([
+                game.manufacturer || '',
+                game.yearReleased ? String(game.yearReleased) : '',
+              ].filter(Boolean).join(' - ') || 'No manufacturer/year')
+            : '',
+          rating.review ? p.class`rating-review`(rating.review) : ''
+        )
+      ),
+      secondaryVideos.length ? ratingVideos(secondaryVideos) : ''
     )
   )
 })
 
-const ratingVideos = (rating: GameRating) => {
-  const videos = Array.isArray(rating.videos)
-    ? rating.videos.filter((video) => video?.url)
-    : []
-
-  return videos.length
+const ratingVideos = (videos: Array<{ url: string; description?: string }>) =>
+  videos.length
     ? div.class`rating-videos`(
-        videos.map((video) =>
-          a.href`${video.url}`.class`rating-video-link`.attr('target', '_blank').attr('rel', 'noopener noreferrer')(
-            video.description || 'Watch video'
-          )
-        )
+        videos.map((video) => ratingVideo(video).key(video.url))
       )
     : ''
+
+const ratingVideosList = (rating: GameRating) =>
+  Array.isArray(rating.videos)
+    ? rating.videos.filter((video): video is { url: string; description?: string } => Boolean(video?.url))
+    : []
+
+const latestYoutubeVideo = (videos: Array<{ url: string; description?: string }>) =>
+  [...videos].reverse().find((video) => youtubeEmbedUrl(video.url)) || null
+
+const ratingVideo = tag((video: { url: string; description?: string }) => {
+  ratingVideo.inputs(([nextVideo]) => {
+    video = nextVideo
+  })
+
+  const embedUrl = youtubeEmbedUrl(video.url)
+  const label = video.description || 'Watch video'
+
+  return div.class`rating-video`(
+    embedUrl
+      ? ratingVideoEmbed(video)
+      : '',
+    a.href`${video.url}`.class`rating-video-link`.attr('target', '_blank').attr('rel', 'noopener noreferrer')(
+      label
+    )
+  )
+})
+
+const ratingVideoEmbed = (video: { url: string; description?: string }) =>
+  iframe
+    .class`rating-video-frame`
+    .attr('src', youtubeEmbedUrl(video.url))
+    .attr('title', video.description || 'Watch video')
+    .attr('loading', 'lazy')
+    .attr('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share')
+    .attr('allowfullscreen', '')()
+
+const youtubeEmbedUrl = (url: string) => {
+  const videoId = youtubeVideoId(url)
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
 }
 
-const formatRating = (rating: number | null | undefined) =>
-  typeof rating === 'number' && !Number.isNaN(rating)
-    ? `${rating}/10`
-    : 'Not rated'
+const youtubeVideoId = (url: string) => {
+  try {
+    const parsedUrl = new URL(url)
+    const hostname = parsedUrl.hostname.replace(/^www\./, '')
+
+    if (hostname === 'youtu.be') {
+      return cleanYoutubeId(parsedUrl.pathname.split('/').filter(Boolean)[0])
+    }
+
+    if (hostname === 'youtube.com' || hostname === 'm.youtube.com') {
+      if (parsedUrl.pathname === '/watch') {
+        return cleanYoutubeId(parsedUrl.searchParams.get('v') || '')
+      }
+
+      const [type, id] = parsedUrl.pathname.split('/').filter(Boolean)
+      if (type === 'embed' || type === 'shorts' || type === 'live') {
+        return cleanYoutubeId(id)
+      }
+    }
+  } catch (error) {
+    console.warn('Invalid rating video URL', { url, error })
+  }
+
+  return ''
+}
+
+const cleanYoutubeId = (value = '') =>
+  /^[a-zA-Z0-9_-]{6,}$/.test(value) ? value : ''

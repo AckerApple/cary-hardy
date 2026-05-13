@@ -121,17 +121,6 @@ export const gamesAdminPage = tag((onSignedOut) => {
     manufacturersValueUnsubscribe = () => subscription.unsubscribe()
   }
 
-  const refreshManufacturers = () =>
-    listManufacturers()
-      .then((items) => {
-        manufacturers = items
-        latestManufacturers = items
-        refresh()
-      })
-      .catch((error) => {
-        console.error('Failed to refresh manufacturers', error)
-      })
-
   const openAdd = () => {
     editingId = null
     editGame = emptyGame()
