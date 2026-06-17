@@ -510,16 +510,6 @@ export const homeTag = tag(() => (
     ) : '',
 
     br,
-    div.class`bounce-in section-anchor`.attr('id', 'games').style`--fx-index:5;`(
-      a
-        .href`/lineup.html`
-        .class`fold-section-toggle`
-        .style`text-decoration:none;box-sizing:border-box;`(
-          h2.class`hero-text`('🎮 GAMES')
-        )
-    ),
-
-    br,
     div.class`bounce-in section-anchor`.attr('id', 'youtube').style`--fx-index:5;`(
       button
         .type`button`
@@ -679,6 +669,24 @@ export const homeTag = tag(() => (
           )
         )
       ) : '',
+      br,
+      div.class`bounce-in section-anchor`.attr('id', 'games').style`--fx-index:8;`(
+        a
+          .href`/lineup.html`
+          .class`fold-section-toggle`
+          .style`text-decoration:none;box-sizing:border-box;`(
+            h2.class`hero-text`('🎮 GAMES')
+          )
+      ),
+      br,
+      div.class`bounce-in section-anchor`.attr('id', 'ratings').style`--fx-index:9;`(
+        a
+          .href`/ratings.html`
+          .class`fold-section-toggle`
+          .style`text-decoration:none;box-sizing:border-box;`(
+            h2.class`hero-text`('⭐ RATINGS')
+          )
+      ),
       br,
       br,
       img
