@@ -1,6 +1,7 @@
 import { a, br, div, h1, p, span, tag } from 'taggedjs'
 import { topNavBar } from '../ui/topNav.tag'
 import { publicNavButtons } from '../ui/publicNavButtons.tag'
+import { publicFooter } from '../ui/publicFooter.tag'
 
 export const thankYouTag = tag(() => {
   const params = new URLSearchParams(window.location.search)
@@ -27,6 +28,7 @@ export const thankYouTag = tag(() => {
         ),
         a.class`cta`.href`/index.html`('Back to CaryHardy.com')
       )
-    )
+    ),
+    publicFooter()
   )
 })

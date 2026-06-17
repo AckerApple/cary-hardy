@@ -43,6 +43,11 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    match /pastOwnedGames/{gameId} {
+      allow read: if resource.data.isVisible == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if isAdmin();
     }

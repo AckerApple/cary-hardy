@@ -41,6 +41,7 @@ const emptyGame = (): GameInput => ({
   manufacturer: '',
   yearReleased: null,
   notes: '',
+  dataLinks: [],
 })
 
 let gamesLoaded = false
@@ -140,6 +141,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
       manufacturer: game.manufacturer || '',
       yearReleased: numberOrNull(game.yearReleased),
       notes: game.notes || '',
+      dataLinks: normalizeDataLinks(game.dataLinks),
     }
     errorMessage = ''
     fieldErrors = {}
@@ -159,6 +161,12 @@ export const gamesAdminPage = tag((onSignedOut) => {
 
   const validateGame = () => {
     const nextFieldErrors: Record<string, string> = {}
+    const nextGameId = (editGame.id || '').trim()
+    if (editingId && !nextGameId) nextFieldErrors.id = 'Game ID is required.'
+    if (editingId && nextGameId.includes('/')) nextFieldErrors.id = 'Game ID cannot include /.'
+    if (editingId && nextGameId !== editingId && (games || []).some((game) => game.id === nextGameId)) {
+      nextFieldErrors.id = 'A game with this ID already exists.'
+    }
     if (!editGame.title.trim()) nextFieldErrors.title = 'Game Title is required.'
     if (editGame.yearReleased !== null && Number.isNaN(Number(editGame.yearReleased))) {
       nextFieldErrors.yearReleased = 'Year Released must be numeric.'
@@ -182,16 +190,23 @@ export const gamesAdminPage = tag((onSignedOut) => {
     fieldErrors = {}
     refresh()
     const selectedManufacturer = (manufacturers || []).find((manufacturer) => manufacturer.id === editGame.manufacturerId)
+    const nextGameId = editingId ? (editGame.id || '').trim() : undefined
     tag.promise = upsertGame({
       ...editGame,
-      id: editingId || undefined,
+      id: nextGameId || undefined,
       title: editGame.title.trim(),
       imageUrl: (editGame.imageUrl || '').trim(),
       manufacturerId: (editGame.manufacturerId || '').trim(),
       manufacturer: (selectedManufacturer?.name || editGame.manufacturer || '').trim(),
       yearReleased: numberOrNull(editGame.yearReleased),
       notes: (editGame.notes || '').trim(),
+      dataLinks: normalizeDataLinks(editGame.dataLinks),
     })
+      .then(() => {
+        if (editingId && nextGameId && nextGameId !== editingId) {
+          return deleteGame(editingId)
+        }
+      })
       .then(() => {
         isSaving = false
         closeModal()
@@ -255,7 +270,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
     topNavBar(() => adminNavButtons(signoutClick)),
     div.class`admin-crud-page`(
       div.class`admin-crud-header`(
-        h3('Games Database'),
+        h3('🕹️ Games Database'),
         button.type`button`.class`admin-pill-button`.onClick(openAdd)('Add')
       ),
       div.class`admin-crud-card`(
@@ -311,6 +326,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
               editGame = nextGame
               fieldErrors = {
                 ...fieldErrors,
+                id: nextGame.id?.trim() ? '' : fieldErrors.id,
                 title: nextGame.title?.trim() ? '' : fieldErrors.title,
                 manufacturerId: nextGame.manufacturerId || nextGame.manufacturer?.trim() ? '' : fieldErrors.manufacturerId,
                 yearReleased: nextGame.yearReleased === null || !Number.isNaN(Number(nextGame.yearReleased)) ? '' : fieldErrors.yearReleased,
@@ -468,11 +484,39 @@ const gameModal = tag(({
   })
 
   const updateGame = (patch: Partial<GameInput>) => onChange({ ...editGame, ...patch })
+  const updateDataLink = (index: number, patch: Partial<{ title: string; url: string }>) => {
+    const dataLinks = normalizeDataLinks(editGame.dataLinks, true)
+    dataLinks[index] = {
+      title: dataLinks[index]?.title || '',
+      url: dataLinks[index]?.url || '',
+      ...patch,
+    }
+    updateGame({ dataLinks })
+  }
+  const addDataLink = () => {
+    updateGame({
+      dataLinks: [
+        ...normalizeDataLinks(editGame.dataLinks, true),
+        { title: '', url: '' },
+      ],
+    })
+  }
+  const removeDataLink = (index: number) => {
+    updateGame({
+      dataLinks: normalizeDataLinks(editGame.dataLinks, true).filter((_, linkIndex) => linkIndex !== index),
+    })
+  }
   const invalidBorder = (fieldName: string) => fieldErrors[fieldName] ? '#f87171' : 'rgba(255,255,255,0.2)'
   const labelColor = (fieldName: string) => fieldErrors[fieldName] ? '#fca5a5' : 'inherit'
+  const submitOnEnter = (event: any) => {
+    if (event.key !== 'Enter' || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) return
+    if (String(event.target?.tagName || '').toLowerCase() === 'textarea') return
+    event.preventDefault()
+    onSave()
+  }
 
   return div.class`admin-crud-modal-backdrop`(
-    div.class`admin-crud-modal`(
+    div.class`admin-crud-modal`.onKeyDown(submitOnEnter)(
       div.style`display:flex;justify-content:space-between;gap:1em;align-items:flex-start;`(
         div(
           h3.style`margin:0;`(isEditing ? 'Edit Game' : 'Add Game'),
@@ -487,6 +531,18 @@ const gameModal = tag(({
           )
         : '',
       div.class`admin-crud-form-grid`.style`margin-top:1em;`(
+        _ => isEditing
+          ? [
+              label.attr('style.color', _ => labelColor('id'))('Game ID'),
+              div.style`display:grid;gap:0.28em;`(
+                input.type`text`.value(_ => editGame.id || '').onInput((event: any) => {
+                  updateGame({ id: event?.target?.value || '' })
+                }).attr('aria-invalid', _ => fieldErrors.id ? 'true' : 'false').attr('title', _ => fieldErrors.id || '').attr('style.borderColor', _ => invalidBorder('id'))(),
+                small.style`color:#f6c177;line-height:1.35;`('Changing this value can change or break links to this game.')
+              ),
+            ]
+          : '',
+
         label.attr('style.color', _ => labelColor('title'))('Game Title'),
         input.type`text`.value(_ => editGame.title || '').onInput((event: any) => {
           updateGame({ title: event?.target?.value || '' })
@@ -518,7 +574,27 @@ const gameModal = tag(({
         label('Notes'),
         textarea.value(_ => editGame.notes || '').onInput((event: any) => {
           updateGame({ notes: event?.target?.value || '' })
-        })()
+        })(),
+
+        label('Data Links'),
+        div.style`display:grid;gap:0.55em;`(
+          _ => normalizeDataLinks(editGame.dataLinks, true).length
+            ? normalizeDataLinks(editGame.dataLinks, true).map((link, index) =>
+                div.style`display:grid;grid-template-columns:1fr 1fr auto;gap:0.45em;align-items:center;`(
+                  input.type`text`.placeholder`Title`.value(_ => link.title || '').onInput((event: any) => {
+                    updateDataLink(index, { title: event?.target?.value || '' })
+                  })(),
+                  input.type`url`.placeholder`URL`.value(_ => link.url || '').onInput((event: any) => {
+                    updateDataLink(index, { url: event?.target?.value || '' })
+                  })(),
+                  button.type`button`.class`admin-danger-button`.onClick(() => removeDataLink(index))('🗑️ Delete')
+                ).key(`data-link-${index}`)
+              )
+            : small.style`opacity:0.72;`('No data links added.'),
+          div(
+            button.type`button`.class`admin-secondary-button`.onClick(addDataLink)('Add Data Link')
+          )
+        )
       ),
       div.class`admin-crud-modal-actions`(
         div.style`display:flex;gap:0.7em;flex-wrap:wrap;`(
@@ -526,7 +602,7 @@ const gameModal = tag(({
           button.type`button`.class`admin-secondary-button`.attr('disabled', _ => isSaving ? 'disabled' : null).onClick(onCancel)('Cancel')
         ),
         _ => isEditing
-          ? button.type`button`.class`admin-danger-button`.attr('disabled', _ => isDeleting ? 'disabled' : null).onClick(onDelete)(_ => isDeleting ? 'Deleting...' : 'Delete')
+          ? button.type`button`.class`admin-danger-button`.attr('disabled', _ => isDeleting ? 'disabled' : null).onClick(onDelete)(_ => isDeleting ? '🗑️ Deleting...' : '🗑️ Delete')
           : ''
       )
     )
@@ -545,3 +621,16 @@ const numberOrNull = (value: any) => {
   const parsed = Number(value)
   return Number.isNaN(parsed) ? null : parsed
 }
+
+const normalizeDataLinks = (
+  dataLinks: GameInput['dataLinks'],
+  keepEmpty = false
+) =>
+  Array.isArray(dataLinks)
+    ? dataLinks
+        .map((link) => ({
+          title: (link?.title || '').trim(),
+          url: (link?.url || '').trim(),
+        }))
+        .filter((link) => keepEmpty || link.title || link.url)
+    : []

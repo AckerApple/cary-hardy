@@ -309,7 +309,7 @@ export const adminUsersPage = tag((
   return noElement(
     topNavBar(() => adminNavButtons(signoutClick)),
     div.class`users-page`(
-      h3('Users Admin'),
+      h3('👥 Users Admin'),
       div.class`users-card`(
         div.style`margin-top:0.75em;display:grid;gap:0.5em;`(
           _ => (errorMessage ? p.style`color:#f6c177;`(errorMessage) : ''),

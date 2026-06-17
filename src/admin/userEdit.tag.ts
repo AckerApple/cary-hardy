@@ -104,7 +104,7 @@ export const userEdit = tag(({
         .type`button`
         .onClick(onDelete)
         .style`padding:0.5em 1em;border-radius:999px;border:1px solid rgba(255,255,255,0.3);background:#4b1111;color:#fff;cursor:pointer;`(
-          _=> isDeleting ? 'Deleting...' : 'Delete'
+          _=> isDeleting ? '🗑️ Deleting...' : '🗑️ Delete'
         ),
       button
         .type`button`

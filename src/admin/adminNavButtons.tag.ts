@@ -33,8 +33,11 @@ export const adminNavButtons = tag((onSignout) => {
       ? noElement(
           button.type`button`.class`admin-menu-backdrop`.onClick(closeMenu).attr('aria-label', 'Close menu')(''),
           div.class`admin-menu-panel`.attr('role', 'menu')(
-            a.href`/admin.html`.class`top-nav-pill`.attr('role', 'menuitem')('⭐ admin home'),
-            a.href`/admin/current-games.html`.class`top-nav-pill`.attr('role', 'menuitem')('🎮 lineup'),
+            a.href`/admin.html`.class`top-nav-pill`.attr('role', 'menuitem')('🏠 admin home'),
+            a.href`/admin/qr-maker.html`.class`top-nav-pill`.attr('role', 'menuitem')('🔗 qr maker'),
+            a.href`/admin/meeting-tools.html`.class`top-nav-pill`.attr('role', 'menuitem')('📅 meeting tools'),
+            a.href`/admin/current-games.html`.class`top-nav-pill`.attr('role', 'menuitem')('🎮 current lineup'),
+            a.href`/admin/past-owned-games.html`.class`top-nav-pill`.attr('role', 'menuitem')('📜 past games'),
             a.href`/admin/games.html`.class`top-nav-pill`.attr('role', 'menuitem')('🕹️ games'),
             a.href`/admin/manufacturers.html`.class`top-nav-pill`.attr('role', 'menuitem')('🏭 manufacturers'),
             a.href`/admin/game-ratings.html`.class`top-nav-pill`.attr('role', 'menuitem')('⭐ ratings'),

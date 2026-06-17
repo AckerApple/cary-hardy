@@ -1,8 +1,8 @@
 import {
-  a,
   callback,
   div,
   h2,
+  hr,
   img,
   noElement,
   onDestroy,
@@ -13,19 +13,24 @@ import {
   style,
   tag,
 } from 'taggedjs'
-import { listenGames$, listenVisibleCurrentGames$ } from './firebase'
+import { listenGames$, listenVisibleCurrentGames$, listenVisiblePastOwnedGames$ } from './firebase'
 import { topNavBar } from './ui/topNav.tag'
 import { publicNavButtons } from './ui/publicNavButtons.tag'
+import { publicFooter } from './ui/publicFooter.tag'
 import type { CurrentGame } from './currentGames.types'
+import type { PastOwnedGame } from './pastOwnedGames.types'
 
 let lineupLoaded = false
 let gamesUnsubscribe: (() => void) | null = null
 let gamesValueUnsubscribe: (() => void) | null = null
+let pastGamesUnsubscribe: (() => void) | null = null
+let pastGamesValueUnsubscribe: (() => void) | null = null
 let gameLibraryUnsubscribe: (() => void) | null = null
 let gameLibraryValueUnsubscribe: (() => void) | null = null
 
 export const currentLineupTag = tag((
   lineupItems = null as Array<{ id: string } & Record<string, any>> | null,
+  pastOwnedItems = null as Array<{ id: string } & Record<string, any>> | null,
   gameLibrary = null as Array<{ id: string } & Record<string, any>> | null,
   refreshLineup = callback(() => {})
 ) => {
@@ -37,6 +42,14 @@ export const currentLineupTag = tag((
     if (gamesValueUnsubscribe) {
       gamesValueUnsubscribe()
       gamesValueUnsubscribe = null
+    }
+    if (pastGamesUnsubscribe) {
+      pastGamesUnsubscribe()
+      pastGamesUnsubscribe = null
+    }
+    if (pastGamesValueUnsubscribe) {
+      pastGamesValueUnsubscribe()
+      pastGamesValueUnsubscribe = null
     }
     if (gameLibraryUnsubscribe) {
       gameLibraryUnsubscribe()
@@ -58,6 +71,18 @@ export const currentLineupTag = tag((
       refreshLineup()
     })
     gamesValueUnsubscribe = () => valueSubscription.unsubscribe()
+
+    const pastGames$ = listenVisiblePastOwnedGames$()
+    pastGamesUnsubscribe = (pastGames$ as any)?.unsubscribe || null
+    const pastGamesSubscription = pastGames$.subscribe((items) => {
+      pastOwnedItems = items
+      console.debug('Visible past owned games', {
+        count: items?.length || 0,
+        games: items,
+      })
+      refreshLineup()
+    })
+    pastGamesValueUnsubscribe = () => pastGamesSubscription.unsubscribe()
 
     const libraryGames$ = listenGames$()
     gameLibraryUnsubscribe = (libraryGames$ as any)?.unsubscribe || null
@@ -87,6 +112,14 @@ export const currentLineupTag = tag((
     if (gamesValueUnsubscribe) {
       gamesValueUnsubscribe()
       gamesValueUnsubscribe = null
+    }
+    if (pastGamesUnsubscribe) {
+      pastGamesUnsubscribe()
+      pastGamesUnsubscribe = null
+    }
+    if (pastGamesValueUnsubscribe) {
+      pastGamesValueUnsubscribe()
+      pastGamesValueUnsubscribe = null
     }
     if (gameLibraryUnsubscribe) {
       gameLibraryUnsubscribe()
@@ -157,7 +190,13 @@ export const currentLineupTag = tag((
         margin: 1.4em auto 0;
         display: grid;
         grid-template-columns: 1fr;
-        gap: 1em;
+        gap: 1.4em 1em;
+      }
+
+      .lineup-game-item {
+        display: grid;
+        gap: 0.75em;
+        margin-bottom: 1.7em;
       }
 
       .lineup-game-card {
@@ -240,9 +279,11 @@ export const currentLineupTag = tag((
 
       .lineup-card-date {
         display: block;
-        margin-top: 0.25em;
+        margin: 0;
         color: #f6c177;
         font-weight: 700;
+        line-height: 1.25;
+        text-align: center;
       }
 
       .lineup-empty {
@@ -252,6 +293,24 @@ export const currentLineupTag = tag((
         border-radius: 18px;
         border: 1px solid rgba(255,255,255,0.16);
         background: rgba(0,0,0,0.35);
+        text-align: center;
+      }
+
+      .lineup-section-break {
+        width: min(1120px, 100%);
+        margin: 2.4em auto 1.4em;
+        border: 0;
+        border-top: 1px solid rgba(255,255,255,0.22);
+      }
+
+      .lineup-section-title {
+        width: min(1120px, 100%);
+        margin: 0 auto;
+        color: #fff;
+        font-size: clamp(1.5em, 4vw, 2.6em);
+        line-height: 1.08;
+        font-weight: 900;
+        font-style: italic;
         text-align: center;
       }
 
@@ -292,10 +351,7 @@ export const currentLineupTag = tag((
       div.class`lineup-brand-strip`(),
       div.class`lineup-hero`(
         h2.class`lineup-title`("Cary's Current Lineup"),
-        p.class`lineup-subtitle`('A list of my current games.'),
-        div.style`margin-top:0.9em;`(
-          a.href`/index.html`.class`top-nav-pill`('Back Home')
-        )
+        p.class`lineup-subtitle`('A list of my current games.')
       ),
       _ => {
         if (lineupItems === null) {
@@ -311,14 +367,48 @@ export const currentLineupTag = tag((
         return visibleGames.length
           ? div.class`lineup-results`(
               div.class`lineup-grid`(
-                visibleGames.map((game) => lineupGameCard(game as CurrentGame).key(game.id))
+                visibleGames.map((game) => lineupGameCard({
+                  game: game as CurrentGame,
+                  detail: [
+                    `Collected ${formatDate(game.dateAddedToCollection)}`,
+                    formatCurrentYearsOwned(game as CurrentGame),
+                  ],
+                }).key(game.id))
               )
             )
           : div.class`lineup-results`(
               div.class`lineup-empty`('No current lineup games are visible yet.')
             )
+      },
+      hr.class`lineup-section-break`(),
+      h2.class`lineup-section-title`('Past Games Owned'),
+      _ => {
+        if (pastOwnedItems === null) {
+          return div.class`lineup-results`(
+            div.class`lineup-empty`('Loading past games...')
+          )
+        }
+
+        const visiblePastGames = pastOwnedItems
+          .filter((game) => game.isVisible !== false)
+          .sort(comparePastOwnedGamesByGameId)
+          .map((game) => resolvePastOwnedGame(game as PastOwnedGame, gameLibrary || []))
+
+        return visiblePastGames.length
+          ? div.class`lineup-results`(
+              div.class`lineup-grid`(
+                visiblePastGames.map((game) => lineupGameCard({
+                  game,
+                  detail: formatYearsOwned(game),
+                }).key(`past-${game.id}`))
+              )
+            )
+          : div.class`lineup-results`(
+              div.class`lineup-empty`('No past owned games are visible yet.')
+            )
       }
-    )
+    ),
+    publicFooter()
   )
 })
 
@@ -326,7 +416,7 @@ const resolveLineupGame = (
   lineupGame: CurrentGame,
   gameLibrary: Array<{ id: string } & Record<string, any>>
 ) => {
-  const libraryGame = gameLibrary.find((game) => game.id === lineupGame.gameId)
+  const libraryGame = findGameById(gameLibrary, lineupGame.gameId)
   return {
     ...lineupGame,
     title: libraryGame?.title || lineupGame.title || '',
@@ -336,18 +426,75 @@ const resolveLineupGame = (
   } as CurrentGame
 }
 
-const lineupGameCard = tag((game: CurrentGame) => {
-  lineupGameCard.inputs(([nextGame]) => {
-    game = nextGame
+const comparePastOwnedGamesByGameId = (
+  a: { id?: string; gameId?: string },
+  b: { id?: string; gameId?: string }
+) => {
+  const gameIdCompare = String(a.gameId || '').localeCompare(String(b.gameId || ''), undefined, { sensitivity: 'base' })
+  return gameIdCompare || String(a.id || '').localeCompare(String(b.id || ''), undefined, { sensitivity: 'base' })
+}
+
+const resolvePastOwnedGame = (
+  pastOwnedGame: PastOwnedGame,
+  gameLibrary: Array<{ id: string } & Record<string, any>>
+) => {
+  const libraryGame = findGameById(gameLibrary, pastOwnedGame.gameId)
+  const fallbackTitle = readableGameIdTitle(pastOwnedGame.gameId || pastOwnedGame.id)
+  return {
+    ...pastOwnedGame,
+    title: libraryGame?.title || pastOwnedGame.title || pastOwnedGame.sourceTitle || fallbackTitle,
+    imageUrl: libraryGame?.imageUrl || pastOwnedGame.imageUrl || '',
+    manufacturer: libraryGame?.manufacturer || pastOwnedGame.manufacturer || '',
+    yearReleased: libraryGame?.yearReleased ?? pastOwnedGame.yearReleased ?? null,
+  } as PastOwnedGame
+}
+
+const findGameById = (
+  gameLibrary: Array<{ id: string } & Record<string, any>>,
+  gameId: any
+) => {
+  const normalizedGameId = normalizeId(gameId)
+  if (!normalizedGameId) return null
+
+  return gameLibrary.find((game) => game.id === gameId)
+    || gameLibrary.find((game) => normalizeId(game.id) === normalizedGameId)
+    || null
+}
+
+const normalizeId = (value: any) =>
+  String(value || '').trim().toLowerCase()
+
+const readableGameIdTitle = (value: any) =>
+  String(value || '')
+    .trim()
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+
+const lineupGameCard = tag(({
+  game,
+  detail,
+}: {
+  game: CurrentGame | PastOwnedGame
+  detail: string | string[]
+}) => {
+  lineupGameCard.inputs((args) => {
+    ;[{ game, detail }] = args
   })
 
-  return div.class`lineup-game-card bounce-in`(
-    game.imageUrl
-      ? img.src`${game.imageUrl}`.attr('alt', game.title || 'Pinball game')
-      : div.class`lineup-placeholder`(span('PB')),
-    div.class`lineup-card-copy`(
-      strong.class`lineup-card-title`(game.title || 'Untitled Game'),
-      small.class`lineup-card-date`('Collected ', formatDate(game.dateAddedToCollection))
+  return div.class`lineup-game-item bounce-in`(
+    div.class`lineup-game-card`(
+      game.imageUrl
+        ? img.src`${game.imageUrl}`.attr('alt', game.title || 'Pinball game')
+        : div.class`lineup-placeholder`(span(gameInitials(game.title))),
+      div.class`lineup-card-copy`(
+        strong.class`lineup-card-title`(game.title || 'Untitled Game')
+      )
+    ),
+    small.class`lineup-card-date`(
+      Array.isArray(detail)
+        ? detail.map((line) => div(line))
+        : detail
     )
   )
 })
@@ -367,4 +514,54 @@ const formatDate = (value: any) => {
   return Number.isNaN(date.getTime())
     ? dateValue
     : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+const formatYearsOwned = (game: PastOwnedGame) => {
+  const start = parseDateValue(game.dateAddedToCollection)
+  const end = parseDateValue(game.dateRemovedFromCollection)
+
+  if (!start || !end) {
+    return 'Time not recorded'
+  }
+
+  const years = Math.max(0, (end.getTime() - start.getTime()) / (365.2425 * 24 * 60 * 60 * 1000))
+  const wholeYears = Math.floor(years)
+
+  if (wholeYears >= 1) {
+    return `${wholeYears} year${wholeYears === 1 ? '' : 's'} owned`
+  }
+
+  const months = Math.max(1, Math.round(years * 12))
+  return `${months} month${months === 1 ? '' : 's'} owned`
+}
+
+const formatCurrentYearsOwned = (game: CurrentGame) => {
+  const start = parseDateValue(game.dateAddedToCollection)
+  if (!start) return 'Ownership date unknown'
+
+  const years = Math.max(0, (Date.now() - start.getTime()) / (365.2425 * 24 * 60 * 60 * 1000))
+  if (years < 1) return 'first year owned'
+
+  const wholeYears = Math.floor(years)
+  return `${wholeYears} year${wholeYears === 1 ? '' : 's'} owned`
+}
+
+const gameInitials = (title: any) => {
+  const words = String(title || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if (words.length >= 2) {
+    return `${words[0][0]}${words[1][0]}`.toUpperCase()
+  }
+
+  return (words[0] || 'PB').slice(0, 2).toUpperCase()
+}
+
+const parseDateValue = (value: any) => {
+  const dateValue = dateInputValue(value)
+  if (!dateValue) return null
+  const date = new Date(`${dateValue}T12:00:00`)
+  return Number.isNaN(date.getTime()) ? null : date
 }

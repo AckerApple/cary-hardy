@@ -6,33 +6,23 @@ import {
   h3,
   img,
   output,
+  p,
   tag,
 } from 'taggedjs'
-import { loadNextMeetupDate, saveNextMeetupDate, signOutUser } from '../firebase'
+import { loadNextMeetupDate, signOutUser } from '../firebase'
 import { adminUsersSection } from './adminUsers.tag'
 import { calendarLinksSection } from './calendarLinks.tag'
-import { meetingToolsSection } from './meetingTools.tag'
-import { qrMakerSection } from './qrMaker.tag'
-import { timestampToValues } from './utils'
 
 let meetupLoaded = false
 
 export const adminTools = tag((
   onSignedOut
 ) => (
-  nextMeetupDate = Date.now(),
-  qrUrl = '',
-  { date, time } = timestampToValues(Number(nextMeetupDate))
+  nextMeetupDate = Date.now()
 ) => {
   adminTools.inputs(([_onSignedOut]) => {
     onSignedOut = output(_onSignedOut)
   })
-
-  function updateDateTime() {
-    const x = timestampToValues(Number(nextMeetupDate))
-    date = x.date
-    time = x.time
-  }
 
   if (!meetupLoaded) {
     meetupLoaded = true
@@ -40,22 +30,12 @@ export const adminTools = tag((
       .then((loadedDate) => {
         if (typeof loadedDate === 'number') {
           nextMeetupDate = loadedDate
-          updateDateTime()
         }
       })
       .catch((error) => {
         console.error('Failed to load next meetup date', error)
       })
   }
-
-  const saveMeetupDate = () =>
-    saveNextMeetupDate(Number(nextMeetupDate))
-      .then(() => {
-        alert('saved')
-      })
-      .catch((error) => {
-        console.error('Failed to save meetup date', error)
-      })
 
   const signoutClick = () => signOutUser().then(onSignedOut).catch((error) => {
     console.error('Failed to sign out', error)
@@ -67,43 +47,25 @@ export const adminTools = tag((
       'Hardy Tools'
     ),
     div.style`display:flex;flex-wrap:wrap;gap:1em;text-align:left;`(
-      _=> {
-        console.log('rerendering qr maker', { qrUrl })
-        return collapsibleSection({
-          labelText: 'QR Maker',
-          flex: '1',
-          contentNode: () => qrMakerSection({
-            qrUrl,
-            onQrUrlChange: (value) => {
-              qrUrl = value
-              console.debug('qrUrl changed!', qrUrl)
-            },
-          }),
-        })
-      },
+      adminHomeLinkCard({
+        href: '/admin/qr-maker.html',
+        title: '🔗 QR Maker',
+        description: 'Create a QR code from any link and preview the encoded URL before using it.',
+      }),
       _=> collapsibleSection({
         labelText: 'Calendar Links',
         flex: '2',
         contentNode: calendarLinksSection({
           nextMeetupDate,
           onQrUrlChange: (value) => {
-            qrUrl = value
+            window.location.href = `/admin/qr-maker.html?url=${encodeURIComponent(value)}`
           },
         }),
       }),
-      _=> collapsibleSection({
-        labelText: 'meeting tools',
-        flex: '1',
-        contentNode: meetingToolsSection({
-          nextMeetupDate,
-          date,
-          time,
-          onDate: (dateNum) => {
-            nextMeetupDate = dateNum
-            updateDateTime()
-          },
-          onSave: saveMeetupDate,
-        }),
+      adminHomeLinkCard({
+        href: '/admin/meeting-tools.html',
+        title: '📅 Meeting Tools',
+        description: 'Update the next meetup date, save it to Firestore, and preview the public countdown.',
       }),
       
       _=> collapsibleSection({
@@ -111,38 +73,62 @@ export const adminTools = tag((
         flex: '1',
         contentNode: adminUsersSection,
       }),
-      div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,255,255,0.3);border-radius:0.8em;overflow:hidden;`(
-        a
-          .href`/admin/user.html`
-          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:600;text-align:center;`
-          ('👥 Open Users Admin')
-      ),
-      div.style`flex:1;min-width:min(320px, 100%);background:linear-gradient(135deg, rgba(185,28,28,0.58), rgba(249,115,22,0.42), rgba(250,204,21,0.24));border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
-        a
-          .href`/admin/current-games.html`
-          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
-          ('🎮 Current Game Lineup')
-      ),
-      div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
-        a
-          .href`/admin/games.html`
-          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
-          ('🕹️ Games Database')
-      ),
-      div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
-        a
-          .href`/admin/manufacturers.html`
-          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
-          ('🏭 Manufacturers Database')
-      ),
-      div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
-        a
-          .href`/admin/game-ratings.html`
-          .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;font-weight:800;text-align:center;`
-          ('⭐ Game Ratings')
-      )
+      adminHomeLinkCard({
+        href: '/admin/user.html',
+        title: '👥 Open Users Admin',
+        description: 'Manage authorized admin users and account access.',
+      }),
+      adminHomeLinkCard({
+        href: '/admin/current-games.html',
+        title: '🎮 Current Game Lineup',
+        description: 'Choose which games appear in the public current lineup.',
+      }),
+      adminHomeLinkCard({
+        href: '/admin/past-owned-games.html',
+        title: '📜 Past Games Owned',
+        description: 'Track previously owned games and sync new items from Pinside history.',
+      }),
+      adminHomeLinkCard({
+        href: '/admin/games.html',
+        title: '🕹️ Games Database',
+        description: 'Maintain canonical game details used by lineup and ratings.',
+      }),
+      adminHomeLinkCard({
+        href: '/admin/manufacturers.html',
+        title: '🏭 Manufacturers Database',
+        description: 'Edit manufacturer records and logos for the game database.',
+      }),
+      adminHomeLinkCard({
+        href: '/admin/game-ratings.html',
+        title: '⭐ Game Ratings',
+        description: 'Create and update public ratings, reviews, and related videos.',
+      })
     ),
     br
+  )
+})
+
+const adminHomeLinkCard = tag(({
+  href,
+  title,
+  description,
+}: {
+  href: string
+  title: string
+  description: string
+}) => {
+  adminHomeLinkCard.inputs((x) => {
+    ;[{ href, title, description }] = x
+  })
+
+  return div.style`flex:1;min-width:min(320px, 100%);background:#1f1f1f;border:1px solid rgba(255,185,62,0.55);border-radius:0.8em;overflow:hidden;`(
+    a
+      .href`${href}`
+      .style`display:block;padding:0.9em 1em;color:#fff;text-decoration:none;`
+      (
+        div.style`font-weight:800;text-align:center;`(title),
+        p.style`margin:0.45em 0 0;color:rgba(255,255,255,0.72);font-size:0.82em;line-height:1.35;text-align:center;`(description)
+      )
   )
 })
 

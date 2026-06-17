@@ -1,7 +1,8 @@
 import { ClockComponent } from "./clock/clock.tag"
-import { iframe, img, a, br, div, h2, small, style, tag, callback, noElement } from "taggedjs"
+import { iframe, img, a, br, button, div, h2, small, style, tag, callback, noElement } from "taggedjs"
 import { topNavBar } from "./ui/topNav.tag"
 import { publicNavButtons } from "./ui/publicNavButtons.tag"
+import { publicFooter } from "./ui/publicFooter.tag"
 import { loadNextMeetupDate } from "./firebase"
 
 let meetupLoaded = false
@@ -9,6 +10,11 @@ let meetupLoaded = false
 export const homeTag = tag(() => (
   clickCount = 0,
   showSticker = true,
+  showAwards = false,
+  showMeetups = false,
+  showYoutube = false,
+  showLinks = false,
+  showMerch = false,
   nextMeetupDate = Date.now() - 1000,
   refreshMeetup = callback(() => {}),
   __ = setTimeout(callback(() => showSticker = false), 5000),
@@ -148,6 +154,65 @@ export const homeTag = tag(() => (
       }
       .section-anchor {
         scroll-margin-top: 70px;
+      }
+      .fold-section-toggle {
+        width: min(920px, calc(100% - 2em));
+        margin: 0 auto;
+        padding: 0.8em 1em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1em;
+        border: 1px solid rgba(255,255,255,0.24);
+        border-radius: 12px;
+        background:
+          linear-gradient(90deg, rgba(255,0,128,0.18), rgba(0,255,255,0.12)),
+          rgba(0,0,0,0.55);
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 14px 36px rgba(0,0,0,0.32);
+      }
+      .fold-section-toggle:hover {
+        border-color: rgba(255,255,255,0.42);
+        background:
+          linear-gradient(90deg, rgba(255,0,128,0.24), rgba(0,255,255,0.18)),
+          rgba(0,0,0,0.62);
+      }
+      .fold-section-toggle .hero-text {
+        margin: 0;
+      }
+      .fold-section-icon {
+        width: 2.2em;
+        height: 2.2em;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.22);
+        font-size: 0.8em;
+      }
+      .fold-section-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.55em;
+        flex: 0 0 auto;
+      }
+      .fold-section-badge {
+        min-width: 3.2em;
+        padding: 0.35em 0.55em;
+        border-radius: 999px;
+        background: rgba(246,193,119,0.16);
+        border: 1px solid rgba(246,193,119,0.36);
+        color: #f6c177;
+        font-size: 0.8em;
+        font-weight: 900;
+        line-height: 1;
+        text-align: center;
+      }
+      .fold-section-content {
+        overflow: hidden;
       }
     `),
     img
@@ -316,22 +381,83 @@ export const homeTag = tag(() => (
     br,
     br,
     br,
-    div
-      .class`bounce-in section-anchor`
-      .attr('id', 'links')
-      .style`--fx-index:5; display: flex; align-items: center; margin: 1em 0;`(
-        div
-          .style`flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));`,
-      small
-        .style`padding: 0 1em; color: rgba(255,255,255,0.8); white-space: nowrap;`('links'),
-      div
-        .style`
-          flex: 1;
-          height: 1px;
-          background: linear-gradient(270deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));
-        `,
+    div.class`bounce-in section-anchor`.attr('id', 'merch').style`--fx-index:3;`(
+      button
+        .type`button`
+        .class`fold-section-toggle`
+        .attr('aria-expanded', _=> showMerch ? 'true' : 'false')
+        .onClick(() => showMerch = !showMerch)(
+          h2.class`hero-text`('👕 PINBALL MERCH & MORE'),
+          div.class`fold-section-icon`(_=> showMerch ? '▲' : '▼')
+        )
     ),
-    div.style`display:flex;flex-wrap:wrap;gap:1em;justify-content: center;`(
+    _=> showMerch ? div.class`merch-section bounce-in fold-section-content`.style`--fx-index:2;`(
+      div.style`display: flex; flex-direction: column; align-items: center; gap: 3em;`(
+        div.style`display: flex; flex-direction: column; align-items: center; gap: 1em;`(
+          div.class`merch-item`.style`max-width: 900px; margin: 0 auto;`(
+            a.href`https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003`.attr('target', '_blank')(
+              img.attr('src', 'assets/media/wrong_kong_shirts.jpg').attr('alt', 'Wrong Kong Shirt')
+            )
+          ),
+          a
+            .attr('target', '_blank')
+            .href`https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003`
+            .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
+            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
+              "Get your 'Wrong Kong!' T-Shirt"
+            ),
+          a
+            .attr('target', '_blank')
+            .href`https://buy.stripe.com/5kQdR11My7XGbnPePf00005`
+            .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
+            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
+              '🇦🇺 Wrong Kong for Australia residents'
+            )
+        ),
+        div.style`display: flex; flex-direction: column; align-items: center; gap: 1em;`(
+          div.class`merch-item`.style`max-width: 900px; margin: 0 auto;`(
+            a.href`https://buy.stripe.com/5kA4j775zaRsdHy9AA`.attr('target', '_blank')(
+              img.attr('src', 'assets/media/merch-on-glass.jpg').attr('alt', 'Pinball Merchandise')
+            )
+          ),
+          a
+            .attr('target', '_blank')
+            .href`https://buy.stripe.com/5kA4j775zaRsdHy9AA`
+            .class`bounce-in`
+            .style`--fx-index: 9; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
+            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
+              'More guns than Wick T-shirt'
+            )
+        )
+      ),
+      div.style`text-align: center; margin-top: 2em; display: flex; flex-direction: column; gap: 2em; align-items: center;`(
+        a
+          .attr('target', '_blank')
+          .href`https://silverballswag.com/collections/cary-hardy`
+          .class`bounce-in`
+          .style`--fx-index: 9; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
+          .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
+          .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
+            'SHOP SILVERBALL SWAG'
+          )
+      )
+    ) : '',
+
+    br,
+    div.class`bounce-in section-anchor`.attr('id', 'links').style`--fx-index:4;`(
+      button
+        .type`button`
+        .class`fold-section-toggle`
+        .attr('aria-expanded', _=> showLinks ? 'true' : 'false')
+        .onClick(() => showLinks = !showLinks)(
+          h2.class`hero-text`('🔗 LINKS'),
+          div.class`fold-section-icon`(_=> showLinks ? '▲' : '▼')
+        )
+    ),
+    _=> showLinks ? div.class`fold-section-content`.style`display:flex;flex-wrap:wrap;gap:1em;justify-content: center;padding-top:1em;`(
       a.href`https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA`.class`bounce-in link-icon`.style`--fx-index: 2;`(
         img
           .attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAA3ElEQVR4Ae2WIQzDIBBFEdPV6Ip6L2Y3Me9NMzuB98GbWrysqHf1otWYismm+vYFTRCEhXXjJrjkmSslLwHgi8vjxkoRKAL/J0BCSHAHGhjQgxHMwIKnY/Px+taNHd2/Bmg3p4wKuIH0Y1RQAB+ugDJxDgn0GQVMSMBmFJhDApSTYwLLQtR13xNAo0oWINS6ErXtpxInX0CmC3g1TURNkypQ+QL1IYG9hiFFRPIL8C8B/ybkO4bsFxH7Vcz+GLE/x5yBRL+LZDVQkTi2Ochn70dimQpFspKKi0AReAF/IVUTZ3/BGQAAAABJRU5ErkJggg==')
@@ -376,90 +502,40 @@ export const homeTag = tag(() => (
       ),
       a.href`https://www.facebook.com/hardypinball`.class`bounce-in link-icon`.style`--fx-index: 8;`(
         img
-          .attr('src', 'data:image/png;base64,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')
+          .attr('src', 'https://cdn-icons-png.flaticon.com/256/124/124010.png')
           .attr('alt', 'Facebook')
           .class`hover-spin`
           .style`width:10vw;max-width:60px;border-radius: 50%;`
       )
-    ),
+    ) : '',
+
     br,
-    br,
-    br,
-    div.class`bounce-in section-anchor`.attr('id', 'merch').style`--fx-index:8;`(
-      h2.class`hero-text`('PINBALL MERCH & MORE')
-    ),
-    div.class`merch-section bounce-in`.style`--fx-index:9;`(
-      div.style`display: flex; flex-direction: column; align-items: center; gap: 3em;`(
-        div.style`display: flex; flex-direction: column; align-items: center; gap: 1em;`(
-          div.class`merch-item`.style`max-width: 900px; margin: 0 auto;`(
-            a.href`https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003`.attr('target', '_blank')(
-              img.attr('src', 'assets/media/wrong_kong_shirts.jpg').attr('alt', 'Wrong Kong Shirt')
-            )
-          ),
-          a
-            .attr('target', '_blank')
-            .href`https://buy.stripe.com/eVq14f9f01zi3Vn7mN00003`
-            .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
-            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
-            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
-              "Get your 'Wrong Kong!' T-Shirt"
-            ),
-          a
-            .attr('target', '_blank')
-            .href`https://buy.stripe.com/5kQdR11My7XGbnPePf00005`
-            .style`display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
-            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
-            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
-              '🇦🇺 Wrong Kong for Australia residents'
-            )
-        ),
-        div.style`display: flex; flex-direction: column; align-items: center; gap: 1em;`(
-          div.class`merch-item`.style`max-width: 900px; margin: 0 auto;`(
-            a.href`https://buy.stripe.com/5kA4j775zaRsdHy9AA`.attr('target', '_blank')(
-              img.attr('src', 'assets/media/merch-on-glass.jpg').attr('alt', 'Pinball Merchandise')
-            )
-          ),
-          a
-            .attr('target', '_blank')
-            .href`https://buy.stripe.com/5kA4j775zaRsdHy9AA`
-            .class`bounce-in`
-            .style`--fx-index: 11; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
-            .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
-            .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
-              'More guns than Wick T-shirt'
-            )
+    div.class`bounce-in section-anchor`.attr('id', 'games').style`--fx-index:5;`(
+      a
+        .href`/lineup.html`
+        .class`fold-section-toggle`
+        .style`text-decoration:none;box-sizing:border-box;`(
+          h2.class`hero-text`('🎮 GAMES')
         )
-      ),
-      div.style`text-align: center; margin-top: 2em; display: flex; flex-direction: column; gap: 2em; align-items: center;`(
-        a
-          .attr('target', '_blank')
-          .href`https://silverballswag.com/collections/cary-hardy`
-          .class`bounce-in`
-          .style`--fx-index: 12; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
-          .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
-          .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
-            'SHOP SILVERBALL SWAG'
+    ),
+
+    br,
+    div.class`bounce-in section-anchor`.attr('id', 'youtube').style`--fx-index:5;`(
+      button
+        .type`button`
+        .class`fold-section-toggle`
+        .attr('aria-expanded', _=> showYoutube ? 'true' : 'false')
+        .onClick(() => showYoutube = !showYoutube)(
+          h2.class`hero-text`('📺 YOUTUBE CHANNEL'),
+          div.class`fold-section-actions`(
+            div.class`fold-section-badge`('+12K subs'),
+            div.class`fold-section-icon`(_=> showYoutube ? '▲' : '▼')
           )
-      )
+        )
     ),
     br,
-    br,
-    div.class`bounce-in section-anchor`.attr('id', 'youtube').style`--fx-index:5; display: flex; align-items: center; margin: 1em 0;`(
-      div
-        .style`flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));`,
-      small.style`padding: 0 1em; white-space: nowrap;`(
-        a
-          .href`https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA`
-          .attr('target', '_blank')
-          .style`color: rgba(255,255,255,0.8); text-decoration: underline; text-underline-offset: 2px;`(
-            'youtube channel'
-          )
-      ),
-      div
-        .style`flex: 1; height: 1px; background: linear-gradient(270deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));`
-    ),
-    div.style`text-align: center;`(
-      div.class`bounce-in`.style`max-width: 900px;margin: auto;--fx-index:12`(
+    _=> showYoutube ? div.class`fold-section-content`.style`text-align: center; margin-top: 2em;`(
+      div.class`bounce-in`.style`max-width: 900px;padding-top:1em;margin:auto;--fx-index:2`(
         iframe
           .attr('src', 'https://www.youtube.com/embed/JFkiAk44Ntk')
           .attr('frameborder', '0')
@@ -471,7 +547,7 @@ export const homeTag = tag(() => (
           .attr('target', '_blank')
           .href`https://www.youtube.com/channel/UCZ3ah82h0PMiGIRf_rt0cNA`
           .class`bounce-in`
-          .style`--fx-index: 13; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
+          .style`--fx-index: 5; display: inline-block; padding: 1em 2em; background: linear-gradient(45deg, #ff0080, #00ffff); border-radius: 50px; color: white; text-decoration: none; font-weight: bold; transition: all 0.3s ease; min-width: min(250px, calc(100vw - 2.5em)); text-align: center;`
           .onMouseOver((e: any) => e.target.style.transform = 'scale(1.1)')
           .onMouseOut((e: any) => e.target.style.transform = 'scale(1)')(
             'Goto My Channel'
@@ -479,62 +555,64 @@ export const homeTag = tag(() => (
       ),
       br,
       br,
-      br,
-      br,
-      div.class`fade-in`.style`--fx-index:16`(
+    ) : '',
+    div.class`fade-in`.style`--fx-index:6`(
         _=> Date.now() < nextMeetupDate && noElement(
-          div.class`bounce-in`.style`--fx-index:5; display: flex; align-items: center; margin: 1em 0;`(
-            div
-              .style`flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));`,
-            small.style`padding: 0 1em; color: rgba(255,255,255,0.8); white-space: nowrap;`('live meetups'),
-            div.style`flex: 1; height: 1px; background: linear-gradient(270deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.5));`,
+          div.class`bounce-in section-anchor`.attr('id', 'live-meetups').style`--fx-index:5;`(
+            button
+              .type`button`
+              .class`fold-section-toggle`
+              .attr('aria-expanded', _=> showMeetups ? 'true' : 'false')
+              .onClick(() => showMeetups = !showMeetups)(
+                h2.class`hero-text`('🗓️ LIVE MEETUPS'),
+                div.class`fold-section-actions`(
+                  div.class`fold-section-badge`(_=> daysUntilLabel(nextMeetupDate)),
+                  div.class`fold-section-icon`(_=> showMeetups ? '▲' : '▼')
+                )
+              )
           ),
-          div.style`margin-top: 2em; display: flex; flex-wrap: wrap; justify-content: center; gap: 2em;`(
-            div.class`bounce-in`.style`--fx-index:17; position: relative; max-width: 500px; width: 90%; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(255,0,100,0.3), 0 15px 40px rgba(0,255,255,0.2); transform: perspective(1000px) rotateX(2deg);`(
-              div.style`position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, rgba(255,0,100,0.2), rgba(0,255,255,0.2), rgba(255,0,100,0.2)); animation: shimmer 4s infinite;`,
-              img
-                .attr('src', 'assets/media/meetup-screenshot.jpg')
-                .attr('alt', 'Pinball Community Live Meetup')
-                .style`width: 100%; height: auto; display: block; position: relative; z-index: 1;`,
-              div.style`position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5em; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 2;`(
-                div.style`color: white; font-weight: bold; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-size: 1.1em;`('Monthly Live Meetups')
+          _=> showMeetups ? div.class`fold-section-content bounce-in`.style`--fx-index:2;`(
+            div.style`margin-top: 2em; display: flex; flex-wrap: wrap; justify-content: center; gap: 2em;`(
+              div.style`position: relative; max-width: 500px; width: 90%; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(255,0,100,0.3), 0 15px 40px rgba(0,255,255,0.2); transform: perspective(1000px) rotateX(2deg);`(
+                div.style`position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, rgba(255,0,100,0.2), rgba(0,255,255,0.2), rgba(255,0,100,0.2)); animation: shimmer 4s infinite;`,
+                img
+                  .attr('src', 'assets/media/meetup-screenshot.jpg')
+                  .attr('alt', 'Pinball Community Live Meetup')
+                  .style`width: 100%; height: auto; display: block; position: relative; z-index: 1;`,
+                div.style`position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5em; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 2;`(
+                  div.style`color: white; font-weight: bold; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-size: 1.1em;`('Monthly Live Meetups')
+                )
+              ),
+              div.style`position: relative; max-width: 500px; width: 90%; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,255,255,0.3), 0 15px 40px rgba(255,0,100,0.2); transform: perspective(1000px) rotateX(-2deg);`(
+                div
+                  .style`position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, rgba(0,255,255,0.2), rgba(255,0,100,0.2), rgba(0,255,255,0.2)); animation: shimmer 4s infinite; animation-delay: 2s;`,
+                img
+                  .attr('src', 'assets/media/meetup-screenshot2.jpg')
+                  .attr('alt', 'Pinball Community Live Meetup 2')
+                  .style`width: 100%; height: auto; display: block; position: relative; z-index: 1;`,
+                div.style`position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5em; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 2;`(
+                  div.style`color: white; font-weight: bold; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-size: 1.1em;`('Live Discussion & Q&A')
+                )
               )
             ),
-            div.class`bounce-in`.style`--fx-index:18; position: relative; max-width: 500px; width: 90%; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,255,255,0.3), 0 15px 40px rgba(255,0,100,0.2); transform: perspective(1000px) rotateX(-2deg);`(
-              div
-                .style`position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, rgba(0,255,255,0.2), rgba(255,0,100,0.2), rgba(0,255,255,0.2)); animation: shimmer 4s infinite; animation-delay: 2s;`,
-              img
-                .attr('src', 'assets/media/meetup-screenshot2.jpg')
-                .attr('alt', 'Pinball Community Live Meetup 2')
-                .style`width: 100%; height: auto; display: block; position: relative; z-index: 1;`,
-              div.style`position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5em; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 2;`(
-                div.style`color: white; font-weight: bold; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-size: 1.1em;`('Live Discussion & Q&A')
-              )
+            div.style`margin-top: 2em;`(
+              _=> ClockComponent({date: nextMeetupDate, showLearnMore: true})
             )
-          ),
-          div.style`margin-top: 2em;`(
-            _=> ClockComponent({date: nextMeetupDate, showLearnMore: true})
-          )
+          ) : ''
         )
       ),
       br,
-      br,
-      br,
-      br,
-      img
-        .class`bounce-in reflection`
-        .attr('alt', 'Cary Hardy logo')
-        .attr('src', 'https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png')
-        .style`--fx-index:12;width: 55vw;min-width: 200px;max-width: 400px;`,
-      br,
-      br,
-      br,
-      br,
-      br,
-      div.class`bounce-in section-anchor`.attr('id', 'awards').style`--fx-index:13;`(
-        h2.class`hero-text`('AWARD WINNING WORK & CONTENT')
+      div.class`bounce-in section-anchor`.attr('id', 'awards').style`--fx-index:7;`(
+        button
+          .type`button`
+          .class`fold-section-toggle`
+          .attr('aria-expanded', _=> showAwards ? 'true' : 'false')
+          .onClick(() => showAwards = !showAwards)(
+            h2.class`hero-text`('🏆 AWARD WINNING WORK & CONTENT'),
+            div.class`fold-section-icon`(_=> showAwards ? '▲' : '▼')
+          )
       ),
-      div.class`merch-section bounce-in`.style`margin: 2em auto; --fx-index:13;`(
+      _=> showAwards ? div.class`merch-section bounce-in fold-section-content`.style`margin: 2em auto; --fx-index:2;`(
         div.style`display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 2em; margin: 1em 0;`(
           div.style`flex: 0 1 calc(90% - 1.5em); min-width: min(250px, calc(100vw - 2.5em)); max-width: 500px; max-height: 600px; overflow: hidden;`(
             img
@@ -600,21 +678,20 @@ export const homeTag = tag(() => (
             small.style`color: white; display: block; text-align: center;`('TPF 2022')
           )
         )
-      ),
+      ) : '',
       br,
       br,
-      br,
-      br,
-      div(
-        '📧',
-        a
-          .href`mailto:hardypinball@gmail.com?subject=website contact&body=Hello, found your email through your website%0A%0A%0A`
-          .style`color:white`('hardypinball@gmail.com')
-      ),
-      br,
-      br,
-      br,
-      br
-    )
+      img
+        .class`bounce-in reflection`
+        .attr('alt', 'Cary Hardy logo')
+        .attr('src', 'https://cdn.shopify.com/s/files/1/0255/0271/1853/collections/Front_1200x1200.png')
+        .style`--fx-index:8;width: 55vw;min-width: 200px;max-width: 400px;`,
+
+    _=> publicFooter()
   )
 ))
+
+const daysUntilLabel = (dateValue: number) => {
+  const days = Math.max(0, Math.ceil((dateValue - Date.now()) / (24 * 60 * 60 * 1000)))
+  return `${days}d`
+}

@@ -49,7 +49,7 @@ const gameSelectOptions = (
   return [
     option.value``(_=> selectPlaceholder(games, isLoaded)),
     !selectedGameExists
-      ? option.value`${selectedGameId}`(selectedGameId)
+      ? option.value`${selectedGameId}`(`Missing game: ${selectedGameId}`)
       : '',
     groups.map(({ manufacturer, items }) =>
       optgroup.label(manufacturer)(

@@ -139,6 +139,12 @@ export const manufacturersAdminPage = tag((onSignedOut) => {
 
   const validateManufacturer = () => {
     const nextFieldErrors: Record<string, string> = {}
+    const nextManufacturerId = (editManufacturer.id || '').trim()
+    if (editingId && !nextManufacturerId) nextFieldErrors.id = 'Manufacturer ID is required.'
+    if (editingId && nextManufacturerId.includes('/')) nextFieldErrors.id = 'Manufacturer ID cannot include /.'
+    if (editingId && nextManufacturerId !== editingId && (manufacturers || []).some((manufacturer) => manufacturer.id === nextManufacturerId)) {
+      nextFieldErrors.id = 'A manufacturer with this ID already exists.'
+    }
     if (!editManufacturer.name.trim()) nextFieldErrors.name = 'Manufacturer Name is required.'
     fieldErrors = nextFieldErrors
     const messages = Object.values(nextFieldErrors)
@@ -158,7 +164,7 @@ export const manufacturersAdminPage = tag((onSignedOut) => {
     fieldErrors = {}
     const manufacturerToSave = {
       ...editManufacturer,
-      id: editingId || undefined,
+      id: editingId ? (editManufacturer.id || '').trim() : undefined,
       name: editManufacturer.name.trim(),
       logoUrl: (editManufacturer.logoUrl || '').trim(),
       opinions: (editManufacturer.opinions || '').trim(),
@@ -167,12 +173,18 @@ export const manufacturersAdminPage = tag((onSignedOut) => {
 
     return upsertManufacturer(manufacturerToSave)
       .then((result: any) => {
-        const manufacturerId = savedEditingId || result?.id
+        const manufacturerId = manufacturerToSave.id || savedEditingId || result?.id
         if (manufacturerId) {
           updateManufacturerInList(manufacturerId, manufacturerToSave)
         }
+        if (savedEditingId && manufacturerId && manufacturerId !== savedEditingId) {
+          return deleteManufacturer(savedEditingId)
+        }
+      })
+      .then(() => {
         isSaving = false
         closeModal()
+        return refreshManufacturers()
       })
       .catch((error) => {
         console.error('Failed to save manufacturer', error)
@@ -222,7 +234,7 @@ export const manufacturersAdminPage = tag((onSignedOut) => {
     topNavBar(() => adminNavButtons(signoutClick)),
     div.class`admin-crud-page`(
       div.class`admin-crud-header`(
-        h3('Manufacturers Database'),
+        h3('🏭 Manufacturers Database'),
         button.type`button`.class`admin-pill-button`.onClick(openAdd)('Add')
       ),
       div.class`admin-crud-card`(
@@ -257,6 +269,7 @@ export const manufacturersAdminPage = tag((onSignedOut) => {
               editManufacturer = nextManufacturer
               fieldErrors = {
                 ...fieldErrors,
+                id: nextManufacturer.id?.trim() ? '' : fieldErrors.id,
                 name: nextManufacturer.name?.trim() ? '' : fieldErrors.name,
               }
             },
@@ -351,9 +364,15 @@ const manufacturerModal = tag(({
   const updateManufacturer = (patch: Partial<ManufacturerInput>) => onChange({ ...editManufacturer, ...patch })
   const invalidBorder = (fieldName: string) => fieldErrors[fieldName] ? '#f87171' : 'rgba(255,255,255,0.2)'
   const labelColor = (fieldName: string) => fieldErrors[fieldName] ? '#fca5a5' : 'inherit'
+  const submitOnEnter = (event: any) => {
+    if (event.key !== 'Enter' || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) return
+    if (String(event.target?.tagName || '').toLowerCase() === 'textarea') return
+    event.preventDefault()
+    onSave()
+  }
 
   return div.class`admin-crud-modal-backdrop`(
-    div.class`admin-crud-modal`(
+    div.class`admin-crud-modal`.onKeyDown(submitOnEnter)(
       div.style`display:flex;justify-content:space-between;gap:1em;align-items:flex-start;`(
         div(
           h3.style`margin:0;`(isEditing ? 'Edit Manufacturer' : 'Add Manufacturer'),
@@ -368,6 +387,18 @@ const manufacturerModal = tag(({
           )
         : '',
       div.class`admin-crud-form-grid`.style`margin-top:1em;`(
+        _ => isEditing
+          ? [
+              label.attr('style.color', _ => labelColor('id'))('Manufacturer ID'),
+              div.style`display:grid;gap:0.28em;`(
+                input.type`text`.value(_ => editManufacturer.id || '').onInput((event: any) => {
+                  updateManufacturer({ id: event?.target?.value || '' })
+                }).attr('aria-invalid', _ => fieldErrors.id ? 'true' : 'false').attr('title', _ => fieldErrors.id || '').attr('style.borderColor', _ => invalidBorder('id'))(),
+                small.style`color:#f6c177;line-height:1.35;`('Changing this value can change or break links to this manufacturer.')
+              ),
+            ]
+          : '',
+
         label.attr('style.color', _ => labelColor('name'))('Manufacturer Name'),
         input.type`text`.value(_ => editManufacturer.name || '').onInput((event: any) => {
           updateManufacturer({ name: event?.target?.value || '' })
@@ -389,7 +420,7 @@ const manufacturerModal = tag(({
           button.type`button`.class`admin-secondary-button`.attr('disabled', _ => isSaving ? 'disabled' : null).onClick(onCancel)('Cancel')
         ),
         _ => isEditing
-          ? button.type`button`.class`admin-danger-button`.attr('disabled', _ => isDeleting ? 'disabled' : null).onClick(onDelete)(_ => isDeleting ? 'Deleting...' : 'Delete')
+          ? button.type`button`.class`admin-danger-button`.attr('disabled', _ => isDeleting ? 'disabled' : null).onClick(onDelete)(_ => isDeleting ? '🗑️ Deleting...' : '🗑️ Delete')
           : ''
       )
     )

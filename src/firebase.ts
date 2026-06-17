@@ -33,6 +33,7 @@ import type { CurrentGameInput } from "./currentGames.types"
 import type { GameRatingInput } from "./gameRatings.types"
 import type { GameInput } from "./games.types"
 import type { ManufacturerInput } from "./manufacturers.types"
+import type { PastOwnedGameInput, PinsideHistoryGame } from "./pastOwnedGames.types"
 
 let app: ReturnType<typeof initializeApp> | null = null
 let auth: ReturnType<typeof getAuth> | null = null
@@ -80,6 +81,8 @@ const getGameRatingsCollection = () => collection(getDb(), "gameRatings")
 const getGameRatingDoc = (gameId: string) => doc(getDb(), "gameRatings", gameId)
 const getCurrentGamesCollection = () => collection(getDb(), "currentGames")
 const getCurrentGameDoc = (gameId: string) => doc(getDb(), "currentGames", gameId)
+const getPastOwnedGamesCollection = () => collection(getDb(), "pastOwnedGames")
+const getPastOwnedGameDoc = (gameId: string) => doc(getDb(), "pastOwnedGames", gameId)
 
 const normalizeEmail = (email = "") => email.trim().toLowerCase()
 
@@ -393,11 +396,13 @@ export const upsertGame = async (game: GameInput) => {
     )
   }
 
-  return addDoc(getGamesCollection(), {
+  const gameId = await nextAvailableGameId(payload.title)
+  await setDoc(getGameDoc(gameId), {
     ...payload,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   })
+  return { id: gameId }
 }
 
 export const deleteGame = async (gameId: string) => {
@@ -557,6 +562,135 @@ export const deleteCurrentGame = async (gameId: string) => {
   return true
 }
 
+export const listenPastOwnedGames$ = () => {
+  const games$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    getPastOwnedGamesCollection(),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      } as { id: string } & Record<string, any>))
+      games$.next(sortPastOwnedGames(items))
+    },
+    (error) => {
+      console.error("Failed to listen to past owned games", error)
+    }
+  )
+
+  ;(games$ as any).unsubscribe = unsubscribe
+  return games$
+}
+
+export const listenVisiblePastOwnedGames$ = () => {
+  const games$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>([])
+  const unsubscribe = onSnapshot(
+    query(getPastOwnedGamesCollection(), where("isVisible", "==", true)),
+    (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      } as { id: string } & Record<string, any>))
+      games$.next(sortPastOwnedGames(items))
+    },
+    (error) => {
+      console.error("Failed to listen to visible past owned games", error)
+    }
+  )
+
+  ;(games$ as any).unsubscribe = unsubscribe
+  return games$
+}
+
+export const listPastOwnedGames = async () => {
+  const snapshot = await getDocs(getPastOwnedGamesCollection())
+  const items = snapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    ...docSnapshot.data(),
+  } as { id: string } & Record<string, any>))
+  return sortPastOwnedGames(items)
+}
+
+export const upsertPastOwnedGame = async (game: PastOwnedGameInput) => {
+  const payload = cleanPastOwnedGamePayload(game)
+
+  if (game.id) {
+    return setDoc(
+      getPastOwnedGameDoc(game.id),
+      {
+        ...payload,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+  }
+
+  return addDoc(getPastOwnedGamesCollection(), {
+    ...payload,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export const deletePastOwnedGame = async (gameId: string) => {
+  if (!gameId) return false
+  await deleteDoc(getPastOwnedGameDoc(gameId))
+  return true
+}
+
+export const syncPastOwnedGamesFromPinside = async (
+  pinsideGames: PinsideHistoryGame[],
+  gameLibrary: Array<{ id: string } & Record<string, any>> = []
+) => {
+  const existing = await listPastOwnedGames()
+  const existingKeys = new Set(existing.flatMap((game) => pastOwnedGameKeys(game)))
+  const libraryByTitle = createGameTitleMap(gameLibrary)
+  let added = 0
+  let skipped = 0
+
+  for (const pinsideGame of pinsideGames) {
+    const title = (pinsideGame.title || "").trim()
+    if (!title) {
+      skipped += 1
+      continue
+    }
+
+    const keys = pastOwnedGameKeys(pinsideGame)
+    const exists = keys.some((key) => existingKeys.has(key))
+    if (exists) {
+      skipped += 1
+      continue
+    }
+
+    const libraryGame = await ensureCanonicalGameForPastOwned({
+      title,
+      manufacturer: pinsideGame.manufacturer || "",
+      yearReleased: pinsideGame.yearReleased ?? null,
+      imageUrl: pinsideGame.imageUrl || "",
+      notes: pinsideGame.pinsideUrl ? `Imported from ${pinsideGame.pinsideUrl}` : "",
+    }, libraryByTitle)
+    await upsertPastOwnedGame({
+      gameId: libraryGame.id,
+      title: "",
+      imageUrl: "",
+      manufacturer: "",
+      yearReleased: null,
+      dateAddedToCollection: pinsideGame.dateAddedToCollection || "",
+      dateRemovedFromCollection: pinsideGame.dateRemovedFromCollection || "",
+      notes: "",
+      isVisible: true,
+      pinsideUrl: pinsideGame.pinsideUrl || "",
+      pinsideId: pinsideGame.pinsideId || "",
+      sourceTitle: title,
+      source: "pinside",
+    })
+    keys.forEach((key) => existingKeys.add(key))
+    added += 1
+  }
+
+  return { added, skipped, total: pinsideGames.length }
+}
+
 const cleanCurrentGamePayload = (game: CurrentGameInput) => {
   const payload: Record<string, any> = {
     gameId: (game.gameId || "").trim(),
@@ -575,13 +709,48 @@ const cleanCurrentGamePayload = (game: CurrentGameInput) => {
   return payload
 }
 
+const cleanPastOwnedGamePayload = (game: PastOwnedGameInput) => {
+  const payload: Record<string, any> = {
+    gameId: (game.gameId || "").trim(),
+    title: (game.title || "").trim(),
+    dateAddedToCollection: (game.dateAddedToCollection || "").trim(),
+    dateRemovedFromCollection: (game.dateRemovedFromCollection || "").trim(),
+    notes: (game.notes || "").trim(),
+    isVisible: game.isVisible !== false,
+    pinsideUrl: (game.pinsideUrl || "").trim(),
+    pinsideId: (game.pinsideId || "").trim(),
+    sourceTitle: (game.sourceTitle || "").trim(),
+    source: (game.source || "").trim(),
+  }
+
+  if (game.imageUrl) payload.imageUrl = game.imageUrl.trim()
+  if (game.manufacturer) payload.manufacturer = game.manufacturer.trim()
+  if (typeof game.yearReleased === "number" && !Number.isNaN(game.yearReleased)) {
+    payload.yearReleased = game.yearReleased
+  } else {
+    payload.yearReleased = null
+  }
+
+  return payload
+}
+
 const cleanGamePayload = (game: GameInput) => {
+  const dataLinks = Array.isArray(game.dataLinks)
+    ? game.dataLinks
+        .map((link) => ({
+          title: (link?.title || "").trim(),
+          url: (link?.url || "").trim(),
+        }))
+        .filter((link) => link.title || link.url)
+    : []
+
   const payload: Record<string, any> = {
     title: (game.title || "").trim(),
     manufacturerId: (game.manufacturerId || "").trim(),
     imageUrl: (game.imageUrl || "").trim(),
     manufacturer: (game.manufacturer || "").trim(),
     notes: (game.notes || "").trim(),
+    dataLinks,
   }
 
   if (typeof game.yearReleased === "number" && !Number.isNaN(game.yearReleased)) {
@@ -635,6 +804,14 @@ const sortCurrentGames = <T extends Record<string, any>>(items: T[]) =>
     currentGameDateTime(b.dateAddedToCollection) - currentGameDateTime(a.dateAddedToCollection)
   )
 
+const sortPastOwnedGames = <T extends Record<string, any>>(items: T[]) =>
+  [...items].sort((a, b) => {
+    const dateSort =
+      currentGameDateTime(b.dateRemovedFromCollection || b.dateAddedToCollection) -
+      currentGameDateTime(a.dateRemovedFromCollection || a.dateAddedToCollection)
+    return dateSort || String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" })
+  })
+
 const sortGamesByTitle = <T extends Record<string, any>>(items: T[]) =>
   [...items].sort((a, b) =>
     String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" })
@@ -650,3 +827,89 @@ const sortGameRatings = <T extends Record<string, any>>(items: T[]) =>
     const ratingSort = Number(b.rating || 0) - Number(a.rating || 0)
     return ratingSort || String(a.gameId || "").localeCompare(String(b.gameId || ""), undefined, { sensitivity: "base" })
   })
+
+const normalizeGameTitle = (value: any) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+
+const gameTitleSlug = (value: any) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "game"
+
+const nextAvailableGameId = async (title: string) => {
+  const baseId = gameTitleSlug(title)
+  let nextId = baseId
+  let suffix = 2
+
+  while ((await getDoc(getGameDoc(nextId))).exists()) {
+    nextId = `${baseId}-${suffix}`
+    suffix += 1
+  }
+
+  return nextId
+}
+
+const createGameTitleMap = (games: Array<{ id: string } & Record<string, any>>) =>
+  new Map(
+    games
+      .map((game) => [normalizeGameTitle(game.title), game] as const)
+      .filter(([title]) => title)
+  )
+
+const ensureCanonicalGameForPastOwned = async (
+  game: {
+    title: string
+    manufacturer?: string
+    yearReleased?: number | null
+    imageUrl?: string
+    notes?: string
+  },
+  libraryByTitle: Map<string, { id: string } & Record<string, any>>
+) => {
+  const key = normalizeGameTitle(game.title)
+  const existingGame = libraryByTitle.get(key)
+  if (existingGame) return existingGame
+
+  const newGameRef = await upsertGame({
+    title: game.title,
+    manufacturer: game.manufacturer || "",
+    yearReleased: game.yearReleased ?? null,
+    imageUrl: game.imageUrl || "",
+    notes: game.notes || "",
+  })
+  const createdGame = {
+    id: (newGameRef as any).id,
+    title: game.title,
+    manufacturer: game.manufacturer || "",
+    yearReleased: game.yearReleased ?? null,
+    imageUrl: game.imageUrl || "",
+    notes: game.notes || "",
+  }
+  libraryByTitle.set(key, createdGame)
+  return createdGame
+}
+
+const pastOwnedGameKeys = (game: Partial<PastOwnedGameInput | PinsideHistoryGame>) => {
+  const title = normalizeGameTitle(game.title || game.sourceTitle)
+  const hasSourceKey = Boolean(game.pinsideUrl || game.pinsideId)
+  const hasDateKey = Boolean(game.dateAddedToCollection || game.dateRemovedFromCollection)
+  const dateKey = [
+    title,
+    String(game.dateAddedToCollection || "").trim(),
+    String(game.dateRemovedFromCollection || "").trim(),
+  ].filter(Boolean).join("|")
+  const keys = [
+    game.pinsideUrl ? `url:${String(game.pinsideUrl).trim().toLowerCase()}` : "",
+    game.pinsideId ? `pinside:${String(game.pinsideId).trim().toLowerCase()}` : "",
+    hasDateKey && dateKey ? `history:${dateKey}` : "",
+    !hasSourceKey && !hasDateKey && title ? `title:${title}` : "",
+  ]
+  return keys.filter(Boolean)
+}

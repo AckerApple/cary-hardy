@@ -14,6 +14,7 @@ import {
 } from 'taggedjs'
 import { listenGames$, listenVisibleGameRatings$ } from './firebase'
 import { publicNavButtons } from './ui/publicNavButtons.tag'
+import { publicFooter } from './ui/publicFooter.tag'
 import { ratingBadge } from './ui/ratingBadge.tag'
 import { topNavBar } from './ui/topNav.tag'
 import type { GameRating } from './gameRatings.types'
@@ -329,7 +330,8 @@ export const gameRatingsTag = tag((
             )
           : div.class`ratings-empty`('No public game ratings are visible yet.')
       }
-    )
+    ),
+    publicFooter()
   )
 })
 

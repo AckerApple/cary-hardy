@@ -1,6 +1,7 @@
 import { a, div, h1, h2, h3, img, p, span, tag } from 'taggedjs'
 import { topNavBar } from '../ui/topNav.tag'
 import { publicNavButtons } from '../ui/publicNavButtons.tag'
+import { publicFooter } from '../ui/publicFooter.tag'
 
 const images = [
   '/assets/media/product-images/key-box/IMG_1477.heic.jpeg',
@@ -61,6 +62,7 @@ export const keyBoxPatbTag = tag(() => {
           )
         )
       )
-    )
+    ),
+    publicFooter()
   )
 })

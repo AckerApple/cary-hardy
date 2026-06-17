@@ -22,6 +22,7 @@ import {
   listGameRatings,
   listGames,
   listenGameRatings$,
+  listenGames$,
   signOutUser,
   upsertGameRating,
 } from '../firebase'
@@ -45,6 +46,8 @@ let latestGames: Array<{ id: string } & Record<string, any>> | null = null
 let latestRatings: Array<{ id: string } & Record<string, any>> | null = null
 let ratingsUnsubscribe: (() => void) | null = null
 let ratingsValueUnsubscribe: (() => void) | null = null
+let gamesUnsubscribe: (() => void) | null = null
+let gamesValueUnsubscribe: (() => void) | null = null
 
 export const gameRatingsAdminPageTag = createAdminAuthTag((onSignedOut) => gameRatingsAdminPage(onSignedOut))
 
@@ -78,12 +81,27 @@ export const gameRatingsAdminPage = tag((onSignedOut) => {
 
     const ratings$ = listenGameRatings$()
     ratingsUnsubscribe = (ratings$ as any)?.unsubscribe || null
-    const subscription = ratings$.subscribe((items) => {
+    const subscription = ratings$.subscribe(callback((items) => {
       ratings = items
       latestRatings = items
-      refresh()
-    })
+    }))
     ratingsValueUnsubscribe = () => subscription.unsubscribe()
+  }
+
+  const startGamesListener = () => {
+    if (gamesUnsubscribe) gamesUnsubscribe()
+    if (gamesValueUnsubscribe) gamesValueUnsubscribe()
+    games = null
+    latestGames = null
+    refresh()
+
+    const games$ = listenGames$()
+    gamesUnsubscribe = (games$ as any)?.unsubscribe || null
+    const subscription = games$.subscribe(callback((items) => {
+      games = items
+      latestGames = items
+    }))
+    gamesValueUnsubscribe = () => subscription.unsubscribe()
   }
 
   const refreshRatings = () =>
@@ -233,13 +251,18 @@ export const gameRatingsAdminPage = tag((onSignedOut) => {
   if (!ratingsLoaded) {
     ratingsLoaded = true
     if (!ratingsUnsubscribe) startRatingsListener()
+    if (!gamesUnsubscribe) startGamesListener()
   }
 
   onDestroy(() => {
     if (ratingsUnsubscribe) ratingsUnsubscribe()
     if (ratingsValueUnsubscribe) ratingsValueUnsubscribe()
+    if (gamesUnsubscribe) gamesUnsubscribe()
+    if (gamesValueUnsubscribe) gamesValueUnsubscribe()
     ratingsUnsubscribe = null
     ratingsValueUnsubscribe = null
+    gamesUnsubscribe = null
+    gamesValueUnsubscribe = null
     latestGames = null
     latestRatings = null
     ratingsLoaded = false
@@ -263,7 +286,7 @@ export const gameRatingsAdminPage = tag((onSignedOut) => {
     topNavBar(() => adminNavButtons(signoutClick)),
     div.class`admin-crud-page`(
       div.class`admin-crud-header`(
-        h3('Game Ratings'),
+        h3('⭐ Game Ratings'),
         button.type`button`.class`admin-pill-button`.onClick(openAdd)('Add')
       ),
       div.class`admin-crud-card`(
@@ -463,14 +486,21 @@ const ratingModal = tag(({
         div.style`display:grid;gap:0.6em;`(
           _ => (editRating.videos || []).length
             ? (editRating.videos || []).map((video, index) =>
-                div.style`display:grid;grid-template-columns:1fr 1fr auto;gap:0.5em;align-items:center;`(
-                  input.type`url`.value(_ => video.url || '').attr('placeholder', 'Video URL').onInput((event: any) => {
-                    updateVideo(index, { url: event?.target?.value || '' })
-                  })(),
-                  input.type`text`.value(_ => video.description || '').attr('placeholder', 'Description').onInput((event: any) => {
+                div.style`display:grid;gap:0.45em;border:1px solid rgba(255,255,255,0.12);border-radius:0.55em;padding:0.65em;background:rgba(0,0,0,0.18);`(
+                  div.style`display:grid;grid-template-columns:1fr auto;gap:0.45em;align-items:center;`(
+                    input.type`url`.style`width:100%;`.value(_ => video.url || '').attr('placeholder', 'YouTube video URL').onInput((event: any) => {
+                      updateVideo(index, { url: event?.target?.value || '' })
+                    })(),
+                    _ => video.url
+                      ? a.href`${video.url}`.class`admin-secondary-button`.style`text-decoration:none;`.attr('target', '_blank').attr('rel', 'noopener noreferrer').attr('title', 'Open video link')('🔗')
+                      : ''
+                  ),
+                  input.type`text`.style`width:100%;`.value(_ => video.description || '').attr('placeholder', 'Description').onInput((event: any) => {
                     updateVideo(index, { description: event?.target?.value || '' })
                   })(),
-                  button.type`button`.class`admin-secondary-button`.onClick(() => removeVideo(index))('Remove')
+                  div.style`display:flex;justify-content:flex-end;`(
+                    button.type`button`.class`admin-secondary-button`.onClick(() => removeVideo(index))('🗑️ Remove')
+                  )
                 )
               )
             : small.style`opacity:0.72;`('No videos linked.'),
@@ -491,7 +521,7 @@ const ratingModal = tag(({
           button.type`button`.class`admin-secondary-button`.attr('disabled', _ => isSaving ? 'disabled' : null).onClick(onCancel)('Cancel')
         ),
         _ => isEditing
-          ? button.type`button`.class`admin-danger-button`.attr('disabled', _ => isDeleting ? 'disabled' : null).onClick(onDelete)(_ => isDeleting ? 'Deleting...' : 'Delete')
+          ? button.type`button`.class`admin-danger-button`.attr('disabled', _ => isDeleting ? 'disabled' : null).onClick(onDelete)(_ => isDeleting ? '🗑️ Deleting...' : '🗑️ Delete')
           : ''
       )
     )

@@ -47,7 +47,7 @@ export const adminUsersSection = tag(() => {
             .value(_ => email)
             .onInput((e: any) => onChange(index, e.target.value))
             .style`width:100%`,
-          button.onClick(() => onRemove(index))('remove')
+          button.onClick(() => onRemove(index))('🗑️ remove')
         )
       )
     ),

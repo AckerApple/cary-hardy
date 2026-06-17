@@ -1,0 +1,88 @@
+import { callback, div, h3, img, noElement, output, tag } from 'taggedjs'
+import { loadNextMeetupDate, saveNextMeetupDate, signOutUser } from '../firebase'
+import { topNavBar } from '../ui/topNav.tag'
+import { adminNavButtons } from './adminNavButtons.tag'
+import { createAdminAuthTag } from './adminPageShell.tag'
+import { meetingToolsSection } from './meetingTools.tag'
+import { timestampToValues } from './utils'
+
+let meetupLoaded = false
+let latestMeetupDate: number | null = null
+
+export const meetingToolsAdminPageTag = createAdminAuthTag((onSignedOut) => meetingToolsAdminPage(onSignedOut))
+
+export const meetingToolsAdminPage = tag((onSignedOut) => (
+  nextMeetupDate = latestMeetupDate || Date.now(),
+  { date, time } = timestampToValues(Number(nextMeetupDate))
+) => {
+  meetingToolsAdminPage.inputs(([_onSignedOut]) => {
+    onSignedOut = output(_onSignedOut)
+  })
+
+  const refresh = callback(() => {})
+
+  function updateDateTime() {
+    const nextValues = timestampToValues(Number(nextMeetupDate))
+    date = nextValues.date
+    time = nextValues.time
+  }
+
+  if (!meetupLoaded) {
+    meetupLoaded = true
+    tag.promise = loadNextMeetupDate()
+      .then((loadedDate) => {
+        if (typeof loadedDate === 'number') {
+          nextMeetupDate = loadedDate
+          latestMeetupDate = loadedDate
+          updateDateTime()
+          refresh()
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load next meetup date', error)
+      })
+  }
+
+  const signoutClick = () =>
+    signOutUser()
+      .then(onSignedOut)
+      .catch((error) => {
+        console.error('Failed to sign out', error)
+      })
+
+  const saveMeetupDate = () =>
+    saveNextMeetupDate(Number(nextMeetupDate))
+      .then(() => {
+        latestMeetupDate = Number(nextMeetupDate)
+        alert('saved')
+      })
+      .catch((error) => {
+        console.error('Failed to save meetup date', error)
+      })
+
+  return noElement(
+    topNavBar(() => adminNavButtons(signoutClick)),
+    div.class`admin-crud-page`(
+      div.class`admin-crud-header`(
+        h3(
+          img.src`../assets/media/icon.png`.style`width:40px;margin-right:10px;`,
+          '📅 Meeting Tools'
+        )
+      ),
+      div.class`admin-crud-card`(
+        meetingToolsSection({
+          nextMeetupDate,
+          date,
+          time,
+          onDate: (dateNum) => {
+            nextMeetupDate = dateNum
+            latestMeetupDate = dateNum
+            updateDateTime()
+            refresh()
+          },
+          onSave: saveMeetupDate,
+        })
+      )
+    )
+  )
+})

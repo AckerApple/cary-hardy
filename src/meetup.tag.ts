@@ -3,6 +3,7 @@ import { a, b, br, button, div, h1, h2, li, noElement, p, span, tag, tagElement,
 import { loadNextMeetupDate } from "./firebase"
 import { topNavBar } from './ui/topNav.tag'
 import { publicNavButtons } from './ui/publicNavButtons.tag'
+import { publicFooter } from './ui/publicFooter.tag'
 
 const img = htmlTag('img')
 let meetupLoaded = false
@@ -114,6 +115,7 @@ export const meetupTag = tag(() => {
           button.type`button`('🔙 home')
         )
       )
-    )
+    ),
+    publicFooter()
   )
 })

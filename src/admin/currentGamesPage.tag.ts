@@ -328,7 +328,7 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
     topNavBar(() => adminNavButtons(signoutClick)),
     div.class`admin-crud-page`(
       div.class`admin-crud-header`(
-        h3('Current Game Lineup'),
+        h3('🎮 Current Game Lineup'),
         button.type`button`.class`admin-pill-button`.onClick(openAdd)('Add')
       ),
       div.class`admin-crud-card`(
@@ -549,7 +549,7 @@ const currentGameModal = tag(({
               .type`button`
               .class`admin-danger-button`
               .attr('disabled', _ => isDeleting ? 'disabled' : null)
-              .onClick(onDelete)(_ => isDeleting ? 'Deleting...' : 'Delete')
+              .onClick(onDelete)(_ => isDeleting ? '🗑️ Deleting...' : '🗑️ Delete')
           : ''
       )
     )
