@@ -452,16 +452,65 @@ const resolvePastOwnedGame = (
   pastOwnedGame: PastOwnedGame,
   gameLibrary: Array<{ id: string } & Record<string, any>>
 ) => {
-  const libraryGame = gameLibrary.find((game) => game.id === pastOwnedGame.gameId)
+  const libraryGame = findGameByPastOwnedGame(gameLibrary, pastOwnedGame)
   return {
     ...pastOwnedGame,
     title: libraryGame?.title || pastOwnedGame.title || pastOwnedGame.sourceTitle || '',
-    imageUrl: libraryGame?.imageUrl || pastOwnedGame.imageUrl || '',
+    imageUrl: bestGameImageUrl(libraryGame, pastOwnedGame),
     manufacturer: libraryGame?.manufacturer || pastOwnedGame.manufacturer || '',
     yearReleased: libraryGame?.yearReleased ?? pastOwnedGame.yearReleased ?? null,
     isMissingGame: Boolean(pastOwnedGame.gameId && !libraryGame),
   } as PastOwnedGame
 }
+
+const findGameByPastOwnedGame = (
+  gameLibrary: Array<{ id: string } & Record<string, any>>,
+  pastOwnedGame: PastOwnedGame
+) =>
+  findGameById(gameLibrary, pastOwnedGame.gameId)
+    || findGameById(gameLibrary, pastOwnedGame.title)
+    || findGameById(gameLibrary, pastOwnedGame.sourceTitle)
+    || null
+
+const findGameById = (
+  gameLibrary: Array<{ id: string } & Record<string, any>>,
+  gameId: any
+) => {
+  const normalizedGameId = normalizeGameId(gameId)
+  const sluggedGameId = slugifyGameId(gameId)
+  if (!normalizedGameId) return null
+
+  return gameLibrary.find((game) => game.id === gameId)
+    || gameLibrary.find((game) => normalizeGameId(game.id) === normalizedGameId)
+    || gameLibrary.find((game) => slugifyGameId(game.id) === sluggedGameId)
+    || gameLibrary.find((game) => slugifyGameId(game.title) === sluggedGameId)
+    || null
+}
+
+const normalizeGameId = (value: any) =>
+  String(value || '').trim().toLowerCase()
+
+const slugifyGameId = (value: any) =>
+  normalizeGameId(value)
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+const bestGameImageUrl = (
+  libraryGame: ({ id: string } & Record<string, any>) | null,
+  record: Record<string, any>
+) =>
+  String(
+    libraryGame?.imageUrl ||
+    libraryGame?.gameImageUrl ||
+    libraryGame?.backglassUrl ||
+    libraryGame?.image ||
+    record.imageUrl ||
+    record.gameImageUrl ||
+    record.backglassUrl ||
+    record.image ||
+    ''
+  ).trim()
 
 const sortPastOwnedGamesByGameId = (games: PastOwnedGame[]) =>
   [...games].sort((a, b) => {

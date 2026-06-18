@@ -316,6 +316,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
       _ => modalOpen
         ? gameModal({
             isEditing: Boolean(editingId),
+            originalGameId: editingId || '',
             editGame,
             manufacturers: manufacturers || [],
             errorMessage,
@@ -438,8 +439,16 @@ const manufacturerLabel = (
 const normalizeManufacturerName = (value: any) =>
   String(value || '').trim().toLowerCase()
 
+const gameImageSearchString = (title: string) => `${title} pinball machine backglass`
+const googleImageSearchUrl = (title: string) =>
+  `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(gameImageSearchString(title))}`
+
+const pinsideMachineUrl = (gameId: string) =>
+  `https://pinside.com/pinball/machine/${encodeURIComponent(gameId)}`
+
 const gameModal = tag(({
   isEditing,
+  originalGameId,
   editGame,
   manufacturers,
   errorMessage,
@@ -452,6 +461,7 @@ const gameModal = tag(({
   onCancel,
 }: {
   isEditing: boolean
+  originalGameId: string
   editGame: GameInput
   manufacturers: Array<{ id: string } & Record<string, any>>
   errorMessage: string
@@ -466,6 +476,7 @@ const gameModal = tag(({
   gameModal.inputs((args) => {
     ;[{
       isEditing,
+      originalGameId,
       editGame,
       manufacturers,
       errorMessage,
@@ -538,7 +549,19 @@ const gameModal = tag(({
                 input.type`text`.value(_ => editGame.id || '').onInput((event: any) => {
                   updateGame({ id: event?.target?.value || '' })
                 }).attr('aria-invalid', _ => fieldErrors.id ? 'true' : 'false').attr('title', _ => fieldErrors.id || '').attr('style.borderColor', _ => invalidBorder('id'))(),
-                small.style`color:#f6c177;line-height:1.35;`('Changing this value can change or break links to this game.')
+                _ => (editGame.id || '').trim() !== originalGameId
+                  ? small.style`color:#f6c177;line-height:1.35;`('Changing this value can change or break links to this game.')
+                  : '',
+                _ => (editGame.id || '').trim()
+                  ? small(
+                      a
+                        .href`${pinsideMachineUrl((editGame.id || '').trim())}`
+                        .class`admin-inline-edit-link`
+                        .attr('target', '_blank')
+                        .attr('rel', 'noopener noreferrer')
+                        .style`justify-self:start;`('pinside link')
+                    )
+                  : ''
               ),
             ]
           : '',
@@ -548,10 +571,31 @@ const gameModal = tag(({
           updateGame({ title: event?.target?.value || '' })
         }).attr('aria-invalid', _ => fieldErrors.title ? 'true' : 'false').attr('title', _ => fieldErrors.title || '').attr('style.borderColor', _ => invalidBorder('title'))(),
 
-        label('Game Image URL'),
-        input.type`url`.value(_ => editGame.imageUrl || '').onInput((event: any) => {
-          updateGame({ imageUrl: event?.target?.value || '' })
-        })(),
+        label('Image URL'),
+        div.style`display:grid;gap:0.5em;`(
+          div.style`display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0.5em;align-items:stretch;`(
+            input.type`url`.value(_ => editGame.imageUrl || '').onInput((event: any) => {
+              updateGame({ imageUrl: event?.target?.value || '' })
+            })(),
+            _ => editGame.imageUrl
+              ? img
+                  .src`${editGame.imageUrl}`
+                  .attr('alt', _ => `${editGame.title || 'Game'} image preview`)
+                  .style`width:64px;height:42px;object-fit:cover;border:1px solid rgba(255,255,255,0.2);border-radius:0.5em;background:#101010;`
+              : ''
+          ),
+          _ => (editGame.title || '').trim()
+            ? a
+                .href`${googleImageSearchUrl(editGame.title || '')}`
+                .class`admin-inline-edit-link`
+                .attr('target', '_blank')
+                .attr('rel', 'noopener noreferrer')
+                .style`justify-self:start;`
+                .attr('title', _ => gameImageSearchString(editGame.title || ''))(
+                  'view google images'
+                )
+            : small.style`opacity:0.72;`('Add a game title to view Google Images.')
+        ),
 
         label.attr('style.color', _ => labelColor('manufacturerId'))('Manufacturer'),
         div.class`admin-field-with-link`(

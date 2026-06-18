@@ -319,6 +319,11 @@ const manufacturerRow = tag(({
 const manufacturerInitial = (name = '') =>
   (name.trim().charAt(0) || 'M').toUpperCase()
 
+const manufacturerLogoSearchString = (name: string) => `${name} manufacturer logo`
+
+const manufacturerLogoGoogleImagesUrl = (name: string) =>
+  `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(manufacturerLogoSearchString(name))}`
+
 const manufacturerModal = tag(({
   isEditing,
   editManufacturer,
@@ -405,9 +410,22 @@ const manufacturerModal = tag(({
         }).attr('aria-invalid', _ => fieldErrors.name ? 'true' : 'false').attr('title', _ => fieldErrors.name || '').attr('style.borderColor', _ => invalidBorder('name'))(),
 
         label('Logo URL'),
-        input.type`url`.value(_ => editManufacturer.logoUrl || '').onInput((event: any) => {
-          updateManufacturer({ logoUrl: event?.target?.value || '' })
-        })(),
+        div.style`display:grid;gap:0.5em;`(
+          input.type`url`.value(_ => editManufacturer.logoUrl || '').onInput((event: any) => {
+            updateManufacturer({ logoUrl: event?.target?.value || '' })
+          })(),
+          _ => (editManufacturer.name || '').trim()
+            ? a
+                .href`${manufacturerLogoGoogleImagesUrl(editManufacturer.name || '')}`
+                .class`admin-inline-edit-link`
+                .attr('target', '_blank')
+                .attr('rel', 'noopener noreferrer')
+                .style`justify-self:start;`
+                .attr('title', _ => manufacturerLogoSearchString(editManufacturer.name || ''))(
+                  'google images'
+                )
+            : small.style`opacity:0.72;`('Add a manufacturer name to view Google Images.')
+        ),
 
         label('Opinions'),
         textarea.value(_ => editManufacturer.opinions || '').onInput((event: any) => {

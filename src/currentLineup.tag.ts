@@ -354,7 +354,7 @@ export const currentLineupTag = tag((
         p.class`lineup-subtitle`('A list of my current games.')
       ),
       _ => {
-        if (lineupItems === null) {
+        if (lineupItems === null || gameLibrary === null) {
           return div.class`lineup-results`(
             div.class`lineup-empty`('Loading current lineup...')
           )
@@ -383,7 +383,7 @@ export const currentLineupTag = tag((
       hr.class`lineup-section-break`(),
       h2.class`lineup-section-title`('Past Games Owned'),
       _ => {
-        if (pastOwnedItems === null) {
+        if (pastOwnedItems === null || gameLibrary === null) {
           return div.class`lineup-results`(
             div.class`lineup-empty`('Loading past games...')
           )
@@ -420,7 +420,7 @@ const resolveLineupGame = (
   return {
     ...lineupGame,
     title: libraryGame?.title || lineupGame.title || '',
-    imageUrl: libraryGame?.imageUrl || lineupGame.imageUrl || '',
+    imageUrl: bestGameImageUrl(libraryGame, lineupGame),
     manufacturer: libraryGame?.manufacturer || lineupGame.manufacturer || '',
     yearReleased: libraryGame?.yearReleased ?? lineupGame.yearReleased ?? null,
   } as CurrentGame
@@ -438,31 +438,66 @@ const resolvePastOwnedGame = (
   pastOwnedGame: PastOwnedGame,
   gameLibrary: Array<{ id: string } & Record<string, any>>
 ) => {
-  const libraryGame = findGameById(gameLibrary, pastOwnedGame.gameId)
+  const libraryGame = findGameByPastOwnedGame(gameLibrary, pastOwnedGame)
   const fallbackTitle = readableGameIdTitle(pastOwnedGame.gameId || pastOwnedGame.id)
   return {
     ...pastOwnedGame,
     title: libraryGame?.title || pastOwnedGame.title || pastOwnedGame.sourceTitle || fallbackTitle,
-    imageUrl: libraryGame?.imageUrl || pastOwnedGame.imageUrl || '',
+    imageUrl: bestGameImageUrl(libraryGame, pastOwnedGame),
     manufacturer: libraryGame?.manufacturer || pastOwnedGame.manufacturer || '',
     yearReleased: libraryGame?.yearReleased ?? pastOwnedGame.yearReleased ?? null,
   } as PastOwnedGame
 }
+
+const findGameByPastOwnedGame = (
+  gameLibrary: Array<{ id: string } & Record<string, any>>,
+  pastOwnedGame: PastOwnedGame
+) =>
+  findGameById(gameLibrary, pastOwnedGame.gameId)
+    || findGameById(gameLibrary, pastOwnedGame.title)
+    || findGameById(gameLibrary, pastOwnedGame.sourceTitle)
+    || findGameById(gameLibrary, readableGameIdTitle(pastOwnedGame.gameId || pastOwnedGame.id))
+    || null
 
 const findGameById = (
   gameLibrary: Array<{ id: string } & Record<string, any>>,
   gameId: any
 ) => {
   const normalizedGameId = normalizeId(gameId)
+  const sluggedGameId = slugifyGameId(gameId)
   if (!normalizedGameId) return null
 
   return gameLibrary.find((game) => game.id === gameId)
     || gameLibrary.find((game) => normalizeId(game.id) === normalizedGameId)
+    || gameLibrary.find((game) => slugifyGameId(game.id) === sluggedGameId)
+    || gameLibrary.find((game) => slugifyGameId(game.title) === sluggedGameId)
     || null
 }
 
 const normalizeId = (value: any) =>
   String(value || '').trim().toLowerCase()
+
+const slugifyGameId = (value: any) =>
+  normalizeId(value)
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+const bestGameImageUrl = (
+  libraryGame: ({ id: string } & Record<string, any>) | null,
+  record: Record<string, any>
+) =>
+  String(
+    libraryGame?.imageUrl ||
+    libraryGame?.gameImageUrl ||
+    libraryGame?.backglassUrl ||
+    libraryGame?.image ||
+    record.imageUrl ||
+    record.gameImageUrl ||
+    record.backglassUrl ||
+    record.image ||
+    ''
+  ).trim()
 
 const readableGameIdTitle = (value: any) =>
   String(value || '')
@@ -484,7 +519,7 @@ const lineupGameCard = tag(({
 
   return div.class`lineup-game-item bounce-in`(
     div.class`lineup-game-card`(
-      game.imageUrl
+      _ => game.imageUrl
         ? img.src`${game.imageUrl}`.attr('alt', game.title || 'Pinball game')
         : div.class`lineup-placeholder`(span(gameInitials(game.title))),
       div.class`lineup-card-copy`(
