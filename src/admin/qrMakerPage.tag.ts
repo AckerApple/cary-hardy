@@ -7,14 +7,11 @@ import { qrMakerSection } from './qrMaker.tag'
 
 export const qrMakerAdminPageTag = createAdminAuthTag((onSignedOut) => qrMakerAdminPage(onSignedOut))
 
-export const qrMakerAdminPage = tag((onSignedOut) => (
-  qrUrl = new URLSearchParams(window.location.search).get('url') || ''
-) => {
+export const qrMakerAdminPage = tag((onSignedOut) => {
+  let qrUrl = new URLSearchParams(window.location.search).get('url') || ''
   qrMakerAdminPage.inputs(([_onSignedOut]) => {
     onSignedOut = output(_onSignedOut)
   })
-
-  const refresh = callback(() => {})
 
   const signoutClick = () =>
     signOutUser()
@@ -33,11 +30,11 @@ export const qrMakerAdminPage = tag((onSignedOut) => (
         )
       ),
       div.class`admin-crud-card`(
-        qrMakerSection({
+        _=> qrMakerSection({
           qrUrl,
           onQrUrlChange: (value) => {
             qrUrl = value
-            refresh()
+            console.log('set qrUrl', {qrUrl})
           },
         })
       )

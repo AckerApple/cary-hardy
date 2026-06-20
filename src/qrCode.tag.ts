@@ -42,12 +42,6 @@ const ensureQrCodeLib = () => {
 }
 
 export const qrCodeDisplay = tag((url: string) => {
-  qrCodeDisplay.updates(x => {
-    if(x[0] !== url) {
-      [url] = x
-      loadAndRenderQr()
-    }
-  })
   const id = `qr-code-${Math.random().toString(36).slice(2, 12)}`
 
   const scheduleQrRender = () => {
@@ -84,7 +78,18 @@ export const qrCodeDisplay = tag((url: string) => {
       })
   }
 
+  qrCodeDisplay.updates(x => {
+    if (x[0] !== url) {
+      [url] = x
+      scheduleQrRender()
+    }
+  })
+
   watch([url], scheduleQrRender)
 
-  return div.id`${id}`
+  return div
+    .id`${id}`
+    .attr('oninit', scheduleQrRender)
+    .style`display:flex;justify-content:center;align-items:center;margin-top:1em;min-height:300px;`
+    ()
 })

@@ -17,9 +17,8 @@ let meetupLoaded = false
 
 export const adminTools = tag((
   onSignedOut
-) => (
-  nextMeetupDate = Date.now()
 ) => {
+  let nextMeetupDate = Date.now()
   adminTools.inputs(([_onSignedOut]) => {
     onSignedOut = output(_onSignedOut)
   })
