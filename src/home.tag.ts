@@ -1,5 +1,5 @@
 import { ClockComponent } from "./clock/clock.tag"
-import { iframe, img, a, br, button, div, h2, small, style, tag, callback, noElement } from "taggedjs"
+import { iframe, img, a, br, button, div, h2, small, style, tag, callback, noElement, state } from "taggedjs"
 import { topNavBar } from "./ui/topNav.tag"
 import { publicNavButtons } from "./ui/publicNavButtons.tag"
 import { publicFooter } from "./ui/publicFooter.tag"
@@ -7,16 +7,37 @@ import { loadNextMeetupDate } from "./firebase"
 
 let meetupLoaded = false
 
-export const homeTag = tag(() => (
+export const homeTag = tag((
   clickCount = 0,
   showSticker = true,
-  showAwards = false,
-  showMeetups = false,
-  showYoutube = false,
-  showLinks = false,
-  showMerch = false,
+  showAwards = state(false),
+  showMeetups = state(false),
+  showYoutube = state(false),
+  showLinks = state(false),
+  showMerch = state(false),
   nextMeetupDate = Date.now() - 1000,
+  refreshHome = callback(() => {}),
   refreshMeetup = callback(() => {}),
+  toggleAwards = () => {
+    showAwards = !showAwards
+    refreshHome()
+  },
+  toggleMeetups = () => {
+    showMeetups = !showMeetups
+    refreshHome()
+  },
+  toggleYoutube = () => {
+    showYoutube = !showYoutube
+    refreshHome()
+  },
+  toggleLinks = () => {
+    showLinks = !showLinks
+    refreshHome()
+  },
+  toggleMerch = () => {
+    showMerch = !showMerch
+    refreshHome()
+  },
   __ = setTimeout(callback(() => showSticker = false), 5000),
   _load = !meetupLoaded && (() => {
     meetupLoaded = true
@@ -386,7 +407,7 @@ export const homeTag = tag(() => (
         .type`button`
         .class`fold-section-toggle`
         .attr('aria-expanded', _=> showMerch ? 'true' : 'false')
-        .onClick(() => showMerch = !showMerch)(
+        .onClick(toggleMerch)(
           h2.class`hero-text`('👕 PINBALL MERCH & MORE'),
           div.class`fold-section-icon`(_=> showMerch ? '▲' : '▼')
         )
@@ -452,7 +473,7 @@ export const homeTag = tag(() => (
         .type`button`
         .class`fold-section-toggle`
         .attr('aria-expanded', _=> showLinks ? 'true' : 'false')
-        .onClick(() => showLinks = !showLinks)(
+        .onClick(toggleLinks)(
           h2.class`hero-text`('🔗 LINKS'),
           div.class`fold-section-icon`(_=> showLinks ? '▲' : '▼')
         )
@@ -515,7 +536,7 @@ export const homeTag = tag(() => (
         .type`button`
         .class`fold-section-toggle`
         .attr('aria-expanded', _=> showYoutube ? 'true' : 'false')
-        .onClick(() => showYoutube = !showYoutube)(
+        .onClick(toggleYoutube)(
           h2.class`hero-text`('📺 YOUTUBE CHANNEL'),
           div.class`fold-section-actions`(
             div.class`fold-section-badge`('+12K subs'),
@@ -553,7 +574,7 @@ export const homeTag = tag(() => (
               .type`button`
               .class`fold-section-toggle`
               .attr('aria-expanded', _=> showMeetups ? 'true' : 'false')
-              .onClick(() => showMeetups = !showMeetups)(
+              .onClick(toggleMeetups)(
                 h2.class`hero-text`('🗓️ LIVE MEETUPS'),
                 div.class`fold-section-actions`(
                   div.class`fold-section-badge`(_=> daysUntilLabel(nextMeetupDate)),
@@ -597,7 +618,7 @@ export const homeTag = tag(() => (
           .type`button`
           .class`fold-section-toggle`
           .attr('aria-expanded', _=> showAwards ? 'true' : 'false')
-          .onClick(() => showAwards = !showAwards)(
+          .onClick(toggleAwards)(
             h2.class`hero-text`('🏆 AWARD WINNING WORK & CONTENT'),
             div.class`fold-section-icon`(_=> showAwards ? '▲' : '▼')
           )
@@ -675,7 +696,7 @@ export const homeTag = tag(() => (
           .href`/lineup.html`
           .class`fold-section-toggle`
           .style`text-decoration:none;box-sizing:border-box;`(
-            h2.class`hero-text`('🎮 GAMES')
+            h2.class`hero-text`('⚪️ GAMES')
           )
       ),
       br,

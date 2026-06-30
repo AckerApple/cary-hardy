@@ -79,7 +79,7 @@ export const adminTools = tag((
       }),
       adminHomeLinkCard({
         href: '/admin/current-games.html',
-        title: '🎮 Current Game Lineup',
+        title: '⚪️ Current Game Lineup',
         description: 'Choose which games appear in the public current lineup.',
       }),
       adminHomeLinkCard({

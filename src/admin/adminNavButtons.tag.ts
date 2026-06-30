@@ -36,7 +36,7 @@ export const adminNavButtons = tag((onSignout) => {
             a.href`/admin.html`.class`top-nav-pill`.attr('role', 'menuitem')('🏠 admin home'),
             a.href`/admin/qr-maker.html`.class`top-nav-pill`.attr('role', 'menuitem')('🔗 qr maker'),
             a.href`/admin/meeting-tools.html`.class`top-nav-pill`.attr('role', 'menuitem')('📅 meeting tools'),
-            a.href`/admin/current-games.html`.class`top-nav-pill`.attr('role', 'menuitem')('🎮 current lineup'),
+            a.href`/admin/current-games.html`.class`top-nav-pill`.attr('role', 'menuitem')('⚪️ current lineup'),
             a.href`/admin/past-owned-games.html`.class`top-nav-pill`.attr('role', 'menuitem')('📜 past games'),
             a.href`/admin/games.html`.class`top-nav-pill`.attr('role', 'menuitem')('🕹️ games'),
             a.href`/admin/manufacturers.html`.class`top-nav-pill`.attr('role', 'menuitem')('🏭 manufacturers'),

@@ -328,7 +328,7 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
     topNavBar(() => adminNavButtons(signoutClick)),
     div.class`admin-crud-page`(
       div.class`admin-crud-header`(
-        h3('🎮 Current Game Lineup'),
+        h3('⚪️ Current Game Lineup'),
         button.type`button`.class`admin-pill-button`.onClick(openAdd)('Add')
       ),
       div.class`admin-crud-card`(
