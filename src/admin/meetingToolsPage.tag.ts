@@ -11,15 +11,13 @@ let latestMeetupDate: number | null = null
 
 export const meetingToolsAdminPageTag = createAdminAuthTag((onSignedOut) => meetingToolsAdminPage(onSignedOut))
 
-export const meetingToolsAdminPage = tag((onSignedOut) => (
-  nextMeetupDate = latestMeetupDate || Date.now(),
-  { date, time } = timestampToValues(Number(nextMeetupDate))
-) => {
+export const meetingToolsAdminPage = tag((onSignedOut) => {
+  let nextMeetupDate = latestMeetupDate || Date.now()
+  let { date, time } = timestampToValues(Number(nextMeetupDate))
+
   meetingToolsAdminPage.inputs(([_onSignedOut]) => {
     onSignedOut = output(_onSignedOut)
   })
-
-  const refresh = callback(() => {})
 
   function updateDateTime() {
     const nextValues = timestampToValues(Number(nextMeetupDate))
@@ -35,7 +33,7 @@ export const meetingToolsAdminPage = tag((onSignedOut) => (
           nextMeetupDate = loadedDate
           latestMeetupDate = loadedDate
           updateDateTime()
-          refresh()
+          console.log('nextMeetupDate', {nextMeetupDate})
         }
       })
       .catch((error) => {
@@ -70,7 +68,7 @@ export const meetingToolsAdminPage = tag((onSignedOut) => (
         )
       ),
       div.class`admin-crud-card`(
-        meetingToolsSection({
+        _=> meetingToolsSection({
           nextMeetupDate,
           date,
           time,
@@ -78,7 +76,6 @@ export const meetingToolsAdminPage = tag((onSignedOut) => (
             nextMeetupDate = dateNum
             latestMeetupDate = dateNum
             updateDateTime()
-            refresh()
           },
           onSave: saveMeetupDate,
         })
