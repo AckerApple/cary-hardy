@@ -1,5 +1,5 @@
 import { ClockComponent, getDaySuffix } from './clock/clock.tag'
-import { a, b, br, button, div, h1, h2, li, noElement, p, span, tag, tagElement, ul, htmlTag, callback } from "taggedjs"
+import { a, b, br, button, div, h1, h2, li, noElement, p, span, tag, ul, htmlTag, callback } from "taggedjs"
 import { loadNextMeetupDate } from "./firebase"
 import { topNavBar } from './ui/topNav.tag'
 import { publicNavButtons } from './ui/publicNavButtons.tag'
@@ -13,17 +13,6 @@ export const meetupTag = tag(() => {
   const refreshMeetup = callback(() => {})
   const getMeetupDate = () => new Date(meetupDate)
 
-  const renderClock = () => {
-    const clockElm = document.getElementById('count-clock') as HTMLElement
-    if (!clockElm) return
-    tagElement(ClockComponent, clockElm, {
-      date: getMeetupDate(),
-      showLearnMore: !window.location.href.includes('meetup.html')
-    })
-  }
-
-  setTimeout(renderClock, 0)
-
   if (!meetupLoaded) {
     meetupLoaded = true
     tag.promise = loadNextMeetupDate()
@@ -31,7 +20,6 @@ export const meetupTag = tag(() => {
         if (typeof loadedDate === "number") {
           meetupDate = loadedDate
           refreshMeetup()
-          renderClock()
         }
       })
       .catch((error) => {
@@ -55,7 +43,12 @@ export const meetupTag = tag(() => {
     ),
     br,
     div.class`bounce-in`.style`--fx-index:2`(
-      div.id`count-clock`
+      div.id`count-clock`(
+        _ => ClockComponent({
+          date: getMeetupDate(),
+          showLearnMore: false,
+        })
+      )
     ),
     br,
     div.class`bounce-in`.style`--fx-index:3;text-align: center;`(
