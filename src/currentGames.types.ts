@@ -1,6 +1,7 @@
 export type CurrentGameInput = {
   id?: string
   gameId?: string
+  tierId?: string
   title?: string
   dateAddedToCollection: string
   imageUrl?: string

@@ -40,6 +40,7 @@ export const adminNavButtons = tag((onSignout) => {
             a.href`/admin/past-owned-games.html`.class`top-nav-pill`.attr('role', 'menuitem')('📜 past games'),
             a.href`/admin/games.html`.class`top-nav-pill`.attr('role', 'menuitem')('🕹️ games'),
             a.href`/admin/manufacturers.html`.class`top-nav-pill`.attr('role', 'menuitem')('🏭 manufacturers'),
+            a.href`/admin/game-tiers.html`.class`top-nav-pill`.attr('role', 'menuitem')('🏷️ game tiers'),
             a.href`/admin/game-ratings.html`.class`top-nav-pill`.attr('role', 'menuitem')('⭐ ratings'),
             a.href`/admin/user.html`.class`top-nav-pill`.attr('role', 'menuitem')('👥 users'),
             a.href`https://github.com/AckerApple/cary-hardy`.class`top-nav-pill`.attr('role', 'menuitem').attr('target', '_blank').attr('rel', 'noopener noreferrer')('🔗 code base')

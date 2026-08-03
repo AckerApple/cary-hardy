@@ -19,6 +19,7 @@ export default defineConfig({
         adminPastOwnedGames: resolve(__dirname, 'src/admin/past-owned-games.html'),
         adminGames: resolve(__dirname, 'src/admin/games.html'),
         adminManufacturers: resolve(__dirname, 'src/admin/manufacturers.html'),
+        adminGameTiers: resolve(__dirname, 'src/admin/game-tiers.html'),
         adminGameRatings: resolve(__dirname, 'src/admin/game-ratings.html'),
         lineup: resolve(__dirname, 'src/lineup.html'),
         ratings: resolve(__dirname, 'src/ratings.html'),

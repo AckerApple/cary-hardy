@@ -6,6 +6,7 @@ export type GameInput = {
   manufacturer?: string
   yearReleased?: number | null
   notes?: string
+  tierIds?: string[]
   dataLinks?: Array<{
     title: string
     url: string

@@ -7,12 +7,14 @@ export const groupedGameSelect = tag(({
   games,
   isLoaded,
   fieldError,
+  editSelectedGame = false,
   onChange,
 }: {
   value: string
   games: GameOption[]
   isLoaded: boolean
   fieldError?: string
+  editSelectedGame?: boolean
   onChange: (gameId: string) => void
 }) => {
   groupedGameSelect.inputs((args) => {
@@ -21,6 +23,7 @@ export const groupedGameSelect = tag(({
       games,
       isLoaded,
       fieldError,
+      editSelectedGame = false,
       onChange,
     }] = args
     onChange = output(onChange)
@@ -34,7 +37,11 @@ export const groupedGameSelect = tag(({
     }).attr('aria-invalid', _ => fieldError ? 'true' : 'false').attr('title', _ => fieldError || '').attr('style.borderColor', _ => invalidBorder())(
       _ => gameSelectOptions(value, games, isLoaded)
     ),
-    a.href`/admin/games.html`.class`admin-inline-edit-link`('edit games')
+    a
+      .href(_ => editSelectedGame && value
+        ? `/admin/games.html?editGame=${encodeURIComponent(value)}`
+        : '/admin/games.html')
+      .class`admin-inline-edit-link`(_ => editSelectedGame && value ? 'edit game' : 'edit games')
   )
 })
 

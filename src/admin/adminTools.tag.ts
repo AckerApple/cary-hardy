@@ -98,6 +98,11 @@ export const adminTools = tag((
         description: 'Edit manufacturer records and logos for the game database.',
       }),
       adminHomeLinkCard({
+        href: '/admin/game-tiers.html',
+        title: '🏷️ Game Tiers Database',
+        description: 'Manage game edition abbreviations and full names.',
+      }),
+      adminHomeLinkCard({
         href: '/admin/game-ratings.html',
         title: '⭐ Game Ratings',
         description: 'Create and update public ratings, reviews, and related videos.',

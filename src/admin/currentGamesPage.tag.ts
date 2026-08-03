@@ -10,7 +10,9 @@ import {
   noElement,
   onDestroy,
   output,
+  option,
   p,
+  select,
   small,
   span,
   strong,
@@ -23,6 +25,7 @@ import {
   listCurrentGames,
   listenGames$,
   listenCurrentGames$,
+  listenGameTiers$,
   signOutUser,
   upsertCurrentGame,
 } from '../firebase'
@@ -31,9 +34,11 @@ import { adminNavButtons } from './adminNavButtons.tag'
 import { groupedGameSelect } from './groupedGameSelect.tag'
 import { topNavBar } from '../ui/topNav.tag'
 import type { CurrentGame, CurrentGameInput } from '../currentGames.types'
+import type { GameTier } from '../gameTiers.types'
 
 const emptyGame = (): CurrentGameInput => ({
   gameId: '',
+  tierId: '',
   dateAddedToCollection: '',
   notes: '',
   isVisible: true,
@@ -46,6 +51,9 @@ let gamesValueUnsubscribe: (() => void) | null = null
 let latestGameLibrary: Array<{ id: string } & Record<string, any>> | null = null
 let gameLibraryUnsubscribe: (() => void) | null = null
 let gameLibraryValueUnsubscribe: (() => void) | null = null
+let latestGameTiers: GameTier[] | null = null
+let gameTiersUnsubscribe: (() => void) | null = null
+let gameTiersValueUnsubscribe: (() => void) | null = null
 
 export const currentGamesAdminPageTag = createAdminAuthTag((onSignedOut) => currentGamesAdminPage(onSignedOut))
 
@@ -70,6 +78,7 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
   let editGame: CurrentGameInput = emptyGame()
   let currentGames = latestGames
   let gameLibrary = latestGameLibrary
+  let gameTiers = latestGameTiers
   const refresh = callback(() => {})
 
   const startGamesListener = () => {
@@ -127,6 +136,22 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
     gameLibraryValueUnsubscribe = () => valueSubscription.unsubscribe()
   }
 
+  const startGameTiersListener = () => {
+    gameTiersUnsubscribe?.()
+    gameTiersValueUnsubscribe?.()
+    gameTiers = null
+    latestGameTiers = null
+    const tiers$ = listenGameTiers$()
+    gameTiersUnsubscribe = (tiers$ as any)?.unsubscribe || null
+    const subscription = tiers$.subscribe((items) => {
+      if (!Array.isArray(items)) return
+      gameTiers = items as GameTier[]
+      latestGameTiers = gameTiers
+      refresh()
+    })
+    gameTiersValueUnsubscribe = () => subscription.unsubscribe()
+  }
+
   const refreshGamesList = () =>
     listCurrentGames()
       .then((items) => {
@@ -171,6 +196,7 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
     editGame = {
       id: game.id,
       gameId: game.gameId || '',
+      tierId: game.tierId || '',
       title: game.title || '',
       dateAddedToCollection: dateInputValue(game.dateAddedToCollection),
       imageUrl: game.imageUrl || '',
@@ -204,6 +230,12 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
 
     if (!editGame.dateAddedToCollection) {
       nextFieldErrors.dateAddedToCollection = 'Date Added to Collection is required.'
+    }
+
+    const selectedGame = (gameLibrary || []).find((game) => game.id === editGame.gameId)
+    const availableTierIds = Array.isArray(selectedGame?.tierIds) ? selectedGame.tierIds : []
+    if (availableTierIds.length && !availableTierIds.includes(editGame.tierId)) {
+      nextFieldErrors.tierId = 'Select the tier for this current game.'
     }
 
     if (editGame.yearReleased !== null && typeof editGame.yearReleased !== 'undefined' && Number.isNaN(Number(editGame.yearReleased))) {
@@ -243,6 +275,7 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
       ...editGame,
       id: editingId || undefined,
       gameId: (editGame.gameId || '').trim(),
+      tierId: (editGame.tierId || '').trim(),
       title: (editGame.title || '').trim(),
       imageUrl: (editGame.imageUrl || '').trim(),
       manufacturer: (editGame.manufacturer || '').trim(),
@@ -300,6 +333,7 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
     if (!gameLibraryUnsubscribe) {
       startGameLibraryListener()
     }
+    if (!gameTiersUnsubscribe) startGameTiersListener()
   }
 
   onDestroy(() => {
@@ -319,6 +353,11 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
       gameLibraryValueUnsubscribe()
       gameLibraryValueUnsubscribe = null
     }
+    gameTiersUnsubscribe?.()
+    gameTiersValueUnsubscribe?.()
+    gameTiersUnsubscribe = null
+    gameTiersValueUnsubscribe = null
+    latestGameTiers = null
     gamesLoaded = false
     latestGames = null
     latestGameLibrary = null
@@ -357,6 +396,8 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
             isEditing: Boolean(editingId),
             editGame,
             gameLibrary: gameLibrary || [],
+            gameTiers: gameTiers || [],
+            isGameTiersLoaded: gameTiers !== null,
             isGameLibraryLoaded: gameLibrary !== null,
             errorMessage,
             fieldErrors,
@@ -367,6 +408,7 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
               fieldErrors = {
                 ...fieldErrors,
                 gameId: nextGame.gameId || nextGame.title?.trim() ? '' : fieldErrors.gameId,
+                tierId: nextGame.tierId ? '' : fieldErrors.tierId,
                 dateAddedToCollection: nextGame.dateAddedToCollection ? '' : fieldErrors.dateAddedToCollection,
                 yearReleased: nextGame.yearReleased === null || !Number.isNaN(Number(nextGame.yearReleased)) ? '' : fieldErrors.yearReleased,
               }
@@ -434,6 +476,8 @@ const currentGameModal = tag(({
   isEditing,
   editGame,
   gameLibrary,
+  gameTiers,
+  isGameTiersLoaded,
   isGameLibraryLoaded,
   errorMessage,
   fieldErrors,
@@ -447,6 +491,8 @@ const currentGameModal = tag(({
   isEditing: boolean
   editGame: CurrentGameInput
   gameLibrary: Array<{ id: string } & Record<string, any>>
+  gameTiers: GameTier[]
+  isGameTiersLoaded: boolean
   isGameLibraryLoaded: boolean
   errorMessage: string
   fieldErrors: Record<string, string>
@@ -462,6 +508,8 @@ const currentGameModal = tag(({
       isEditing,
       editGame,
       gameLibrary,
+      gameTiers,
+      isGameTiersLoaded,
       isGameLibraryLoaded,
       errorMessage,
       fieldErrors,
@@ -510,8 +558,41 @@ const currentGameModal = tag(({
             games: gameLibrary,
             isLoaded: isGameLibraryLoaded,
             fieldError: fieldErrors.gameId,
-            onChange: (gameId) => updateGame({ gameId }),
+            editSelectedGame: true,
+            onChange: (gameId) => updateGame({ gameId, tierId: '' }),
           }).key(`${isGameLibraryLoaded ? 'loaded' : 'loading'}-${gameLibrary.length}`),
+
+        label.style`text-align:left;justify-self:start;`.attr('style.color', _ => labelColor('tierId'))('Game Tier'),
+        _ => {
+          const selectedGame = gameLibrary.find((game) => game.id === editGame.gameId)
+          const availableTierIds = Array.isArray(selectedGame?.tierIds) ? selectedGame.tierIds : []
+          const availableTiers = availableTierIds
+            .map((tierId: string) => gameTiers.find((tier) => tier.id === tierId))
+            .filter(Boolean) as GameTier[]
+          return div.style`text-align:left;justify-self:stretch;width:100%;`(
+            availableTiers.length
+              ? div.style`display:grid;gap:0.45em;text-align:left;`(
+                availableTiers.map((tier) => label.style`display:flex;gap:0.5em;align-items:center;text-align:left;justify-content:flex-start;`(
+                  input.type`radio`.attr('name', 'current-game-tier').value`${tier.id}`
+                    .attr('checked', _ => editGame.tierId === tier.id ? 'checked' : null)
+                    .onChange(() => updateGame({ tierId: tier.id }))(),
+                  span(`${tier.shortName} — ${tier.longName}`)
+                ).key(tier.id))
+                )
+              : !isGameTiersLoaded
+                ? small.style`opacity:0.72;`('Loading game tiers...')
+                : editGame.gameId
+                ? select.style`text-align:left;width:100%;`.value(_ => editGame.tierId || '').onChange((event: any) => {
+                  updateGame({ tierId: event?.target?.value || '' })
+                }).attr('aria-invalid', _ => fieldErrors.tierId ? 'true' : 'false').attr('title', _ => fieldErrors.tierId || '')(
+                  [
+                    option.value``(gameTiers.length ? 'Select a game tier' : 'No game tiers available'),
+                    ...gameTiers.map((tier) => option.value`${tier.id}`(`${tier.shortName} — ${tier.longName}`)),
+                  ]
+                )
+                : small.style`opacity:0.72;`('Select a game first.')
+          )
+        },
 
         label.attr('style.color', _ => labelColor('dateAddedToCollection'))('Date Added to Collection'),
         input.type`date`.value(_ => editGame.dateAddedToCollection || '').onInput((event: any) => {

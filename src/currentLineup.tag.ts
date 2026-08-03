@@ -13,12 +13,13 @@ import {
   style,
   tag,
 } from 'taggedjs'
-import { listenGames$, listenVisibleCurrentGames$, listenVisiblePastOwnedGames$ } from './firebase'
+import { listenGames$, listenGameTiers$, listenVisibleCurrentGames$, listenVisiblePastOwnedGames$ } from './firebase'
 import { topNavBar } from './ui/topNav.tag'
 import { publicNavButtons } from './ui/publicNavButtons.tag'
 import { publicFooter } from './ui/publicFooter.tag'
 import type { CurrentGame } from './currentGames.types'
 import type { PastOwnedGame } from './pastOwnedGames.types'
+import type { GameTier } from './gameTiers.types'
 
 let lineupLoaded = false
 let gamesUnsubscribe: (() => void) | null = null
@@ -27,11 +28,14 @@ let pastGamesUnsubscribe: (() => void) | null = null
 let pastGamesValueUnsubscribe: (() => void) | null = null
 let gameLibraryUnsubscribe: (() => void) | null = null
 let gameLibraryValueUnsubscribe: (() => void) | null = null
+let gameTiersUnsubscribe: (() => void) | null = null
+let gameTiersValueUnsubscribe: (() => void) | null = null
 
 export const currentLineupTag = tag((
   lineupItems = null as Array<{ id: string } & Record<string, any>> | null,
   pastOwnedItems = null as Array<{ id: string } & Record<string, any>> | null,
   gameLibrary = null as Array<{ id: string } & Record<string, any>> | null,
+  gameTiers = null as GameTier[] | null,
   refreshLineup = callback(() => {})
 ) => {
   const startLineupListener = () => {
@@ -58,6 +62,14 @@ export const currentLineupTag = tag((
     if (gameLibraryValueUnsubscribe) {
       gameLibraryValueUnsubscribe()
       gameLibraryValueUnsubscribe = null
+    }
+    if (gameTiersUnsubscribe) {
+      gameTiersUnsubscribe()
+      gameTiersUnsubscribe = null
+    }
+    if (gameTiersValueUnsubscribe) {
+      gameTiersValueUnsubscribe()
+      gameTiersValueUnsubscribe = null
     }
 
     const liveGames$ = listenVisibleCurrentGames$()
@@ -95,6 +107,15 @@ export const currentLineupTag = tag((
       refreshLineup()
     })
     gameLibraryValueUnsubscribe = () => librarySubscription.unsubscribe()
+
+    const tiers$ = listenGameTiers$()
+    gameTiersUnsubscribe = (tiers$ as any)?.unsubscribe || null
+    const tiersSubscription = tiers$.subscribe((items) => {
+      if (!Array.isArray(items)) return
+      gameTiers = items as GameTier[]
+      refreshLineup()
+    })
+    gameTiersValueUnsubscribe = () => tiersSubscription.unsubscribe()
   }
 
   if (!lineupLoaded) {
@@ -128,6 +149,14 @@ export const currentLineupTag = tag((
     if (gameLibraryValueUnsubscribe) {
       gameLibraryValueUnsubscribe()
       gameLibraryValueUnsubscribe = null
+    }
+    if (gameTiersUnsubscribe) {
+      gameTiersUnsubscribe()
+      gameTiersUnsubscribe = null
+    }
+    if (gameTiersValueUnsubscribe) {
+      gameTiersValueUnsubscribe()
+      gameTiersValueUnsubscribe = null
     }
     lineupLoaded = false
   })
@@ -286,6 +315,10 @@ export const currentLineupTag = tag((
         text-align: center;
       }
 
+      .lineup-card-date .lineup-tier-detail {
+        color: #fff;
+      }
+
       .lineup-empty {
         width: min(680px, calc(100% - 2em));
         margin: 1.5em auto;
@@ -354,11 +387,12 @@ export const currentLineupTag = tag((
         p.class`lineup-subtitle`('A list of my current games.')
       ),
       _ => {
-        if (lineupItems === null || gameLibrary === null) {
+        if (lineupItems === null || gameLibrary === null || gameTiers === null) {
           return div.class`lineup-results`(
             div.class`lineup-empty`('Loading current lineup...')
           )
         }
+        const availableGameTiers = gameTiers
 
         const visibleGames = lineupItems
           .filter((game) => game.isVisible !== false)
@@ -370,9 +404,12 @@ export const currentLineupTag = tag((
                 visibleGames.map((game) => lineupGameCard({
                   game: game as CurrentGame,
                   detail: [
+                    gameTierLabel(game.tierId, availableGameTiers)
+                      ? span.class`lineup-tier-detail`(gameTierLabel(game.tierId, availableGameTiers))
+                      : '',
                     `Collected ${formatDate(game.dateAddedToCollection)}`,
                     formatCurrentYearsOwned(game as CurrentGame),
-                  ],
+                  ].filter(Boolean),
                 }).key(game.id))
               )
             )
@@ -424,6 +461,13 @@ const resolveLineupGame = (
     manufacturer: libraryGame?.manufacturer || lineupGame.manufacturer || '',
     yearReleased: libraryGame?.yearReleased ?? lineupGame.yearReleased ?? null,
   } as CurrentGame
+}
+
+const gameTierLabel = (tierId: string | undefined, gameTiers: GameTier[]) => {
+  if (!tierId) return ''
+  const tier = gameTiers.find((item) => item.id === tierId)
+  if (!tier) return ''
+  return tier.longName || tier.shortName || ''
 }
 
 const comparePastOwnedGamesByGameId = (
@@ -511,7 +555,7 @@ const lineupGameCard = tag(({
   detail,
 }: {
   game: CurrentGame | PastOwnedGame
-  detail: string | string[]
+  detail: any | any[]
 }) => {
   lineupGameCard.inputs((args) => {
     ;[{ game, detail }] = args
@@ -527,7 +571,7 @@ const lineupGameCard = tag(({
       )
     ),
     small.class`lineup-card-date`(
-      Array.isArray(detail)
+      _ => Array.isArray(detail)
         ? detail.map((line) => div(line))
         : detail
     )

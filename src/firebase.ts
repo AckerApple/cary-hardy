@@ -25,6 +25,7 @@ import {
   serverTimestamp,
   setDoc,
   where,
+  writeBatch,
 } from "firebase/firestore"
 import { ValueSubject } from "taggedjs"
 import firebaseConfig from "./firebase.config"
@@ -32,6 +33,7 @@ import type { NewOrderInput, UserProfileInput } from "./commerce.types"
 import type { CurrentGameInput } from "./currentGames.types"
 import type { GameRatingInput } from "./gameRatings.types"
 import type { GameInput } from "./games.types"
+import type { GameTierInput } from "./gameTiers.types"
 import type { ManufacturerInput } from "./manufacturers.types"
 import type { PastOwnedGameInput, PinsideHistoryGame } from "./pastOwnedGames.types"
 
@@ -77,6 +79,8 @@ const getGamesCollection = () => collection(getDb(), "games")
 const getGameDoc = (gameId: string) => doc(getDb(), "games", gameId)
 const getManufacturersCollection = () => collection(getDb(), "manufacturers")
 const getManufacturerDoc = (manufacturerId: string) => doc(getDb(), "manufacturers", manufacturerId)
+const getGameTiersCollection = () => collection(getDb(), "gameTiers")
+const getGameTierDoc = (tierId: string) => doc(getDb(), "gameTiers", tierId)
 const getGameRatingsCollection = () => collection(getDb(), "gameRatings")
 const getGameRatingDoc = (gameId: string) => doc(getDb(), "gameRatings", gameId)
 const getCurrentGamesCollection = () => collection(getDb(), "currentGames")
@@ -370,6 +374,49 @@ export const upsertManufacturer = async (manufacturer: ManufacturerInput) => {
 export const deleteManufacturer = async (manufacturerId: string) => {
   if (!manufacturerId) return false
   await deleteDoc(getManufacturerDoc(manufacturerId))
+  return true
+}
+
+export const listenGameTiers$ = () => {
+  const tiers$ = new ValueSubject<Array<{ id: string } & Record<string, any>>>()
+  const unsubscribe = onSnapshot(
+    getGameTiersCollection(),
+    (snapshot) => tiers$.next(sortGameTiers(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })))),
+    (error) => console.error("Failed to listen to game tiers", error)
+  )
+  ;(tiers$ as any).unsubscribe = unsubscribe
+  return tiers$
+}
+
+export const listGameTiers = async () => {
+  const snapshot = await getDocs(getGameTiersCollection())
+  return sortGameTiers(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })))
+}
+
+export const upsertGameTier = async (tier: GameTierInput) => {
+  const payload = {
+    shortName: (tier.shortName || "").trim().toUpperCase(),
+    longName: (tier.longName || "").trim(),
+    order: typeof tier.order === "number" ? tier.order : 0,
+  }
+  if (tier.id) {
+    return setDoc(getGameTierDoc(tier.id), { ...payload, updatedAt: serverTimestamp() }, { merge: true })
+  }
+  return addDoc(getGameTiersCollection(), { ...payload, createdAt: serverTimestamp(), updatedAt: serverTimestamp() })
+}
+
+export const saveGameTierOrder = async (tierIds: string[]) => {
+  const batch = writeBatch(getDb())
+  tierIds.forEach((tierId, index) => {
+    batch.update(getGameTierDoc(tierId), { order: index, updatedAt: serverTimestamp() })
+  })
+  await batch.commit()
+  return true
+}
+
+export const deleteGameTier = async (tierId: string) => {
+  if (!tierId) return false
+  await deleteDoc(getGameTierDoc(tierId))
   return true
 }
 
@@ -694,6 +741,7 @@ export const syncPastOwnedGamesFromPinside = async (
 const cleanCurrentGamePayload = (game: CurrentGameInput) => {
   const payload: Record<string, any> = {
     gameId: (game.gameId || "").trim(),
+    tierId: (game.tierId || "").trim(),
     dateAddedToCollection: game.dateAddedToCollection,
     notes: (game.notes || "").trim(),
     isVisible: game.isVisible !== false,
@@ -751,6 +799,9 @@ const cleanGamePayload = (game: GameInput) => {
     manufacturer: (game.manufacturer || "").trim(),
     notes: (game.notes || "").trim(),
     dataLinks,
+    tierIds: Array.isArray(game.tierIds)
+      ? [...new Set(game.tierIds.map((tierId) => String(tierId || "").trim()).filter(Boolean))]
+      : [],
   }
 
   if (typeof game.yearReleased === "number" && !Number.isNaN(game.yearReleased)) {
@@ -767,6 +818,15 @@ const cleanManufacturerPayload = (manufacturer: ManufacturerInput) => ({
   logoUrl: (manufacturer.logoUrl || "").trim(),
   opinions: (manufacturer.opinions || "").trim(),
 })
+
+const sortGameTiers = <T extends Record<string, any>>(items: T[]) =>
+  [...items].sort((a, b) => {
+    const aHasOrder = typeof a.order === "number"
+    const bHasOrder = typeof b.order === "number"
+    if (aHasOrder && bHasOrder && a.order !== b.order) return a.order - b.order
+    if (aHasOrder !== bHasOrder) return aHasOrder ? -1 : 1
+    return String(a.shortName || "").localeCompare(String(b.shortName || ""), undefined, { sensitivity: "base" })
+  })
 
 const cleanGameRatingPayload = (rating: GameRatingInput) => {
   const ratingValue = typeof rating.rating === "number" && !Number.isNaN(rating.rating)

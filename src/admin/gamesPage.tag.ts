@@ -23,6 +23,7 @@ import {
   deleteGame,
   listGames,
   listManufacturers,
+  listenGameTiers$,
   listenGames$,
   listenManufacturers$,
   signOutUser,
@@ -30,6 +31,7 @@ import {
 } from '../firebase'
 import type { Game, GameInput } from '../games.types'
 import type { Manufacturer } from '../manufacturers.types'
+import type { GameTier } from '../gameTiers.types'
 import { createAdminAuthTag } from './adminPageShell.tag'
 import { adminNavButtons } from './adminNavButtons.tag'
 import { topNavBar } from '../ui/topNav.tag'
@@ -42,6 +44,7 @@ const emptyGame = (): GameInput => ({
   yearReleased: null,
   notes: '',
   dataLinks: [],
+  tierIds: [],
 })
 
 let gamesLoaded = false
@@ -51,6 +54,9 @@ let gamesValueUnsubscribe: (() => void) | null = null
 let latestManufacturers: Array<{ id: string } & Record<string, any>> | null = null
 let manufacturersUnsubscribe: (() => void) | null = null
 let manufacturersValueUnsubscribe: (() => void) | null = null
+let latestGameTiers: GameTier[] | null = null
+let gameTiersUnsubscribe: (() => void) | null = null
+let gameTiersValueUnsubscribe: (() => void) | null = null
 
 export const gamesAdminPageTag = createAdminAuthTag((onSignedOut) => gamesAdminPage(onSignedOut))
 
@@ -66,6 +72,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
 
   let games = latestGames
   let manufacturers = latestManufacturers
+  let gameTiers = latestGameTiers
   let modalOpen = false
   let editingId: string | null = null
   let editGame: GameInput = emptyGame()
@@ -73,6 +80,8 @@ export const gamesAdminPage = tag((onSignedOut) => {
   let isDeleting = false
   let errorMessage = ''
   let fieldErrors: Record<string, string> = {}
+  const requestedGameId = new URLSearchParams(window.location.search).get('editGame') || ''
+  let requestedGameOpened = false
   const refresh = callback(() => {})
 
   const startGamesListener = () => {
@@ -87,6 +96,13 @@ export const gamesAdminPage = tag((onSignedOut) => {
     const subscription = games$.subscribe((items) => {
       games = items
       latestGames = items
+      if (requestedGameId && !requestedGameOpened) {
+        const requestedGame = items.find((game) => game.id === requestedGameId)
+        if (requestedGame) {
+          requestedGameOpened = true
+          openEdit(requestedGame as Game)
+        }
+      }
       refresh()
     })
     gamesValueUnsubscribe = () => subscription.unsubscribe()
@@ -122,6 +138,22 @@ export const gamesAdminPage = tag((onSignedOut) => {
     manufacturersValueUnsubscribe = () => subscription.unsubscribe()
   }
 
+  const startGameTiersListener = () => {
+    gameTiersUnsubscribe?.()
+    gameTiersValueUnsubscribe?.()
+    gameTiers = null
+    latestGameTiers = null
+    const tiers$ = listenGameTiers$()
+    gameTiersUnsubscribe = (tiers$ as any)?.unsubscribe || null
+    const subscription = tiers$.subscribe((items) => {
+      if (!Array.isArray(items)) return
+      gameTiers = items as GameTier[]
+      latestGameTiers = gameTiers
+      refresh()
+    })
+    gameTiersValueUnsubscribe = () => subscription.unsubscribe()
+  }
+
   const openAdd = () => {
     editingId = null
     editGame = emptyGame()
@@ -142,6 +174,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
       yearReleased: numberOrNull(game.yearReleased),
       notes: game.notes || '',
       dataLinks: normalizeDataLinks(game.dataLinks),
+      tierIds: normalizeTierIds(game.tierIds),
     }
     errorMessage = ''
     fieldErrors = {}
@@ -201,6 +234,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
       yearReleased: numberOrNull(editGame.yearReleased),
       notes: (editGame.notes || '').trim(),
       dataLinks: normalizeDataLinks(editGame.dataLinks),
+      tierIds: normalizeTierIds(editGame.tierIds),
     })
       .then(() => {
         if (editingId && nextGameId && nextGameId !== editingId) {
@@ -250,6 +284,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
     gamesLoaded = true
     if (!gamesUnsubscribe) startGamesListener()
     if (!manufacturersUnsubscribe) startManufacturersListener()
+    if (!gameTiersUnsubscribe) startGameTiersListener()
   }
 
   onDestroy(() => {
@@ -257,12 +292,17 @@ export const gamesAdminPage = tag((onSignedOut) => {
     if (gamesValueUnsubscribe) gamesValueUnsubscribe()
     if (manufacturersUnsubscribe) manufacturersUnsubscribe()
     if (manufacturersValueUnsubscribe) manufacturersValueUnsubscribe()
+    gameTiersUnsubscribe?.()
+    gameTiersValueUnsubscribe?.()
     gamesUnsubscribe = null
     gamesValueUnsubscribe = null
     manufacturersUnsubscribe = null
     manufacturersValueUnsubscribe = null
     latestGames = null
     latestManufacturers = null
+    gameTiersUnsubscribe = null
+    gameTiersValueUnsubscribe = null
+    latestGameTiers = null
     gamesLoaded = false
   })
 
@@ -281,13 +321,14 @@ export const gamesAdminPage = tag((onSignedOut) => {
             if (manufacturers === null) return small.style`opacity:0.7;`('Loading manufacturers...')
             if (!manufacturers.length) return small.style`opacity:0.7;`('No manufacturers found. Add a manufacturer first.')
             if (games === null) return small.style`opacity:0.7;`('Loading games...')
+            const availableManufacturers = manufacturers
 
             const unmatchedGames = games.filter((game) =>
-              !manufacturers.some((manufacturer) => isGameForManufacturer(game, manufacturer as Manufacturer))
+              !availableManufacturers.some((manufacturer) => isGameForManufacturer(game, manufacturer as Manufacturer))
             ) as Game[]
 
             return [
-              ...manufacturers.map((manufacturer) => manufacturerSection({
+              ...availableManufacturers.map((manufacturer) => manufacturerSection({
                 manufacturer: manufacturer as Manufacturer,
                 games: gamesForManufacturer(manufacturer as Manufacturer, games || []),
                 onGameClick: openEdit,
@@ -310,6 +351,7 @@ export const gamesAdminPage = tag((onSignedOut) => {
         div.style`margin-top:1em;display:flex;gap:0.75em;flex-wrap:wrap;`(
           a.href`../admin/current-games.html`.class`admin-secondary-button`('Lineup Admin'),
           a.href`../admin/manufacturers.html`.class`admin-secondary-button`('Manufacturers Admin'),
+          a.href`../admin/game-tiers.html`.class`admin-secondary-button`('Game Tiers Admin'),
           a.href`../admin/game-ratings.html`.class`admin-secondary-button`('Ratings Admin')
         )
       ),
@@ -319,6 +361,8 @@ export const gamesAdminPage = tag((onSignedOut) => {
             originalGameId: editingId || '',
             editGame,
             manufacturers: manufacturers || [],
+            gameTiers: gameTiers || [],
+            isGameTiersLoaded: gameTiers !== null,
             errorMessage,
             fieldErrors,
             isSaving,
@@ -451,6 +495,8 @@ const gameModal = tag(({
   originalGameId,
   editGame,
   manufacturers,
+  gameTiers,
+  isGameTiersLoaded,
   errorMessage,
   fieldErrors,
   isSaving,
@@ -464,6 +510,8 @@ const gameModal = tag(({
   originalGameId: string
   editGame: GameInput
   manufacturers: Array<{ id: string } & Record<string, any>>
+  gameTiers: GameTier[]
+  isGameTiersLoaded: boolean
   errorMessage: string
   fieldErrors: Record<string, string>
   isSaving: boolean
@@ -479,6 +527,8 @@ const gameModal = tag(({
       originalGameId,
       editGame,
       manufacturers,
+      gameTiers,
+      isGameTiersLoaded,
       errorMessage,
       fieldErrors,
       isSaving,
@@ -615,6 +665,23 @@ const gameModal = tag(({
           updateGame({ yearReleased: optionalNumber(event?.target?.value) })
         }).attr('aria-invalid', _ => fieldErrors.yearReleased ? 'true' : 'false').attr('title', _ => fieldErrors.yearReleased || '').attr('style.borderColor', _ => invalidBorder('yearReleased'))(),
 
+        label('Game Tiers'),
+        div.class`admin-field-with-link`(
+          _ => gameTiers.length
+            ? select
+                .attr('multiple', 'multiple')
+                .attr('size', _ => String(Math.min(6, Math.max(2, gameTiers.length))))
+                .onChange((event: any) => {
+                  updateGame({ tierIds: Array.from(event?.target?.selectedOptions || []).map((item: any) => item.value) })
+                })(
+                  gameTiers.map((tier) => option
+                    .value`${tier.id}`
+                    .attr('selected', _ => normalizeTierIds(editGame.tierIds).includes(tier.id) ? 'selected' : null)(`${tier.shortName} — ${tier.longName}`))
+                )
+            : small.style`opacity:0.72;`(isGameTiersLoaded ? 'No game tiers available.' : 'Loading game tiers...'),
+          a.href`/admin/game-tiers.html`.class`admin-inline-edit-link`('edit game tiers')
+        ),
+
         label('Notes'),
         textarea.value(_ => editGame.notes || '').onInput((event: any) => {
           updateGame({ notes: event?.target?.value || '' })
@@ -678,3 +745,6 @@ const normalizeDataLinks = (
         }))
         .filter((link) => keepEmpty || link.title || link.url)
     : []
+
+const normalizeTierIds = (tierIds: GameInput['tierIds']) =>
+  Array.isArray(tierIds) ? [...new Set(tierIds.map((tierId) => String(tierId || '').trim()).filter(Boolean))] : []
