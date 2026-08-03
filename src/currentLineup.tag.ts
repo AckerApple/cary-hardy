@@ -523,7 +523,7 @@ const lineupGameCard = tag(({
         ? img.src`${game.imageUrl}`.attr('alt', game.title || 'Pinball game')
         : div.class`lineup-placeholder`(span(gameInitials(game.title))),
       div.class`lineup-card-copy`(
-        strong.class`lineup-card-title`(game.title || 'Untitled Game')
+        strong.class`lineup-card-title`(_ => game.title || 'Untitled Game')
       )
     ),
     small.class`lineup-card-date`(
