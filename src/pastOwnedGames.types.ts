@@ -1,6 +1,7 @@
 export type PastOwnedGameInput = {
   id?: string
   gameId?: string
+  tierId?: string
   title?: string
   dateAddedToCollection?: string
   dateRemovedFromCollection?: string
@@ -17,6 +18,7 @@ export type PastOwnedGameInput = {
 
 export type PastOwnedGame = PastOwnedGameInput & {
   id: string
+  isMissingGame?: boolean
   createdAt?: any
   updatedAt?: any
 }

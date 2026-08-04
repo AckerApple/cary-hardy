@@ -10,9 +10,7 @@ import {
   noElement,
   onDestroy,
   output,
-  option,
   p,
-  select,
   small,
   span,
   strong,
@@ -35,6 +33,7 @@ import { groupedGameSelect } from './groupedGameSelect.tag'
 import { topNavBar } from '../ui/topNav.tag'
 import type { CurrentGame, CurrentGameInput } from '../currentGames.types'
 import type { GameTier } from '../gameTiers.types'
+import { availableGameTiers, gameTierField } from './gameTierField.tag'
 
 const emptyGame = (): CurrentGameInput => ({
   gameId: '',
@@ -232,9 +231,8 @@ export const currentGamesAdminPage = tag((onSignedOut) => {
       nextFieldErrors.dateAddedToCollection = 'Date Added to Collection is required.'
     }
 
-    const selectedGame = (gameLibrary || []).find((game) => game.id === editGame.gameId)
-    const availableTierIds = Array.isArray(selectedGame?.tierIds) ? selectedGame.tierIds : []
-    if (availableTierIds.length && !availableTierIds.includes(editGame.tierId)) {
+    const tierChoices = availableGameTiers(editGame.gameId || '', gameLibrary || [], gameTiers || [])
+    if (tierChoices.length && !tierChoices.some((tier) => tier.id === editGame.tierId)) {
       nextFieldErrors.tierId = 'Select the tier for this current game.'
     }
 
@@ -562,37 +560,16 @@ const currentGameModal = tag(({
             onChange: (gameId) => updateGame({ gameId, tierId: '' }),
           }).key(`${isGameLibraryLoaded ? 'loaded' : 'loading'}-${gameLibrary.length}`),
 
-        label.style`text-align:left;justify-self:start;`.attr('style.color', _ => labelColor('tierId'))('Game Tier'),
-        _ => {
-          const selectedGame = gameLibrary.find((game) => game.id === editGame.gameId)
-          const availableTierIds = Array.isArray(selectedGame?.tierIds) ? selectedGame.tierIds : []
-          const availableTiers = availableTierIds
-            .map((tierId: string) => gameTiers.find((tier) => tier.id === tierId))
-            .filter(Boolean) as GameTier[]
-          return div.style`text-align:left;justify-self:stretch;width:100%;`(
-            availableTiers.length
-              ? div.style`display:grid;gap:0.45em;text-align:left;`(
-                availableTiers.map((tier) => label.style`display:flex;gap:0.5em;align-items:center;text-align:left;justify-content:flex-start;`(
-                  input.type`radio`.attr('name', 'current-game-tier').value`${tier.id}`
-                    .attr('checked', _ => editGame.tierId === tier.id ? 'checked' : null)
-                    .onChange(() => updateGame({ tierId: tier.id }))(),
-                  span(`${tier.shortName} — ${tier.longName}`)
-                ).key(tier.id))
-                )
-              : !isGameTiersLoaded
-                ? small.style`opacity:0.72;`('Loading game tiers...')
-                : editGame.gameId
-                ? select.style`text-align:left;width:100%;`.value(_ => editGame.tierId || '').onChange((event: any) => {
-                  updateGame({ tierId: event?.target?.value || '' })
-                }).attr('aria-invalid', _ => fieldErrors.tierId ? 'true' : 'false').attr('title', _ => fieldErrors.tierId || '')(
-                  [
-                    option.value``(gameTiers.length ? 'Select a game tier' : 'No game tiers available'),
-                    ...gameTiers.map((tier) => option.value`${tier.id}`(`${tier.shortName} — ${tier.longName}`)),
-                  ]
-                )
-                : small.style`opacity:0.72;`('Select a game first.')
-          )
-        },
+        _ => gameTierField({
+          gameId: editGame.gameId || '',
+          tierId: editGame.tierId || '',
+          games: gameLibrary,
+          gameTiers,
+          isLoaded: isGameTiersLoaded,
+          fieldError: fieldErrors.tierId,
+          radioName: 'current-game-tier',
+          onChange: (tierId) => updateGame({ tierId }),
+        }).key(`${editGame.gameId || 'no-game'}-${isGameTiersLoaded ? 'loaded' : 'loading'}-${gameTiers.length}`),
 
         label.attr('style.color', _ => labelColor('dateAddedToCollection'))('Date Added to Collection'),
         input.type`date`.value(_ => editGame.dateAddedToCollection || '').onInput((event: any) => {

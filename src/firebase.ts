@@ -760,6 +760,7 @@ const cleanCurrentGamePayload = (game: CurrentGameInput) => {
 const cleanPastOwnedGamePayload = (game: PastOwnedGameInput) => {
   const payload: Record<string, any> = {
     gameId: (game.gameId || "").trim(),
+    tierId: (game.tierId || "").trim(),
     title: (game.title || "").trim(),
     dateAddedToCollection: (game.dateAddedToCollection || "").trim(),
     dateRemovedFromCollection: (game.dateRemovedFromCollection || "").trim(),

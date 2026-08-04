@@ -420,11 +420,12 @@ export const currentLineupTag = tag((
       hr.class`lineup-section-break`(),
       h2.class`lineup-section-title`('Past Games Owned'),
       _ => {
-        if (pastOwnedItems === null || gameLibrary === null) {
+        if (pastOwnedItems === null || gameLibrary === null || gameTiers === null) {
           return div.class`lineup-results`(
             div.class`lineup-empty`('Loading past games...')
           )
         }
+        const availableGameTiers = gameTiers
 
         const visiblePastGames = pastOwnedItems
           .filter((game) => game.isVisible !== false)
@@ -436,7 +437,12 @@ export const currentLineupTag = tag((
               div.class`lineup-grid`(
                 visiblePastGames.map((game) => lineupGameCard({
                   game,
-                  detail: formatYearsOwned(game),
+                  detail: [
+                    gameTierLabel(game.tierId, availableGameTiers)
+                      ? span.class`lineup-tier-detail`(gameTierLabel(game.tierId, availableGameTiers))
+                      : '',
+                    formatYearsOwned(game),
+                  ].filter(Boolean),
                 }).key(`past-${game.id}`))
               )
             )

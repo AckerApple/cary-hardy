@@ -22,21 +22,25 @@ import {
   listGames,
   listPastOwnedGames,
   listenGames$,
+  listenGameTiers$,
   listenPastOwnedGames$,
   signOutUser,
   syncPastOwnedGamesFromPinside,
   upsertPastOwnedGame,
 } from '../firebase'
 import type { PastOwnedGame, PastOwnedGameInput, PinsideHistoryGame } from '../pastOwnedGames.types'
+import type { GameTier } from '../gameTiers.types'
 import { topNavBar } from '../ui/topNav.tag'
 import { adminNavButtons } from './adminNavButtons.tag'
 import { createAdminAuthTag } from './adminPageShell.tag'
 import { groupedGameSelect } from './groupedGameSelect.tag'
+import { availableGameTiers, gameTierField } from './gameTierField.tag'
 
 const PINSIDE_HISTORY_URL = 'https://pinside.com/pinball/community/pinsiders/thecapn/collection/history'
 
 const emptyGame = (): PastOwnedGameInput => ({
   gameId: '',
+  tierId: '',
   title: '',
   dateAddedToCollection: '',
   dateRemovedFromCollection: '',
@@ -54,6 +58,9 @@ let gamesValueUnsubscribe: (() => void) | null = null
 let latestGameLibrary: Array<{ id: string } & Record<string, any>> | null = null
 let gameLibraryUnsubscribe: (() => void) | null = null
 let gameLibraryValueUnsubscribe: (() => void) | null = null
+let latestGameTiers: GameTier[] | null = null
+let gameTiersUnsubscribe: (() => void) | null = null
+let gameTiersValueUnsubscribe: (() => void) | null = null
 
 export const pastOwnedGamesAdminPageTag = createAdminAuthTag((onSignedOut) => pastOwnedGamesAdminPage(onSignedOut))
 
@@ -80,6 +87,7 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
   let editGame: PastOwnedGameInput = emptyGame()
   let pastOwnedGames = latestPastOwnedGames
   let gameLibrary = latestGameLibrary
+  let gameTiers = latestGameTiers
   const refresh = callback(() => {})
 
   const startGamesListener = () => {
@@ -115,6 +123,22 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
       refresh()
     })
     gameLibraryValueUnsubscribe = () => valueSubscription.unsubscribe()
+  }
+
+  const startGameTiersListener = () => {
+    gameTiersUnsubscribe?.()
+    gameTiersValueUnsubscribe?.()
+    gameTiers = null
+    latestGameTiers = null
+    const tiers$ = listenGameTiers$()
+    gameTiersUnsubscribe = (tiers$ as any)?.unsubscribe || null
+    const subscription = tiers$.subscribe((items) => {
+      if (!Array.isArray(items)) return
+      gameTiers = items as GameTier[]
+      latestGameTiers = gameTiers
+      refresh()
+    })
+    gameTiersValueUnsubscribe = () => subscription.unsubscribe()
   }
 
   const refreshGamesList = () =>
@@ -157,6 +181,7 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
     editGame = {
       id: game.id,
       gameId: game.gameId || '',
+      tierId: game.tierId || '',
       title: '',
       dateAddedToCollection: dateInputValue(game.dateAddedToCollection),
       dateRemovedFromCollection: dateInputValue(game.dateRemovedFromCollection),
@@ -192,6 +217,11 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
       nextFieldErrors.gameId = 'Game is required.'
     }
 
+    const tierChoices = availableGameTiers(editGame.gameId || '', gameLibrary || [], gameTiers || [])
+    if (tierChoices.length && !tierChoices.some((tier) => tier.id === editGame.tierId)) {
+      nextFieldErrors.tierId = 'Select the tier for this past game.'
+    }
+
     if (editGame.yearReleased !== null && typeof editGame.yearReleased !== 'undefined' && Number.isNaN(Number(editGame.yearReleased))) {
       nextFieldErrors.yearReleased = 'Year must be numeric.'
     }
@@ -217,6 +247,7 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
       ...editGame,
       id: editingId || undefined,
       gameId: (editGame.gameId || '').trim(),
+      tierId: (editGame.tierId || '').trim(),
       title: '',
       imageUrl: (editGame.imageUrl || '').trim(),
       manufacturer: (editGame.manufacturer || '').trim(),
@@ -306,6 +337,7 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
     gamesLoaded = true
     if (!gamesUnsubscribe) startGamesListener()
     if (!gameLibraryUnsubscribe) startGameLibraryListener()
+    if (!gameTiersUnsubscribe) startGameTiersListener()
   }
 
   onDestroy(() => {
@@ -313,13 +345,18 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
     if (gamesValueUnsubscribe) gamesValueUnsubscribe()
     if (gameLibraryUnsubscribe) gameLibraryUnsubscribe()
     if (gameLibraryValueUnsubscribe) gameLibraryValueUnsubscribe()
+    gameTiersUnsubscribe?.()
+    gameTiersValueUnsubscribe?.()
     gamesUnsubscribe = null
     gamesValueUnsubscribe = null
     gameLibraryUnsubscribe = null
     gameLibraryValueUnsubscribe = null
+    gameTiersUnsubscribe = null
+    gameTiersValueUnsubscribe = null
     gamesLoaded = false
     latestPastOwnedGames = null
     latestGameLibrary = null
+    latestGameTiers = null
   })
 
   return noElement(
@@ -340,6 +377,7 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
           button
             .type`button`
             .class`admin-secondary-button`
+            .attr('title', 'Import missing past-owned games from pasted Pinside collection history without duplicating existing entries.')
             .attr('aria-expanded', _ => syncPanelOpen ? 'true' : 'false')
             .onClick(toggleSyncPanel)('Pinside Sync')
         ),
@@ -384,6 +422,8 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
             isEditing: Boolean(editingId),
             editGame,
             gameLibrary: gameLibrary || [],
+            gameTiers: gameTiers || [],
+            isGameTiersLoaded: gameTiers !== null,
             isGameLibraryLoaded: gameLibrary !== null,
             errorMessage,
             fieldErrors,
@@ -394,6 +434,7 @@ export const pastOwnedGamesAdminPage = tag((onSignedOut) => {
               fieldErrors = {
                 ...fieldErrors,
                 gameId: nextGame.gameId ? '' : fieldErrors.gameId,
+                tierId: nextGame.tierId ? '' : fieldErrors.tierId,
               }
               refresh()
             },
@@ -524,7 +565,9 @@ const pastOwnedGameModal = tag(({
   isEditing,
   editGame,
   gameLibrary,
+  gameTiers,
   isGameLibraryLoaded,
+  isGameTiersLoaded,
   errorMessage,
   fieldErrors,
   isSaving,
@@ -537,7 +580,9 @@ const pastOwnedGameModal = tag(({
   isEditing: boolean
   editGame: PastOwnedGameInput
   gameLibrary: Array<{ id: string } & Record<string, any>>
+  gameTiers: GameTier[]
   isGameLibraryLoaded: boolean
+  isGameTiersLoaded: boolean
   errorMessage: string
   fieldErrors: Record<string, string>
   isSaving: boolean
@@ -552,7 +597,9 @@ const pastOwnedGameModal = tag(({
       isEditing,
       editGame,
       gameLibrary,
+      gameTiers,
       isGameLibraryLoaded,
+      isGameTiersLoaded,
       errorMessage,
       fieldErrors,
       isSaving,
@@ -589,8 +636,20 @@ const pastOwnedGameModal = tag(({
             games: gameLibrary,
             isLoaded: isGameLibraryLoaded,
             fieldError: fieldErrors.gameId,
-            onChange: (gameId) => updateGame({ gameId }),
+            editSelectedGame: true,
+            onChange: (gameId) => updateGame({ gameId, tierId: '' }),
           }).key(`${isGameLibraryLoaded ? 'loaded' : 'loading'}-${gameLibrary.length}`),
+
+        _ => gameTierField({
+          gameId: editGame.gameId || '',
+          tierId: editGame.tierId || '',
+          games: gameLibrary,
+          gameTiers,
+          isLoaded: isGameTiersLoaded,
+          fieldError: fieldErrors.tierId,
+          radioName: 'past-game-tier',
+          onChange: (tierId) => updateGame({ tierId }),
+        }).key(`${editGame.gameId || 'no-game'}-${isGameTiersLoaded ? 'loaded' : 'loading'}-${gameTiers.length}`),
 
         label('Date Added to Collection'),
         input.type`date`.value(_ => editGame.dateAddedToCollection || '').onInput((event: any) => {
