@@ -17,7 +17,7 @@ export const ClockComponent = tag(({
 }: any) => {
   date = new Date(date)
 
-  ClockComponent.updates(x => {
+  ClockComponent.inputs(x => {
     [{date, showLearnMore}] = x
   })
 

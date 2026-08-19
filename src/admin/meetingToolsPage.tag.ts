@@ -12,15 +12,18 @@ let latestMeetupDate: number | null = null
 export const meetingToolsAdminPageTag = createAdminAuthTag((onSignedOut) => meetingToolsAdminPage(onSignedOut))
 
 export const meetingToolsAdminPage = tag((onSignedOut) => {
-  let nextMeetupDate = latestMeetupDate || Date.now()
-  let { date, time } = timestampToValues(Number(nextMeetupDate))
+  let nextMeetupDate = latestMeetupDate
+  let { date, time } = nextMeetupDate === null
+    ? { date: '', time: '' }
+    : timestampToValues(nextMeetupDate)
 
   meetingToolsAdminPage.inputs(([_onSignedOut]) => {
     onSignedOut = output(_onSignedOut)
   })
 
   function updateDateTime() {
-    const nextValues = timestampToValues(Number(nextMeetupDate))
+    if (nextMeetupDate === null) return
+    const nextValues = timestampToValues(nextMeetupDate)
     date = nextValues.date
     time = nextValues.time
   }
@@ -48,15 +51,17 @@ export const meetingToolsAdminPage = tag((onSignedOut) => {
         console.error('Failed to sign out', error)
       })
 
-  const saveMeetupDate = () =>
-    saveNextMeetupDate(Number(nextMeetupDate))
+  const saveMeetupDate = () => {
+    if (nextMeetupDate === null) return
+    return saveNextMeetupDate(nextMeetupDate)
       .then(() => {
-        latestMeetupDate = Number(nextMeetupDate)
+        latestMeetupDate = nextMeetupDate
         alert('saved')
       })
       .catch((error) => {
         console.error('Failed to save meetup date', error)
       })
+  }
 
   return noElement(
     topNavBar(() => adminNavButtons(signoutClick)),
@@ -68,17 +73,19 @@ export const meetingToolsAdminPage = tag((onSignedOut) => {
         )
       ),
       div.class`admin-crud-card`(
-        _=> meetingToolsSection({
-          nextMeetupDate,
-          date,
-          time,
-          onDate: (dateNum) => {
-            nextMeetupDate = dateNum
-            latestMeetupDate = dateNum
-            updateDateTime()
-          },
-          onSave: saveMeetupDate,
-        })
+        _=> nextMeetupDate === null
+          ? div.style`opacity:0.7;`('Loading saved meetup time...')
+          : meetingToolsSection({
+              nextMeetupDate,
+              date,
+              time,
+              onDate: (dateNum) => {
+                nextMeetupDate = dateNum
+                latestMeetupDate = dateNum
+                updateDateTime()
+              },
+              onSave: saveMeetupDate,
+            })
       )
     )
   )

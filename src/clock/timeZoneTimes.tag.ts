@@ -3,23 +3,25 @@ import { getDaySuffix } from './clock.tag'
 import { div, span, tag } from 'taggedjs'
 
 export const labeledCountdown = tag((date: Date | number) => {
-  labeledCountdown.updates(x => [date] = x)
+  labeledCountdown.inputs(x => [date] = x)
 
-  const d = new Date(date)
   return div.style`text-align:center;`(
-    div(
-      span(
-        '🗓️ ',
-        d.toLocaleString('default', { weekday: 'long' }),
-        ', ',
-        d.toLocaleString('default', { month: 'long' }),
-        ' ',
-        d.getDate(),
-        getDaySuffix(d)
+    _ => {
+      const displayDate = new Date(date)
+      return div(
+        span(
+          '🗓️ ',
+          displayDate.toLocaleString('default', { weekday: 'long' }),
+          ', ',
+          displayDate.toLocaleString('default', { month: 'long' }),
+          ' ',
+          displayDate.getDate(),
+          getDaySuffix(displayDate)
+        )
       )
-    ),
+    },
     _=> countdown({date}),
-    smallTimeZoneTimes(d)
+    _ => smallTimeZoneTimes(new Date(date))
   )
 })
 

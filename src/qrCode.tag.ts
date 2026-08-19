@@ -78,7 +78,7 @@ export const qrCodeDisplay = tag((url: string) => {
       })
   }
 
-  qrCodeDisplay.updates(x => {
+  qrCodeDisplay.inputs(x => {
     if (x[0] !== url) {
       [url] = x
       scheduleQrRender()

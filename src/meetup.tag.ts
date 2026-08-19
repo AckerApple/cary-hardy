@@ -7,11 +7,12 @@ import { publicFooter } from './ui/publicFooter.tag'
 
 const img = htmlTag('img')
 let meetupLoaded = false
+let latestMeetupDate: number | null = null
 
 export const meetupTag = tag(() => {
-  let meetupDate = Date.now() - 1000
+  let meetupDate = latestMeetupDate
   const refreshMeetup = callback(() => {})
-  const getMeetupDate = () => new Date(meetupDate)
+  const getMeetupDate = () => new Date(meetupDate as number)
 
   if (!meetupLoaded) {
     meetupLoaded = true
@@ -19,6 +20,7 @@ export const meetupTag = tag(() => {
       .then((loadedDate) => {
         if (typeof loadedDate === "number") {
           meetupDate = loadedDate
+          latestMeetupDate = loadedDate
           refreshMeetup()
         }
       })
@@ -44,10 +46,12 @@ export const meetupTag = tag(() => {
     br,
     div.class`bounce-in`.style`--fx-index:2`(
       div.id`count-clock`(
-        _ => ClockComponent({
-          date: getMeetupDate(),
-          showLearnMore: false,
-        })
+        _ => meetupDate === null
+          ? div.style`opacity:0.7;`('Loading meetup time...')
+          : ClockComponent({
+              date: getMeetupDate(),
+              showLearnMore: false,
+            })
       )
     ),
     br,
@@ -61,10 +65,10 @@ export const meetupTag = tag(() => {
                 'By becoming a ',
                 a.class`color-inherit`.href`https://www.patreon.com/caryhardy/membership`('Cary Hardy LE supporter'),
                 ' before ',
-                _=> getMeetupDate().toLocaleString('default', { month: 'long' }),
+                _=> meetupDate === null ? '' : getMeetupDate().toLocaleString('default', { month: 'long' }),
                 ' ',
-                _=> getMeetupDate().getDate(),
-                _=> getDaySuffix(getMeetupDate()),
+                _=> meetupDate === null ? '' : getMeetupDate().getDate(),
+                _=> meetupDate === null ? '' : getDaySuffix(getMeetupDate()),
                 ', you will receive an LE only Patreon ',
                 span.style`white-space: nowrap;`('💬 message'),
                 ', ',

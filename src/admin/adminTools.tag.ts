@@ -14,11 +14,12 @@ import { adminUsersSection } from './adminUsers.tag'
 import { calendarLinksSection } from './calendarLinks.tag'
 
 let meetupLoaded = false
+let latestMeetupDate: number | null = null
 
 export const adminTools = tag((
   onSignedOut
 ) => {
-  let nextMeetupDate = Date.now()
+  let nextMeetupDate = latestMeetupDate
   adminTools.inputs(([_onSignedOut]) => {
     onSignedOut = output(_onSignedOut)
   })
@@ -29,6 +30,7 @@ export const adminTools = tag((
       .then((loadedDate) => {
         if (typeof loadedDate === 'number') {
           nextMeetupDate = loadedDate
+          latestMeetupDate = loadedDate
         }
       })
       .catch((error) => {
@@ -54,12 +56,14 @@ export const adminTools = tag((
       _=> collapsibleSection({
         labelText: 'Calendar Links',
         flex: '2',
-        contentNode: calendarLinksSection({
-          nextMeetupDate,
-          onQrUrlChange: (value) => {
-            window.location.href = `/admin/qr-maker.html?url=${encodeURIComponent(value)}`
-          },
-        }),
+        contentNode: nextMeetupDate === null
+          ? div.style`opacity:0.7;`('Loading saved meetup time...')
+          : calendarLinksSection({
+              nextMeetupDate,
+              onQrUrlChange: (value) => {
+                window.location.href = `/admin/qr-maker.html?url=${encodeURIComponent(value)}`
+              },
+            }),
       }),
       adminHomeLinkCard({
         href: '/admin/meeting-tools.html',

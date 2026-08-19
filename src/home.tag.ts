@@ -15,7 +15,7 @@ export const homeTag = tag((
   showYoutube = false,
   showLinks = false,
   showMerch = false,
-  nextMeetupDate = Date.now() - 1000,
+  nextMeetupDate: number | null = null,
   refreshHome = callback(() => {}),
   refreshMeetup = callback(() => {}),
   toggleAwards = () => {
@@ -568,7 +568,7 @@ export const homeTag = tag((
       br,
     ) : '',
     div.class`fade-in`.style`--fx-index:6`(
-        _=> Date.now() < nextMeetupDate && noElement(
+        _=> nextMeetupDate !== null && Date.now() < nextMeetupDate && noElement(
           div.class`bounce-in section-anchor`.attr('id', 'live-meetups').style`--fx-index:5;`(
             button
               .type`button`

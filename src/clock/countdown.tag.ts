@@ -18,7 +18,7 @@ export const countdown = tag(({date}) => {
   // when html ready, start
   run()
 
-  countdown.updates(x => {
+  countdown.inputs(x => {
     const oldDate = date;
     [{date}] = x
 
@@ -28,8 +28,12 @@ export const countdown = tag(({date}) => {
     }
   })
 
-  date = date || new Date()
   function updateCountdown() {
+    if (date === null || date === undefined) {
+      stop()
+      return
+    }
+
     const now = new Date() as any
     const remaining = date - now;
 
